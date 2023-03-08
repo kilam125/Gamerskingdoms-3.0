@@ -10,6 +10,7 @@ class GmkTextField extends StatefulWidget {
   final void Function(String) onChanged;
   final void Function()? onFocus;
   final void Function()? onDone;
+  final void Function(String?)? onSaved;
   final TextInputType inputType;
   final bool obscure;
   final EdgeInsets edges;
@@ -20,16 +21,21 @@ class GmkTextField extends StatefulWidget {
   final String? Function(String?)? validator;
   final TextInputType? textInputType;
   final TextEditingController controller;
+  final TextInputAction? textInputAction;
+  final int? maxLines;
   const GmkTextField(
     {
       Key? key,
       required this.controller,
       required this.title,
+      this.maxLines,
       this.defaultText = '',
       this.hintText = '',
       this.onDone,
+      this.onSaved,
       this.onFocus,
       this.validator,
+      this.textInputAction,
       this.titleTextStyle = const TextStyle(
         color:  Color(0xff000000),
         fontSize: 20,
@@ -55,7 +61,10 @@ class GmkTextField extends StatefulWidget {
   GmkTextFieldState createState() => GmkTextFieldState();
 }
 
-class GmkTextFieldState extends State<GmkTextField> {
+class GmkTextFieldState extends State<GmkTextField> with AutomaticKeepAliveClientMixin  {
+  @override
+  bool get wantKeepAlive => true;
+
   Color borderColor = const Color(0xffa0a0a0);
   final Color fillColor = const Color.fromARGB(255, 187, 186, 186);
   FocusNode focus = FocusNode();
@@ -78,6 +87,7 @@ class GmkTextFieldState extends State<GmkTextField> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,6 +100,10 @@ class GmkTextFieldState extends State<GmkTextField> {
           )
         ),
         TextFormField(
+          decoration: const InputDecoration(
+            contentPadding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+          ),
+          maxLines: widget.maxLines,
           validator: widget.validator,
           inputFormatters: [
             LengthLimitingTextInputFormatter(widget.maxLength),
@@ -99,7 +113,7 @@ class GmkTextFieldState extends State<GmkTextField> {
           ],
           controller: textCtrl,
           focusNode: focus,
-          textInputAction: TextInputAction.done,
+          textInputAction: widget.textInputAction ?? TextInputAction.done,
           keyboardType: widget.inputType,
           textAlign: TextAlign.left,
           showCursor: true,
@@ -109,19 +123,9 @@ class GmkTextFieldState extends State<GmkTextField> {
           enableSuggestions: false,
           cursorColor: const Color(0xff000000),
           cursorHeight: 18,
-          /* decoration: InputDecoration(
-            filled: true,
-            fillColor: Theme.of(context).focusColor,
-            isCollapsed: true,
-            hintText: widget.hintText,
-            hintStyle: widget.hintTextStyle,
-            contentPadding: widget.edges,
-            enabledBorder: Theme.of(context).inputDecorationTheme.enabledBorder,
-            focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
-            border: Theme.of(context).inputDecorationTheme.border,
-          ), */
           style: Theme.of(context).textTheme.headlineSmall,
           onChanged: widget.onChanged,
+          onSaved: widget.onSaved,
         ),
       ]
     );

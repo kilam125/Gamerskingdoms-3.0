@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1006388837793:android:eb8f3235a7473e23141fe0",
+        "mobilesdk_app_id": "1:1006388837793:android:c39b363940869423141fe0",
         "android_client_info": {
-          "package_name": "com.example.gamers_kingdom"
+          "package_name": "com.gamerskindoms.app"
         }
       },
       "oauth_client": [
@@ -29,6 +29,13 @@
             {
               "client_id": "1006388837793-f9d5kmia4nn7r23ue4akk7ck4180d1e2.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "1006388837793-rngvlsjqi09dh6jlhbq1me1ffqj4u8s2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gamersKingdom"
+              }
             }
           ]
         }

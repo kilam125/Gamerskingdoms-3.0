@@ -1,17 +1,64 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:gamers_kingdom/dashboard.dart';
+import 'package:gamers_kingdom/firebase_options.dart';
 import 'package:gamers_kingdom/login_page.dart';
+import 'package:gamers_kingdom/sign_up.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late StreamSubscription<User?> _sub;
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  
+  @override
+  void initState() {
+    super.initState();
+    _sub = FirebaseAuth.instance.authStateChanges().listen((user) {
+      bool result = user != null;
+      debugPrint("InListening : ${result?"/Dashboard":"/LoginPage"}");
+      if (result) {
+        debugPrint("Checking mail validation");
+        if (user.emailVerified) {
+          debugPrint("Mail already verified");
+          _navigatorKey.currentState!.pushReplacementNamed(
+            Dashboard.routeName,
+            arguments: {
+              "email":user.email
+            }
+          );
+        }
+      } else {
+        debugPrint("Not Authenticated");
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    //FirebaseAuth.instance.signOut();
     return MaterialApp(
-      title: 'Gamers Kingdom Demo',
+      navigatorKey: _navigatorKey,
+      title: 'Gamers Kingdoms',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         primaryColor: const Color.fromRGBO(68, 129, 235, 1),
@@ -160,6 +207,32 @@ class MyApp extends StatelessWidget {
         )
       ),
       home: const HomePage(),
+      onGenerateRoute: (settings){
+        if(settings.name!.contains(SignUp.routeName)){
+          return MaterialPageRoute(
+            settings: RouteSettings(
+              name:SignUp.routeName,
+            ),
+            builder: (context) => const SignUp()
+          );
+        } else if(settings.name!.contains(Dashboard.routeName)) {
+          return MaterialPageRoute(
+            settings: RouteSettings(
+              name:Dashboard.routeName,
+            ),
+            builder: (context) => Dashboard(
+              email: (settings.arguments! as Map)["email"],
+            )
+          );
+        } else {
+          return MaterialPageRoute(
+            settings: RouteSettings(
+              name:HomePage.routeName,
+            ),
+            builder: (context) => const HomePage()
+          );
+        }
+      },
     );
   }
 }
@@ -175,8 +248,24 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     debugPrint("Routename : HomePage");
-    return const Scaffold(
-      body: LoginPage(),
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: Column(
+            children: [
+              Flexible(
+                flex: 3,
+                child: Image.asset("assets/icon/main_logo_transparent.png")
+              ),
+              const Flexible(
+                flex: 7,
+                child: LoginPage()
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

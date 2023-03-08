@@ -1,5 +1,8 @@
 import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gamers_kingdom/pop_up/pop_up.dart';
+import 'package:gamers_kingdom/sign_up.dart';
 import 'package:gamers_kingdom/widgets/gmk_textfield.dart';
 
 class LoginPage extends StatefulWidget {
@@ -20,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
     return Form(
       key: formKey,
       child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -37,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text(
-                "Connectez-vous",
+                "Log In",
                 style: Theme.of(context).textTheme.titleLarge
               ),
             ),
@@ -45,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: GmkTextField(
                 controller: emailController,
-                title: "Adresse e-mail", 
+                title: "Mail address", 
                 onChanged: (value){
                   setState(() {
                     emailController.text = value;
@@ -53,13 +57,10 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 validator: (value){
                   if(value!.isEmpty){
-                    return "E-mail requis";
+                    return "Mail address required";
                   }
                   if(!EmailValidator.validate(value)){
-                    return "Format d'e-mail incorrect";
-                  }
-                  if(emailController.text != "president17@gmail.com"){
-                    return "Utilisateur inconnu";
+                    return "Bad mail address syntax";
                   }
                   return null;
                 },
@@ -68,8 +69,9 @@ class _LoginPageState extends State<LoginPage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: GmkTextField(
+                maxLines: 1,
                 controller: passwordController,
-                title: "Mot de passe",
+                title: "Password",
                 obscure: true,
                 onChanged: (value){
                   setState(() {
@@ -78,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 validator: (value){
                   if(value == null || value.isEmpty){
-                    return "Mot de passe requis";
+                    return "Password required";
                   }
                   return null;
                 },
@@ -100,13 +102,13 @@ class _LoginPageState extends State<LoginPage> {
                         }
                       ),
                       Text(
-                        "Se souvenir de moi",
+                        "Remember me",
                         style: Theme.of(context).textTheme.displaySmall,
                       )
                     ],
                   ),
                   Text(
-                    "Mot de passe oublié ?",
+                    "Forgot password ?",
                     style: Theme.of(context).textTheme.labelSmall
                   )
                 ],
@@ -116,14 +118,22 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: ElevatedButton(
                 onPressed: () async {
-                  debugPrint("Tapped");
                   if(formKey.currentState!.validate()){
                     formKey.currentState!.save();
                     if(!mounted)return;
+                    try{
+                      await FirebaseAuth.instance.signInWithEmailAndPassword(email: emailController.text, password: passwordController.text);
+                    } on FirebaseAuthException catch (_) {
+                      await PopUp.okPopUp(
+                        context: context,
+                        title: "Something went wrong",
+                        message: "This account does not exist or the password is invalid",
+                      );
+                    }
                   }
                 }, 
                 child: const Text(
-                  "Se connecter",
+                  "Login",
                 )
               ),
             ),
@@ -131,9 +141,10 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: TextButton(
                 onPressed: (){
+                  Navigator.of(context).pushNamed(SignUp.routeName);
                 }, 
                 child: const Text(
-                  "Vous n'avez pas de compte ?",
+                  "No account ?",
                 )
               ),
             ),

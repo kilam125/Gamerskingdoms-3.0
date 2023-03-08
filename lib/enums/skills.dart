@@ -1,0 +1,21 @@
+enum Skills {
+  leader,
+  accomplisher, 
+  strategist, 
+  explorer, 
+  challenger, 
+  shooter, 
+  attacker, 
+  hardcore, 
+  roleplayer, 
+  cosplayer, 
+  rpg, 
+  mmo,
+  team, 
+  solo, 
+  professional, 
+  passionate, 
+  cool, 
+  noob, 
+  troll
+}
