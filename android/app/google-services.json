@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1006388837793",
+    "project_id": "test-a06bf",
+    "storage_bucket": "test-a06bf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006388837793:android:eb8f3235a7473e23141fe0",
+        "android_client_info": {
+          "package_name": "com.example.gamers_kingdom"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1006388837793-f9d5kmia4nn7r23ue4akk7ck4180d1e2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcHIp1VrMGYjvZfggt4Oz77ziBQAXvgS8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1006388837793-f9d5kmia4nn7r23ue4akk7ck4180d1e2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
