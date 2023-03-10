@@ -1,12 +1,17 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gamers_kingdom/pop_up/dialog.dart';
 import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/sign_up.dart';
 import 'package:gamers_kingdom/widgets/gmk_textfield.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final BuildContext parentContext;
+  const LoginPage({
+    required this.parentContext,
+    super.key
+  });
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -14,8 +19,10 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final formKey = GlobalKey<FormState>();
+  final forgotPassword = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController mailResetController = TextEditingController();
   bool checkValue = false;
 
   @override
@@ -91,7 +98,8 @@ class _LoginPageState extends State<LoginPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  const SizedBox(height: 10, width: 10,),
+/*                   Row(
                     children: [
                       Checkbox(
                         value: checkValue, 
@@ -106,10 +114,30 @@ class _LoginPageState extends State<LoginPage> {
                         style: Theme.of(context).textTheme.displaySmall,
                       )
                     ],
-                  ),
-                  Text(
-                    "Forgot password ?",
-                    style: Theme.of(context).textTheme.labelSmall
+                  ), */
+                  GestureDetector(
+                    onTap: () async {
+                      await GmkDialog.sendInvitation(
+                        context: widget.parentContext, 
+                        title: "Reset password", 
+                        hintText: "your@mail.com", 
+                        controller: mailResetController, 
+                        formKey: forgotPassword, 
+                        callBack: (){
+                          return FirebaseAuth.instance.sendPasswordResetEmail(email: mailResetController.text);
+                        }
+                      );
+                      if(!mounted)return;
+                      await PopUp.okPopUp(
+                        context: context, 
+                        title: "Done", 
+                        message: "Password recover mail has been sent to : ${mailResetController.text}"
+                      );
+                    },
+                    child: Text(
+                      "Forgot password ?",
+                      style: Theme.of(context).textTheme.labelSmall
+                    ),
                   )
                 ],
               ),

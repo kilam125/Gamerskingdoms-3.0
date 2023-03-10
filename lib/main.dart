@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -26,13 +24,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late StreamSubscription<User?> _sub;
   final _navigatorKey = GlobalKey<NavigatorState>();
   
   @override
   void initState() {
     super.initState();
-    _sub = FirebaseAuth.instance.authStateChanges().listen((user) {
+    FirebaseAuth.instance.authStateChanges().listen((user) {
       bool result = user != null;
       debugPrint("InListening : ${result?"/Dashboard":"/LoginPage"}");
       if (result) {
@@ -54,11 +51,11 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    //FirebaseAuth.instance.signOut();
     return MaterialApp(
       navigatorKey: _navigatorKey,
       title: 'Gamers Kingdoms',
       debugShowCheckedModeBanner: false,
+      initialRoute:FirebaseAuth.instance.currentUser == null ? HomePage.routeName : Dashboard.routeName,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         primaryColor: const Color.fromRGBO(68, 129, 235, 1),
@@ -206,7 +203,6 @@ class _MyAppState extends State<MyApp> {
           ),
         )
       ),
-      home: const HomePage(),
       onGenerateRoute: (settings){
         if(settings.name!.contains(SignUp.routeName)){
           return MaterialPageRoute(
@@ -221,7 +217,7 @@ class _MyAppState extends State<MyApp> {
               name:Dashboard.routeName,
             ),
             builder: (context) => Dashboard(
-              email: (settings.arguments! as Map)["email"],
+              email: FirebaseAuth.instance.currentUser!.email!,
             )
           );
         } else {
@@ -250,17 +246,20 @@ class _HomePageState extends State<HomePage> {
     debugPrint("Routename : HomePage");
     return Scaffold(
       body: SingleChildScrollView(
-        child: SizedBox(
+        child: Container(
           height: MediaQuery.of(context).size.height,
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
           child: Column(
             children: [
               Flexible(
                 flex: 3,
                 child: Image.asset("assets/icon/main_logo_transparent.png")
               ),
-              const Flexible(
+              Flexible(
                 flex: 7,
-                child: LoginPage()
+                child: LoginPage(
+                  parentContext:context
+                )
               ),
             ],
           ),
