@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/firebase_options.dart';
 import 'package:gamers_kingdom/login_page.dart';
+import 'package:gamers_kingdom/profile.dart';
 import 'package:gamers_kingdom/sign_up.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -148,6 +149,7 @@ class _MyAppState extends State<MyApp> {
           )
         ),
         inputDecorationTheme: InputDecorationTheme(
+          alignLabelWithHint: true,
           filled: true,
           fillColor: Theme.of(context).focusColor,
           enabledBorder: const OutlineInputBorder(
@@ -170,6 +172,7 @@ class _MyAppState extends State<MyApp> {
           ),
           titleMedium: GoogleFonts.lalezar(
             fontSize:20,
+            height: 1,
             fontWeight:FontWeight.w400,
             color: Theme.of(context).primaryColor,
             letterSpacing: 1
