@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gamers_kingdom/database_service.dart';
 import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/profile.dart';
@@ -34,10 +35,10 @@ class _DashboardState extends State<Dashboard> {
           return const ProgressWidget();
         }
         QuerySnapshot qds = snapshot.data as QuerySnapshot;
-        Map userData = (qds.docs.first.data() as Map);
-        return ListenableProvider<UserProfile>.value(
+        return StreamProvider<UserProfile>.value(
           updateShouldNotify:(oldList, currentList) => (currentList != oldList),
-          value: UserProfile.fromFirestore(data: qds.docs.first),
+          initialData: UserProfile.fromFirestore(data: qds.docs.first),
+          value: DatabaseService.streamUser(qds.docs.first.id),
           builder: (context, __) {
             UserProfile user = context.watch<UserProfile>();
             return Navigator(
@@ -48,66 +49,71 @@ class _DashboardState extends State<Dashboard> {
                   });
                 } else {
                   return MaterialPageRoute(builder: (context){
-                    return Scaffold(
-                      appBar: AppBar(
-                      leading: Container(),
-                      actions: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 16.0),
-                          child: GestureDetector(
-                            onTap: (){
-                              Navigator.of(context, rootNavigator: false).push(
-                                MaterialPageRoute(builder: (context){
-                                  return Profile(user: user);
-                                })
-                              );
+                    return Builder(
+                      builder: (context) {
+                        UserProfile user = context.watch<UserProfile>();
+                        return Scaffold(
+                          appBar: AppBar(
+                          leading: Container(),
+                          actions: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 16.0),
+                              child: GestureDetector(
+                                onTap: (){
+                                  Navigator.of(context, rootNavigator: false).push(
+                                    MaterialPageRoute(builder: (context){
+                                      return Profile(user: user);
+                                    })
+                                  );
+                                },
+                                child: const Icon(
+                                  Icons.person,
+                                  size: 30,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                          bottomNavigationBar: BottomNavigationBar(
+                            type: BottomNavigationBarType.fixed,
+                            currentIndex: activeIndex,
+                            elevation: 10,
+                            showSelectedLabels: true,
+                            onTap: (value) async {
+                              setState(() {
+                                activeIndex = value;
+                              });
                             },
-                            child: const Icon(
-                              Icons.person,
-                              size: 30,
-                            ),
+                            items: const [
+                              BottomNavigationBarItem(
+                                label: "Posts",
+                                icon: Icon(Icons.note)
+                              ),
+                              BottomNavigationBarItem(
+                                label: "Add Posts",
+                                icon: Icon(Icons.post_add)
+                              ),
+                              BottomNavigationBarItem(
+                                label: "Followers",
+                                icon: Icon(Icons.note)
+                              ),
+                            ],
                           ),
-                        )
-                      ],
-                    ),
-                      bottomNavigationBar: BottomNavigationBar(
-                        type: BottomNavigationBarType.fixed,
-                        currentIndex: activeIndex,
-                        elevation: 10,
-                        showSelectedLabels: true,
-                        onTap: (value) async {
-                          setState(() {
-                            activeIndex = value;
-                          });
-                        },
-                        items: const [
-                          BottomNavigationBarItem(
-                            label: "Posts",
-                            icon: Icon(Icons.note)
+                          body: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("Your are logged as : ${user.displayName}"),
+                              ElevatedButton(
+                                onPressed: (){
+                                  Navigator.of(context).popAndPushNamed(HomePage.routeName);
+                                  FirebaseAuth.instance.signOut();
+                                }, 
+                                child: const Text("Logout")
+                              )
+                            ],
                           ),
-                          BottomNavigationBarItem(
-                            label: "Add Posts",
-                            icon: Icon(Icons.post_add)
-                          ),
-                          BottomNavigationBarItem(
-                            label: "Followers",
-                            icon: Icon(Icons.note)
-                          ),
-                        ],
-                      ),
-                      body: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("Your are logged as : ${userData["displayName"]}"),
-                          ElevatedButton(
-                            onPressed: (){
-                              Navigator.of(context).popAndPushNamed(HomePage.routeName);
-                              FirebaseAuth.instance.signOut();
-                            }, 
-                            child: const Text("Logout")
-                          )
-                        ],
-                      ),
+                        );
+                      }
                     );
                   });
                 }

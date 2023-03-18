@@ -132,7 +132,6 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                           await fbf.collection("users").add(
                             {
                               "email":emailController.text.toLowerCase().trim(),
-                              "password":passwordController.text,
                               "name": nameController.text.toLowerCase().trim(),
                               "surname": surnameController.text.toLowerCase().trim(),
                               "displayName": pseudoController.text.toLowerCase().trim(),

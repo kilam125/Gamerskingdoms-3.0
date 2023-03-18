@@ -1,7 +1,10 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
-import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/util/util.dart';
+import 'package:gamers_kingdom/widgets/progress_widget.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:provider/provider.dart';
@@ -21,17 +24,20 @@ class _ProfileState extends State<Profile> {
   final formKey = GlobalKey<FormState>();
   TextEditingController displayName = TextEditingController();
   TextEditingController bio = TextEditingController();
-  List<String> skills = List.generate(Skills.values.length, (index) => Skills.values[index].name.capitalize());
-  List<String> selectedSkills = [];
-  late final List<MultiSelectItem<String>> items;
-
+  List<Skills> skills = List.generate(Skills.values.length, (index) => Skills.values[index]);
+  List<Skills> selectedSkills = [];
+  late final List<MultiSelectItem<Skills>> items;
+  bool isLoading = false;
+  bool isLoadingButton = false;
   @override
   void initState() {
     super.initState();
     displayName.text = widget.user.displayName;
-    selectedSkills  = widget.user.skills.map((e) => e.toString()).toList();
+    debugPrint("Selected Skills ${selectedSkills.toString()}");
+    debugPrint("User Skills ${widget.user.skills.toString()}");
+    selectedSkills  = widget.user.skills;
     items = skills
-      .map((skill) => MultiSelectItem<String>(skill, skill))
+      .map((skill) => MultiSelectItem<Skills>(skill, Util.skillsToString(skill)))
       .toList();
     if(widget.user.bio != null){
       bio.text = widget.user.bio!;
@@ -52,95 +58,155 @@ class _ProfileState extends State<Profile> {
         padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
         child: Form(
           key: formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Stack(
-                children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      child: user.picture == null ?
-                        Image.asset(
-                          "assets/images/userpic.png", 
-                          height: 200,
-                          width: 200
-                        )
-                      :Image.network(
-                        user.picture!,
-                        height: 200,
-                        width: 200,
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Container(
-                      padding: const EdgeInsets.all(8.0),
-                      decoration: const BoxDecoration(
-                        color: Color.fromARGB(255, 213, 213, 213),
-                        shape: BoxShape.circle
-                      ),
-                      child: const Icon(Icons.edit, color: Colors.black,)
-                    ),
-                  )
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    label: Text("Display Name")
-                  ),
-                  controller: displayName,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    label: Text("Bio")
-                  ),
-                  controller: bio,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Stack(
                   children: [
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.only(bottom: 5, left: 12),
-                      child: Text(
-                        "Your Skills",
-                        style: Theme.of(context).inputDecorationTheme.labelStyle,
-                      )
-                    ),
-                    MultiSelectDialogField<String>(
-                      items: items,
-                      title: const Text("Skills"),
-                      selectedColor: Colors.blue,
-                      buttonIcon: const Icon(
-                        Icons.manage_accounts,
-                        color: Colors.blue,
-                      ),
-                      buttonText: Text(
-                        "Choose your skills",
-                        style: TextStyle(
-                          color: Colors.blue[800],
-                          fontSize: 16,
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        clipBehavior: Clip.antiAlias,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle
+                        ),
+                        child: user.picture == null ?
+                          Image.asset(
+                            "assets/images/userpic.png", 
+                            fit: BoxFit.fill,
+                            height: 200,
+                            width: 200,
+                          )
+                        :Image.network(
+                          user.picture!,
+                          fit: BoxFit.fill,
+                          height: 200,
+                          width: 200,
                         ),
                       ),
-                      onConfirm: (results) {
-                        selectedSkills = results;
-                      },
                     ),
+                    GestureDetector(
+                      onTap: () async {
+                        final ImagePicker picker = ImagePicker();
+                        var result = await picker.pickImage(source: ImageSource.gallery, imageQuality: 30);
+                        if(result != null){
+                          setState(() {
+                            isLoading = true;
+                          });
+                          final file = await result.readAsBytes();
+                          final TaskSnapshot upload = await FirebaseStorage.instance.ref(widget.user.email).putData(file, SettableMetadata(contentType: 'image/jpeg'));
+                          final String downloadUrl = await upload.ref.getDownloadURL();
+                          setState(() {
+                            isLoading = false;
+                          });
+                          user.picture = downloadUrl;
+                        }
+                      },
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: isLoading ?
+                        const ProgressWidget():
+                        Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: const BoxDecoration(
+                            color: Color.fromARGB(255, 213, 213, 213),
+                            shape: BoxShape.circle
+                          ),
+                          child: const Icon(Icons.edit, color: Colors.black,)
+                        ),
+                      ),
+                    )
                   ],
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: TextFormField(
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.only(top: 12, left: 12),
+                      label: Padding(
+                        padding: EdgeInsets.only(bottom: 20.0),
+                        child: Text("Display Name"),
+                      )
+                    ),
+                    controller: displayName,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: TextFormField(
+                    maxLines: 5,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.only(top: 16, left: 12),
+                      label: Padding(
+                        padding: EdgeInsets.only(bottom: 20.0),
+                        child: Text("Bio"),
+                      ),
+                    ),
+                    controller: bio,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.only(bottom: 5, left: 12),
+                        child: Text(
+                          "Your Skills",
+                          style: Theme.of(context).inputDecorationTheme.labelStyle,
+                        )
+                      ),
+                      MultiSelectDialogField<Skills>(
+                        initialValue: selectedSkills,
+                        items: items,
+                        title: const Text("Skills"),
+                        selectedColor: Colors.blue,
+                        buttonIcon: const Icon(
+                          Icons.manage_accounts,
+                          color: Colors.blue,
+                        ),
+                        buttonText: Text(
+                          "Your skills",
+                          style: TextStyle(
+                            color: Colors.blue[800],
+                            fontSize: 16,
+                          ),
+                        ),
+                        onConfirm: (results) {
+                          selectedSkills = results;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                !isLoadingButton ?
+                ElevatedButton(
+                  onPressed: () async {
+                    setState(() {
+                      isLoadingButton = true;
+                    });
+                    debugPrint(selectedSkills.toString());
+                    user.setDisplayName = displayName.text;
+                    user.bio = bio.text;
+                    user.skills = selectedSkills;
+                    await user.setUser(
+                      displayName: displayName.text, 
+                      skills: selectedSkills, 
+                      picture: user.picture!, 
+                      bio: bio.text
+                    );
+                    if(!mounted)return;
+                    Navigator.of(context).pop();
+                  }, 
+                  child: const Text("Send")
+                ):
+                const ProgressWidget()
+              ],
+            ),
           ),
         ),
       ),
