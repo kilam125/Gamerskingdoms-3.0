@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gamers_kingdom/add_posts.dart';
 import 'package:gamers_kingdom/database_service.dart';
-import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/profile.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
@@ -22,6 +21,23 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final formKey = GlobalKey<FormState>();
   int activeIndex = 0;
+
+  List<Widget> pages = const [
+    AddPosts(),
+    AddPosts(),
+    AddPosts(),
+  ];
+
+  titleByIndex(activeIndex){
+    switch(activeIndex){
+      case 0:
+        return "Posts";
+      case 1:
+        return "Add Post";
+      case 2:
+        return "Followers";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,26 +70,41 @@ class _DashboardState extends State<Dashboard> {
                         UserProfile user = context.watch<UserProfile>();
                         return Scaffold(
                           appBar: AppBar(
-                          leading: Container(),
-                          actions: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 16.0),
-                              child: GestureDetector(
-                                onTap: (){
-                                  Navigator.of(context, rootNavigator: false).push(
-                                    MaterialPageRoute(builder: (context){
-                                      return Profile(user: user);
-                                    })
-                                  );
-                                },
-                                child: const Icon(
-                                  Icons.person,
-                                  size: 30,
+                            centerTitle: true,
+                            leading: null,
+                            title: Text(
+                              titleByIndex(activeIndex)
+                            ),
+                            actions: [
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.search, 
+                                    color: Colors.white,
+                                    size: 30,
+                                  ),
+                                  onPressed: (){},
                                 ),
                               ),
-                            )
-                          ],
-                        ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 16.0),
+                                child: GestureDetector(
+                                  onTap: (){
+                                    Navigator.of(context, rootNavigator: false).push(
+                                      MaterialPageRoute(builder: (context){
+                                        return Profile(user: user);
+                                      })
+                                    );
+                                  },
+                                  child: const Icon(
+                                    Icons.person,
+                                    size: 30,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
                           bottomNavigationBar: BottomNavigationBar(
                             type: BottomNavigationBarType.fixed,
                             currentIndex: activeIndex,
@@ -95,23 +126,11 @@ class _DashboardState extends State<Dashboard> {
                               ),
                               BottomNavigationBarItem(
                                 label: "Followers",
-                                icon: Icon(Icons.note)
+                                icon: Icon(Icons.group)
                               ),
                             ],
                           ),
-                          body: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text("Your are logged as : ${user.displayName}"),
-                              ElevatedButton(
-                                onPressed: (){
-                                  Navigator.of(context).popAndPushNamed(HomePage.routeName);
-                                  FirebaseAuth.instance.signOut();
-                                }, 
-                                child: const Text("Logout")
-                              )
-                            ],
-                          ),
+                          body: pages[activeIndex],
                         );
                       }
                     );

@@ -1,3 +1,4 @@
+import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
 
 class Util{
@@ -43,6 +44,7 @@ class Util{
         return Skills.noob;
     }
   }
+
   static String skillsToString(Skills str){
     switch (str){
       case Skills.leader:
@@ -84,5 +86,18 @@ class Util{
       case Skills.troll:
         return "Troll";
     }
+  }
+
+  static AttachmentType? intToAttachmentType(int num){
+    if(num == 0){
+      return AttachmentType.picture;
+    }
+    if(num == 1){
+      return AttachmentType.video;
+    }
+    if(num == 2){
+      return AttachmentType.voice;
+    }
+    return null;
   }
 }

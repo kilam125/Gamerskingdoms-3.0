@@ -48,6 +48,7 @@ dependencies:
   provider: ^6.0.5
   image_picker: ^0.8.7
   firebase_storage: ^11.0.16
+  voice_message_package: ^1.0.41
 
 dev_dependencies:
   flutter_test:
