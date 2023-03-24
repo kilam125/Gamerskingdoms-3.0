@@ -27,9 +27,8 @@ class _AddPostsState extends State<AddPosts> {
   bool uploadVideo = false;
   bool uploadVoiceNote = false;
 
-  List<String> images = [];
   List<XFile> listXFileImages = [];
-  
+  XFile? videoFile;  
   @override
   Widget build(BuildContext context) {
 
@@ -82,15 +81,22 @@ class _AddPostsState extends State<AddPosts> {
                         isAttachmentSend = true;
                         listXFileImages = result;
                       });
-
                     }
                   }, 
                   icon: const Icon(Icons.image, size: 30,)
                 ),
                 IconButton(
                   padding: EdgeInsets.zero,
-                  onPressed: (){
-
+                  onPressed: () async {
+                    final ImagePicker picker = ImagePicker();
+                    var result = await picker.pickVideo(source: ImageSource.gallery);
+                    if(result!=null){
+                      setState(() {
+                        uploadVideo = true;
+                        isAttachmentSend = true;
+                        videoFile = result;
+                      });
+                    }
                   }, 
                   icon: const Icon(Icons.movie, size: 30,)
                 ),
@@ -110,7 +116,6 @@ class _AddPostsState extends State<AddPosts> {
                   setState(() {
                     isLoading = true;
                   });
-
                   if(uploadImages){
                     List<String> downloadUrls = [];
                     List<Future<Uint8List>> filesAsBytes = listXFileImages.map((e) {

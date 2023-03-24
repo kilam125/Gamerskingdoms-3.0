@@ -51,16 +51,30 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final Map<int, Color> blackMap = {
+      50: const Color(0xFFFFD7C2),
+      100: const Color.fromARGB(255, 0, 0, 0),
+      200: const Color.fromARGB(255, 0, 0, 0),
+      300: const Color.fromARGB(255, 0, 0, 0),
+      400: const Color.fromARGB(255, 0, 0, 0),
+      500: const Color.fromARGB(255, 0, 0, 0),
+      600: const Color.fromARGB(255, 0, 0, 0),
+      700: const Color.fromARGB(255, 0, 0, 0),
+      800: const Color.fromARGB(255, 0, 0, 0),
+      900: const Color.fromARGB(255, 0, 0, 0),
+    };
+    final MaterialColor blackSwatch = MaterialColor(const Color.fromARGB(255, 0, 0, 0).value, blackMap);
+
     return MaterialApp(
       navigatorKey: _navigatorKey,
       title: 'Gamers Kingdoms',
       debugShowCheckedModeBanner: false,
       initialRoute:FirebaseAuth.instance.currentUser == null ? HomePage.routeName : Dashboard.routeName,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        primaryColor: const Color.fromRGBO(68, 129, 235, 1),
+        primarySwatch: blackSwatch,
+        primaryColor: const Color.fromARGB(255, 0, 0, 0),
         iconTheme: const IconThemeData(
-          color:  Color.fromRGBO(68, 129, 235, 1),
+          color:  Color.fromARGB(255, 0, 0, 0),
           size: 15
         ),
         iconButtonTheme: IconButtonThemeData(
@@ -89,7 +103,7 @@ class _MyAppState extends State<MyApp> {
         ),
         textButtonTheme: TextButtonThemeData(
           style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
             textStyle: MaterialStateProperty.resolveWith((states) {
               if (states.contains(MaterialState.hovered)) {
                 return GoogleFonts.poppins(
@@ -109,11 +123,11 @@ class _MyAppState extends State<MyApp> {
             overlayColor: MaterialStateProperty.resolveWith<Color?>(
               (Set<MaterialState> states) {
                 if (states.contains(MaterialState.hovered)) {
-                  return Colors.blue.withOpacity(0.04);
+                  return Colors.black.withOpacity(0.04);
                 }
                 if (states.contains(MaterialState.focused) ||
                     states.contains(MaterialState.pressed)) {
-                  return Colors.blue.withOpacity(0.12);
+                  return Colors.black.withOpacity(0.12);
                 }
                 return null; // Defer to the widget's default.
               },
@@ -173,17 +187,17 @@ class _MyAppState extends State<MyApp> {
             fontSize:20,
             height: 1,
             fontWeight:FontWeight.w400,
-            color: Theme.of(context).primaryColor,
+            color: Colors.white,
             letterSpacing: 1
           ),
           titleSmall: GoogleFonts.lalezar(
-            fontSize:16,
+            fontSize: 16,
             fontWeight:FontWeight.w400,
-            color: Theme.of(context).primaryColor,
+            color: Colors.black,
             letterSpacing: 1
           ),
           headlineSmall: GoogleFonts.poppins(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
             color: Theme.of(context).hintColor
           ),

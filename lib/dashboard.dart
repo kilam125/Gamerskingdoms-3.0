@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/add_posts.dart';
 import 'package:gamers_kingdom/database_service.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/posts.dart';
 import 'package:gamers_kingdom/profile.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +24,7 @@ class _DashboardState extends State<Dashboard> {
   int activeIndex = 0;
 
   List<Widget> pages = const [
-    AddPosts(),
+    Posts(),
     AddPosts(),
     AddPosts(),
   ];

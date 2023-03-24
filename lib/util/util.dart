@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
 
@@ -88,7 +89,7 @@ class Util{
     }
   }
 
-  static AttachmentType? intToAttachmentType(int num){
+  static AttachmentType? intToAttachmentType(int? num){
     if(num == 0){
       return AttachmentType.picture;
     }
