@@ -8,12 +8,17 @@ import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../posts.dart';
 
 class PostWidget extends StatelessWidget {
   final Post post;
+  final UserProfile user;
   const PostWidget({
     super.key,
-    required this.post
+    required this.post,
+    required this.user
   });
 
   static Widget getPictureWidget(String url){
@@ -108,12 +113,12 @@ class PostWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: GestureDetector(
             onTap: (){
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) {
-                    return PageComments(post: post);    
-                  }
-                )
+              Navigator.of(context).pushNamed(
+                PageComments.routeName,
+                arguments: {
+                  "index":context.read<List<Post>>().indexOf(post),
+                  "userProfile":user
+                }
               );
             },
             child: Text(

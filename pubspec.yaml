@@ -50,6 +50,9 @@ dependencies:
   firebase_storage: ^11.0.16
   voice_message_package: ^1.0.41
   intl: ^0.17.0
+  video_player: ^2.6.0
+  sliver_tools: ^0.2.9
+  audio_waveforms: ^1.0.3
 
 dev_dependencies:
   flutter_test:

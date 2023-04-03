@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
+import 'package:gamers_kingdom/models/comment.dart';
 import 'package:gamers_kingdom/util/util.dart';
 
 class Post extends ChangeNotifier {
@@ -27,6 +28,17 @@ class Post extends ChangeNotifier {
       },
       SetOptions(merge: true)
     );
+  }
+
+  Future<void> addComment(Comment comment) async {
+    DocumentReference ref = await FirebaseFirestore.instance.collection("comments").add(comment.toJson());
+    await postRef.set(
+      {
+        "comments":FieldValue.arrayUnion([ref])
+      },
+      SetOptions(merge: true)
+    );
+    notifyListeners();
   }
 
   Future<void> removeLike(DocumentReference ref) async {
@@ -88,14 +100,14 @@ class Post extends ChangeNotifier {
   factory Post.fromFirestore({required DocumentSnapshot data}){
     return Post(
       postRef: data.reference,
+      attachmentType:Util.intToAttachmentType(data["attachmentType"]),
+      attachmentUrl: data["attachmentUrl"],
       comments: data["comments"], 
       content: data["content"],
       datePost: (data["datePost"] as Timestamp).toDate(),
-      owner: data["owner"],
-      attachmentType:Util.intToAttachmentType(data["attachmentType"]),
-      attachmentUrl: data["attachmentUrl"],
+      likers: data["likers"] ?? [],
       likes: data["likes"] ?? 0,
-      likers: data["likers"] ?? []
+      owner: data["owner"],
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/firebase_options.dart';
 import 'package:gamers_kingdom/login_page.dart';
+import 'package:gamers_kingdom/profile_view.dart';
 import 'package:gamers_kingdom/sign_up.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -73,6 +74,17 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: blackSwatch,
         primaryColor: const Color.fromARGB(255, 0, 0, 0),
+        appBarTheme: AppBarTheme(
+          color: Colors.white,
+          iconTheme: const IconThemeData(color: Colors.black),
+          actionsIconTheme: const IconThemeData(color: Colors.black),
+          titleTextStyle: GoogleFonts.lalezar(
+              fontSize:30,
+              fontWeight:FontWeight.w400,
+              color: Colors.black,
+              letterSpacing: 1
+            )
+        ),
         iconTheme: const IconThemeData(
           color:  Color.fromARGB(255, 0, 0, 0),
           size: 15
@@ -220,6 +232,7 @@ class _MyAppState extends State<MyApp> {
         )
       ),
       onGenerateRoute: (settings){
+        debugPrint("Name : ${settings.name}");
         if(settings.name!.contains(SignUp.routeName)){
           return MaterialPageRoute(
             settings: RouteSettings(

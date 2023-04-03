@@ -2,9 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/add_posts.dart';
 import 'package:gamers_kingdom/database_service.dart';
+import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/posts.dart';
 import 'package:gamers_kingdom/profile.dart';
+import 'package:gamers_kingdom/profile_view.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -21,13 +24,8 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   final formKey = GlobalKey<FormState>();
+  final globalKey = GlobalKey(debugLabel: 'btm_app_bar');
   int activeIndex = 0;
-
-  List<Widget> pages = const [
-    Posts(),
-    AddPosts(),
-    AddPosts(),
-  ];
 
   titleByIndex(activeIndex){
     switch(activeIndex){
@@ -42,6 +40,17 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
+    navCallback(int index){
+      setState(() {
+        activeIndex = index;
+      });
+    }
+
+    List<Widget> pages = [
+      Posts(navCallback: navCallback),
+      AddPosts(navCallback: navCallback),
+      AddPosts(navCallback: navCallback),
+    ];
     return StreamBuilder<Object>(
       stream: FirebaseFirestore.instance
         .collection("users")
@@ -52,10 +61,19 @@ class _DashboardState extends State<Dashboard> {
           return const ProgressWidget();
         }
         QuerySnapshot qds = snapshot.data as QuerySnapshot;
-        return StreamProvider<UserProfile>.value(
-          updateShouldNotify:(oldList, currentList) => (currentList != oldList),
-          initialData: UserProfile.fromFirestore(data: qds.docs.first),
-          value: DatabaseService.streamUser(qds.docs.first.id),
+        return MultiProvider(
+          providers: [
+            StreamProvider<UserProfile>.value(
+              updateShouldNotify:(oldList, currentList) => (currentList != oldList),
+              initialData: UserProfile.fromFirestore(data: qds.docs.first),
+              value: DatabaseService.streamUser(qds.docs.first.id),
+            ),
+            StreamProvider<List<Post>>.value(
+              value:Post.streamAllPosts(),
+              updateShouldNotify:(oldList,currentList) => (currentList!=oldList),
+              initialData: const [],
+            )
+          ],
           builder: (context, __) {
             UserProfile user = context.watch<UserProfile>();
             return Navigator(
@@ -64,6 +82,23 @@ class _DashboardState extends State<Dashboard> {
                   return MaterialPageRoute(builder: (context){
                     return Profile(user: user);
                   });
+                }  else if(settings.name!.contains(ProfileView.routeName)){
+                  return MaterialPageRoute(
+                    settings: const RouteSettings(
+                      name:ProfileView.routeName,
+                    ),
+                    builder: (context) => ProfileView(user: (settings.arguments as Map)["user"])
+                  );
+                } else if(settings.name!.contains(PageComments.routeName)){
+                  return MaterialPageRoute(
+                    settings: RouteSettings(
+                      name:PageComments.routeName,
+                    ),
+                    builder: (context) => PageComments(
+                      index: (settings.arguments as Map)["index"],
+                      userProfile: (settings.arguments as Map)["userProfile"],
+                    )
+                  );
                 } else {
                   return MaterialPageRoute(builder: (context){
                     return Builder(
@@ -81,8 +116,8 @@ class _DashboardState extends State<Dashboard> {
                                 padding: const EdgeInsets.only(right: 8.0),
                                 child: IconButton(
                                   icon: const Icon(
-                                    Icons.search, 
-                                    color: Colors.white,
+                                    Icons.search,
+                                    color: Colors.black,
                                     size: 30,
                                   ),
                                   onPressed: (){},
@@ -107,14 +142,13 @@ class _DashboardState extends State<Dashboard> {
                             ],
                           ),
                           bottomNavigationBar: BottomNavigationBar(
+                            key: globalKey,
                             type: BottomNavigationBarType.fixed,
                             currentIndex: activeIndex,
                             elevation: 10,
                             showSelectedLabels: true,
                             onTap: (value) async {
-                              setState(() {
-                                activeIndex = value;
-                              });
+                              navCallback(value);
                             },
                             items: const [
                               BottomNavigationBarItem(
