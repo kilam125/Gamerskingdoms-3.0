@@ -352,11 +352,11 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                               items: const [
                                 DropdownMenuItem(
                                   value: Gender.male,
-                                  child: Text("Male"),
+                                  child: Text("Male", style: TextStyle(color: Colors.black)),
                                 ),
                                 DropdownMenuItem(
                                   value: Gender.female,
-                                  child: Text("Female"),
+                                  child: Text("Female", style: TextStyle(color: Colors.black)),
                                 ),
                               ],
                               onChanged: (value){

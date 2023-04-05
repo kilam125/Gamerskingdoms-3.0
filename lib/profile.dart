@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
@@ -50,6 +51,14 @@ class _ProfileState extends State<Profile> {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: (){
+              FirebaseAuth.instance.signOut();
+            },
+          )
+        ],
         title: const Text("My profile"),
       ),
       body: Container(

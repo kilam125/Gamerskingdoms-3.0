@@ -46,6 +46,9 @@ class _MyAppState extends State<MyApp> {
         }
       } else {
         debugPrint("Not Authenticated");
+        _navigatorKey.currentState!.pushReplacementNamed(
+          HomePage.routeName,
+        );
       }
     });
   }
@@ -70,7 +73,6 @@ class _MyAppState extends State<MyApp> {
       navigatorKey: _navigatorKey,
       title: 'Gamers Kingdoms',
       debugShowCheckedModeBanner: false,
-      initialRoute:FirebaseAuth.instance.currentUser == null ? HomePage.routeName : Dashboard.routeName,
       theme: ThemeData(
         primarySwatch: blackSwatch,
         primaryColor: const Color.fromARGB(255, 0, 0, 0),
@@ -231,6 +233,7 @@ class _MyAppState extends State<MyApp> {
           ),
         )
       ),
+      initialRoute:FirebaseAuth.instance.currentUser == null ? HomePage.routeName : Dashboard.routeName,
       onGenerateRoute: (settings){
         debugPrint("Name : ${settings.name}");
         if(settings.name!.contains(SignUp.routeName)){
@@ -249,7 +252,7 @@ class _MyAppState extends State<MyApp> {
               email: FirebaseAuth.instance.currentUser!.email!,
             )
           );
-        } else {
+        } else if(settings.name!.contains(HomePage.routeName)){
           return MaterialPageRoute(
             settings: RouteSettings(
               name:HomePage.routeName,
@@ -257,6 +260,7 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => const HomePage()
           );
         }
+        return null;
       },
     );
   }

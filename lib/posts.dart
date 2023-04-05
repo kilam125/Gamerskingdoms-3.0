@@ -187,7 +187,7 @@ class _PostsState extends State<Posts> {
                         }, 
                         icon: const Icon(
                           Icons.add_comment,
-                          size: 30,
+                          size: 28,
                         )
                       ),
                     ],
