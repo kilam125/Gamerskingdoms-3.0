@@ -21,7 +21,11 @@ class CommentLine extends StatelessWidget {
       stream: comment.commentator.snapshots(),
       builder: (context, userSnapshot) {
         if(!userSnapshot.hasData){
-          return const ProgressWidget();
+          return const SizedBox(
+            height: 30,
+            width: 30,
+            child: ProgressWidget()
+          );
         }
         UserProfile user = UserProfile.fromFirestore(data: userSnapshot.data!);
         return Column(

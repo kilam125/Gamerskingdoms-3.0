@@ -11,6 +11,7 @@ import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:video_compress/video_compress.dart';
 
 class AddPosts extends StatefulWidget {
   final Function(int) navCallback;
@@ -113,11 +114,15 @@ class _AddPostsState extends State<AddPosts> {
                     onPressed: () async {
                       final ImagePicker picker = ImagePicker();
                       var result = await picker.pickVideo(source: ImageSource.gallery);
-                      if(result!=null){
+                      var compressResult = await VideoCompress.compressVideo(
+                        result!.path,
+                        quality:VideoQuality.LowQuality
+                      );
+                      if(compressResult != null){
                         setState(() {
                           uploadVideo = true;
                           isAttachmentSend = true;
-                          videoFile = result;
+                          videoFile = XFile(compressResult.path!);
                         });
                       }
                     }, 

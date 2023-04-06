@@ -16,6 +16,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   late VideoPlayerController controller;
   late Future<void> _initializeVideoPlayerFuture;
   bool isPlaying = false;
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +25,14 @@ class _VideoWidgetState extends State<VideoWidget> {
     _initializeVideoPlayerFuture = controller.initialize();
     controller.setLooping(true);
   }
+
+  @override
+  void dispose(){
+    super.dispose();
+    controller.dispose();
+    debugPrint("disposing video widget");
+  }
+  
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -64,7 +73,11 @@ class _VideoWidgetState extends State<VideoWidget> {
           );
         } else {
           return const Center(
-            child: ProgressWidget(),
+            child: SizedBox(
+              height: 30,
+              width: 30,
+              child: ProgressWidget()
+            ),
           );
         }
       },

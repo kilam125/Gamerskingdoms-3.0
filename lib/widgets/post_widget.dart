@@ -6,11 +6,10 @@ import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
+import 'package:gamers_kingdom/widgets/video_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
-import '../posts.dart';
 
 class PostWidget extends StatelessWidget {
   final Post post;
@@ -32,14 +31,26 @@ class PostWidget extends StatelessWidget {
       
     );
   }
-
-  Widget attachementViewByType(AttachmentType attachmentType, String attachmentUrl){
-    if(attachmentType == AttachmentType.picture){
-      return getPictureWidget(attachmentUrl);
-    }
-    else {
+  
+  Widget getVideoWidget(String url) {
+    return SizedBox(
+      height: 300,
+      width: double.infinity,
+      child: VideoWidget(url: url),
+    );
+  }
+  Widget attachementViewByType(AttachmentType? attachmentType, String? attachmentUrl){
+    if(attachmentType == null || attachmentUrl == null){
       return Container();
     }
+    else if(attachmentType == AttachmentType.picture){
+      return getPictureWidget(attachmentUrl);
+    } else if(attachmentType == AttachmentType.video){
+      return getVideoWidget(attachmentUrl);
+    } else if(attachmentType == AttachmentType.voice){
+
+    }
+    return Container();
   }
   @override
   Widget build(BuildContext context) {
@@ -109,6 +120,7 @@ class PostWidget extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Text(post.content!),
         ),
+        attachementViewByType(post.attachmentType, post.attachmentUrl),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: GestureDetector(

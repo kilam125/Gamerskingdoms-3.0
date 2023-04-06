@@ -1,6 +1,7 @@
 
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flop_list_view/flop_list_view.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
@@ -40,7 +41,8 @@ class _PostsState extends State<Posts> {
 
   List<XFile> listXFileImages = [];
   XFile? videoFile; 
-  
+  final _flopListController = FlopListController();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -49,10 +51,12 @@ class _PostsState extends State<Posts> {
   Widget getPictureWidget(String url){
     return SizedBox(
       height: 300,
-      width: double.infinity,
+      width: MediaQuery.of(context).size.width,
       child: Image.network(
         url,
         fit: BoxFit.fill,
+        cacheHeight: 300,
+        cacheWidth: MediaQuery.of(context).size.width.toInt(),
       ),
       
     );
@@ -80,7 +84,10 @@ class _PostsState extends State<Posts> {
   @override
   Widget build(BuildContext context) {
     UserProfile using = context.watch<UserProfile>();
-    return ListView.builder(
+    return FlopListView.builder(
+      anchor: 1.0,
+      controller: _flopListController,
+      initialScrollIndex: 0,
       itemBuilder: (context, index){
         debugPrint("Index $index");
         // Post post = Post.fromFirestore(data: snapshot.data!.docs[index]);
@@ -95,7 +102,11 @@ class _PostsState extends State<Posts> {
             stream: post.owner.get().asStream(),
             builder: (context, ownerSnapshot) {
               if(ownerSnapshot.data == null){
-                return const ProgressWidget();
+                return const SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: ProgressWidget()
+                );
               }
               UserProfile user = UserProfile.fromFirestore(data:  ownerSnapshot.data!);
               return Column(
