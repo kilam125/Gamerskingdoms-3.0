@@ -23,7 +23,7 @@ class PostWidget extends StatelessWidget {
   static Widget getPictureWidget(String url){
     return SizedBox(
       height: 300,
-      width: 300,
+      width: double.infinity,
       child: Image.network(
         url,
         fit: BoxFit.fill,

@@ -115,7 +115,7 @@ class Post extends ChangeNotifier {
     Query posts = FirebaseFirestore.instance.collection("posts").orderBy("datePost", descending: true);
     return posts.snapshots().map(
       (listOfPosts) {
-        debugPrint("list of clients : ${listOfPosts.docs.length.toString()}");
+        debugPrint("list of posts : ${listOfPosts.docs.length.toString()}");
         return listOfPosts.docs.map((e) => Post.fromFirestore(data:e)).toList();
       });
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/firebase_options.dart';
 import 'package:gamers_kingdom/login_page.dart';
+import 'package:gamers_kingdom/notifications_page.dart';
 import 'package:gamers_kingdom/profile_view.dart';
 import 'package:gamers_kingdom/sign_up.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -46,9 +47,9 @@ class _MyAppState extends State<MyApp> {
         }
       } else {
         debugPrint("Not Authenticated");
-        _navigatorKey.currentState!.pushReplacementNamed(
+/*         _navigatorKey.currentState!.pushReplacementNamed(
           HomePage.routeName,
-        );
+        ); */
       }
     });
   }

@@ -100,6 +100,7 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                   debugPrint("Tapped");
                   if(formKey.currentState!.validate()){
                     formKey.currentState!.save();
+                    debugPrint(selectedSkills.toString());
                     if(pageController.page == 1){
                       setState(() {
                         isLoading = true;
@@ -108,6 +109,7 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                         User? user;
                         UserCredential? userC;
                         if(FirebaseAuth.instance.currentUser == null){
+                          debugPrint("Creating user");
                           userC = await FirebaseAuth.instance.createUserWithEmailAndPassword(
                             email: emailController.text, 
                             password: passwordController.text,
@@ -120,6 +122,7 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                           .count()
                           .get();
                         if(aq.count > 0){
+                          debugPrint("Found user already existing");
                           PopUp.okPopUp(
                             context: _scaffoldKey.currentContext!,
                             title: "Something went wrong", 
@@ -129,6 +132,7 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                             isLoading = false;
                           });
                         } else {
+                          debugPrint("Creating user in firestore");
                           await fbf.collection("users").add(
                             {
                               "email":emailController.text.toLowerCase().trim(),
@@ -136,15 +140,14 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                               "surname": surnameController.text.toLowerCase().trim(),
                               "displayName": pseudoController.text.toLowerCase().trim(),
                               "bio": bioController.text,
-                              "skills": skills
+                              "skills": selectedSkills
                             }
                           );
                           if(userC != null){
-                            userC.user!.sendEmailVerification();
-                          } else {
-                            await user!.sendEmailVerification();
+                            await userC.user!.sendEmailVerification();
                           }
                           await FirebaseAuth.instance.signOut();
+                          debugPrint("Sign out");
                           if(!mounted)return;
                           await PopUp.okPopUp(
                             context: _scaffoldKey.currentContext!,
@@ -155,6 +158,7 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                           Navigator.of(_scaffoldKey.currentContext!).pop();
                         }
                       } on FirebaseAuthException catch (e) {
+                        debugPrint("Caught exception");
                         setState(() {
                           isLoading = false;
                         });

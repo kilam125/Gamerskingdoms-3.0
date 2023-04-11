@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/add_posts.dart';
 import 'package:gamers_kingdom/database_service.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/notifications_page.dart';
 import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/posts.dart';
 import 'package:gamers_kingdom/profile.dart';
@@ -64,7 +66,10 @@ class _DashboardState extends State<Dashboard> {
         return MultiProvider(
           providers: [
             StreamProvider<UserProfile>.value(
-              updateShouldNotify:(oldList, currentList) => (currentList != oldList),
+              updateShouldNotify:(oldList, currentList) {
+                debugPrint("Updating");
+                return (currentList != oldList);
+              },
               initialData: UserProfile.fromFirestore(data: qds.docs.first),
               value: DatabaseService.streamUser(qds.docs.first.id),
             ),
@@ -98,6 +103,13 @@ class _DashboardState extends State<Dashboard> {
                       index: (settings.arguments as Map)["index"],
                       userProfile: (settings.arguments as Map)["userProfile"],
                     )
+                  );
+                }  else if(settings.name!.contains(NotificationPage.routeName)) {
+                  return MaterialPageRoute(
+                    settings: RouteSettings(
+                      name:NotificationPage.routeName,
+                    ),
+                    builder: (context) => const NotificationPage()
                   );
                 } else {
                   return MaterialPageRoute(builder: (context){
@@ -138,7 +150,20 @@ class _DashboardState extends State<Dashboard> {
                                     size: 30,
                                   ),
                                 ),
-                              )
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 16.0),
+                                child: GestureDetector(
+                                  onTap: (){
+                                    Navigator.of(context).pushNamed(NotificationPage.routeName);
+                                  },
+                                  child: const Icon(
+                                    Icons.notifications,
+                                    size: 30,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                           bottomNavigationBar: BottomNavigationBar(

@@ -1,6 +1,7 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/pop_up/dialog.dart';
 import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/sign_up.dart';
@@ -148,9 +149,20 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: () async {
                   if(formKey.currentState!.validate()){
                     formKey.currentState!.save();
+                    debugPrint(emailController.text);
                     if(!mounted)return;
                     try{
-                      await FirebaseAuth.instance.signInWithEmailAndPassword(email: emailController.text, password: passwordController.text);
+                      UserCredential uc = await FirebaseAuth.instance.signInWithEmailAndPassword(email: emailController.text, password: passwordController.text);
+                      debugPrint(uc.toString());
+                      if(uc.user != null){
+                        if(!mounted)return;
+                        Navigator.of(context).pushReplacementNamed(
+                          Dashboard.routeName,
+                          arguments: {
+                            "email":uc.user!.email
+                          }
+                        );
+                      }
                     } on FirebaseAuthException catch (_) {
                       await PopUp.okPopUp(
                         context: context,

@@ -12,6 +12,7 @@ class UserProfile extends ChangeNotifier {
   String? bio;
   String email;
   DocumentReference userRef;
+  List? friendRequest;
 
   get getUserRef => userRef;
 
@@ -53,6 +54,17 @@ class UserProfile extends ChangeNotifier {
 
  set setEmail( email) => email = email;
 
+  Future<void> setFriendRequest(DocumentReference friendRequest) async {
+    this.friendRequest!.add(friendRequest);
+    await userRef.set({
+      "friendRequest":FieldValue.arrayUnion([friendRequest])
+      },
+      SetOptions(
+        merge: true
+      )
+    );
+    notifyListeners();
+  }
  Future<void> setUser({
     required String displayName,
     required List<Skills> skills,
@@ -77,10 +89,18 @@ class UserProfile extends ChangeNotifier {
     this.picture,
     this.followers,
     this.following,
-    this.bio
+    this.bio,
+    this.friendRequest
   });
 
-
+  static Future<DocumentReference> createFriendRequest({required DocumentReference requester, required DocumentReference target}) async {
+    return FirebaseFirestore.instance.collection("friendRequest")
+      .add({
+        "requester":requester,
+        "target":target,
+        "date":DateTime.now()
+      });
+  }
   factory UserProfile.fromFirestore({required DocumentSnapshot data}){
     Map dataMap = data.data() as Map;
     return UserProfile(
@@ -91,6 +111,7 @@ class UserProfile extends ChangeNotifier {
       bio: data["bio"],
       followers: dataMap.containsKey("followers") ? dataMap["followers"] : [],
       following: dataMap.containsKey("following") ? dataMap["following"] : [],
+      friendRequest: dataMap.containsKey("friendRequest") ? dataMap["friendRequest"] : [],
       userRef: data.reference
     );
   }

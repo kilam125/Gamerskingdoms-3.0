@@ -74,9 +74,9 @@ class _VideoWidgetState extends State<VideoWidget> {
         } else {
           return const Center(
             child: SizedBox(
-              height: 30,
-              width: 30,
-              child: ProgressWidget()
+              height: 300,
+              width: 300,
+              child: Center(child: ProgressWidget())
             ),
           );
         }
