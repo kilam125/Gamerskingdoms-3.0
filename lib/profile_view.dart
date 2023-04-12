@@ -116,7 +116,7 @@ class _ProfileViewState extends State<ProfileView> {
                                   children: [
                                     Text(widget.user.followers!.length.toString()),
                                     Text(
-                                      "Following",
+                                      "Followers",
                                       style: Theme.of(context).textTheme.titleSmall,
                                     ),
                                   ],
@@ -126,7 +126,7 @@ class _ProfileViewState extends State<ProfileView> {
                                 children: [
                                   Text(widget.user.following!.length.toString()),
                                   Text(
-                                    "Followers",
+                                    "Following",
                                     style: Theme.of(context).textTheme.titleSmall,
                                   ),
                                 ],
@@ -144,52 +144,35 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
                 if(!(context.read<UserProfile>().userRef == widget.user.userRef))
                 SliverToBoxAdapter(
-                  child: context.read<UserProfile>().followers!.contains(widget.user.userRef)?
-                  Row(
-                    children: const [
-                      Icon(Icons.check),
-                      Text("Followed")
-                    ],
+                  child:(widget.user.followers!.contains(context.read<UserProfile>().userRef))?
+                  GestureDetector(
+                    onTap: () async {
+                      if(!mounted)return;
+                      widget.user.removeFollower(context.read<UserProfile>().userRef);
+                      if(!mounted)return;
+                      context.read<UserProfile>().removeFollowing(widget.user.userRef);
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Icon(Icons.check),
+                        ),
+                        Text("Followed")
+                      ],
+                    ),
                   ) :
-                  StreamBuilder(
-                    stream: FirebaseFirestore.instance.collection("friendRequest")
-                      .where("target",isEqualTo: widget.user.userRef)
-                      .where("requester",isEqualTo: context.read<UserProfile>().userRef)
-                      .snapshots(),
-                    builder: (context, snapshot) {
-                      if(!snapshot.hasData){
-                        return const SizedBox(
-                          height: 30,
-                          width: 30,
-                          child: ProgressWidget(),
-                        );
-                      }
-                      if(snapshot.data!.docs.isNotEmpty){
-                        return TextButton(
-                          child: const Text("Pending invitation"),
-                          onPressed: () async {
-                            PopUp.yesNoPopUp(
-                              context: context, 
-                              title: "Wait...", 
-                              message: "Are you sure you want to cancel your invitation ?", 
-                              yesCallBack: () async {
-                                await snapshot.data!.docs.first.reference.delete();
-                              }
-                            );
-                          },
-                        );
-                      }
-                      return ElevatedButton(
-                        child: const Text("Follow"),
-                        onPressed: () async {
-                          DocumentReference friendRequest = await UserProfile.createFriendRequest(requester: context.read<UserProfile>().userRef, target: widget.user.userRef);
-                          widget.user.setFriendRequest(friendRequest);
-                          if(!mounted)return;
-                          context.read<UserProfile>().setFriendRequest(friendRequest);
-                        },
-                      );
-                    }
-                  ),
+                  ElevatedButton(
+                    child: const Text("Follow"),
+                    onPressed: () async {
+                      await UserProfile.createFriendRequest(requester: context.read<UserProfile>().userRef, target: widget.user.userRef);
+                      if(!mounted)return;
+                      widget.user.addFollower(context.read<UserProfile>().userRef);
+                      if(!mounted)return;
+                      context.read<UserProfile>().addFollowing(widget.user.userRef);
+                    },
+                  )
                 ),
                 SliverToBoxAdapter(
                   child: Padding(

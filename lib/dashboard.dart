@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/add_posts.dart';
 import 'package:gamers_kingdom/database_service.dart';
+import 'package:gamers_kingdom/followers.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/notifications_page.dart';
@@ -51,8 +52,9 @@ class _DashboardState extends State<Dashboard> {
     List<Widget> pages = [
       Posts(navCallback: navCallback),
       AddPosts(navCallback: navCallback),
-      AddPosts(navCallback: navCallback),
+      Followers(navCallback: navCallback),
     ];
+
     return StreamBuilder<Object>(
       stream: FirebaseFirestore.instance
         .collection("users")

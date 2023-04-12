@@ -7,8 +7,8 @@ class UserProfile extends ChangeNotifier {
   String? picture;
   String displayName;
   List<Skills> skills;
-  List<DocumentReference?>? followers;
-  List<DocumentReference?>? following;
+  List? followers;
+  List? following;
   String? bio;
   String email;
   DocumentReference userRef;
@@ -65,6 +65,55 @@ class UserProfile extends ChangeNotifier {
     );
     notifyListeners();
   }
+
+  Future<void> addFollower(DocumentReference friend) async {
+    followers!.add(friend);
+    await userRef.set({
+      "followers":FieldValue.arrayUnion([friend])
+      },
+      SetOptions(
+        merge: true
+      )
+    );
+    notifyListeners();
+  }
+
+  Future<void> removeFollower(DocumentReference friend) async {
+    followers!.remove(friend);
+    await userRef.set({
+      "followers":FieldValue.arrayRemove([friend])
+      },
+      SetOptions(
+        merge: true
+      )
+    );
+    notifyListeners();
+  }
+
+  Future<void> addFollowing(DocumentReference friend) async {
+    following!.add(friend);
+    await userRef.set({
+      "following":FieldValue.arrayUnion([friend])
+      },
+      SetOptions(
+        merge: true
+      )
+    );
+    notifyListeners();
+  }
+
+  Future<void> removeFollowing(DocumentReference friend) async {
+    following!.remove(friend);
+    await userRef.set({
+      "following":FieldValue.arrayRemove([friend])
+      },
+      SetOptions(
+        merge: true
+      )
+    );
+    notifyListeners();
+  }
+
  Future<void> setUser({
     required String displayName,
     required List<Skills> skills,

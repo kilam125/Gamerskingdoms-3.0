@@ -30,6 +30,7 @@ class _ProfileState extends State<Profile> {
   late final List<MultiSelectItem<Skills>> items;
   bool isLoading = false;
   bool isLoadingButton = false;
+  
   @override
   void initState() {
     super.initState();
@@ -198,14 +199,15 @@ class _ProfileState extends State<Profile> {
                     setState(() {
                       isLoadingButton = true;
                     });
-                    debugPrint(selectedSkills.toString());
                     user.setDisplayName = displayName.text;
                     user.bio = bio.text;
                     user.skills = selectedSkills;
                     await user.setUser(
                       displayName: displayName.text, 
                       skills: selectedSkills, 
-                      picture: user.picture!, 
+                      picture: user.picture == null ? 
+                        null
+                        : user.picture!, 
                       bio: bio.text
                     );
                     if(!mounted)return;
