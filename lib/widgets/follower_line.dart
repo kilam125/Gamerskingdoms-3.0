@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/profile_view.dart';
 
 class FollowerLine extends StatelessWidget {
   final UserProfile user;
@@ -14,6 +15,14 @@ class FollowerLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      onTap: (){
+        Navigator.of(context).pushNamed(
+          ProfileView.routeName,
+          arguments: {
+            "user":user
+          }
+        );
+      },
       leading: user.picture == null ?
         ClipRRect(
           borderRadius: BorderRadius.circular(30),

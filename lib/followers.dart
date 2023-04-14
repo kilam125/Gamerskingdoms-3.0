@@ -27,30 +27,47 @@ class _FollowersState extends State<Followers> {
         child: Text("You have no followers"),
       );
     }
-    return ListView.separated(
-      separatorBuilder: (
-        BuildContext context, 
-        int index
-      ) => const Divider(
-        thickness: 1, 
-        color: Colors.grey
-      ),
-      itemBuilder: (context, index){
-        return StreamBuilder(
-          stream: (userProfile.followers![index] as DocumentReference).snapshots(),
-          builder: (context, snapshot) {
-            if(userProfile.followers == null){
-              return const SizedBox(
-                height: 30,
-                width: 30,
-                child: ProgressWidget(),
+    return Column(
+      children: [
+        Flexible(
+          flex: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Followers : ${userProfile.followers!.length}",
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          )
+        ),
+        Flexible(
+          flex: 8,
+          child: ListView.separated(
+            separatorBuilder: (
+              BuildContext context, 
+              int index
+            ) => const Divider(
+              thickness: 1, 
+              color: Colors.grey
+            ),
+            itemBuilder: (context, index){
+              return StreamBuilder(
+                stream: (userProfile.followers![index] as DocumentReference).snapshots(),
+                builder: (context, snapshot) {
+                  if(userProfile.followers == null){
+                    return const SizedBox(
+                      height: 30,
+                      width: 30,
+                      child: ProgressWidget(),
+                    );
+                  }
+                  return FollowerLine(user: UserProfile.fromFirestore(data: snapshot.data!),);
+                }
               );
-            }
-            return FollowerLine(user: UserProfile.fromFirestore(data: snapshot.data!),);
-          }
-        );
-      },
-      itemCount: userProfile.followers!.length,
+            },
+            itemCount: userProfile.followers!.length,
+          ),
+        ),
+      ],
     );
   }
 }

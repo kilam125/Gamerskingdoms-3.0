@@ -134,7 +134,14 @@ class _DashboardState extends State<Dashboard> {
                                     color: Colors.black,
                                     size: 30,
                                   ),
-                                  onPressed: (){},
+                                  onPressed: () async {
+                                    await showSearch(
+                                      context: context, 
+                                      delegate: MySearchDelegate()
+                                    );
+                                    if (!mounted) return;
+                                    FocusManager.instance.primaryFocus!.unfocus();
+                                  },
                                 ),
                               ),
                               Padding(
@@ -204,5 +211,43 @@ class _DashboardState extends State<Dashboard> {
         );
       }
     );
+  }
+}
+
+class MySearchDelegate extends SearchDelegate {
+  List<Post>? selectedPosts;
+  //final bool Function(List<Post>) filter;
+
+  MySearchDelegate();
+
+  @override
+  String get searchFieldLabel => 'Rechercher...';
+
+  @override
+  Widget? buildLeading(BuildContext context) =>
+      IconButton(onPressed: () => close(context, null), icon: const Icon(Icons.arrow_back));
+
+  @override
+  List<Widget>? buildActions(BuildContext context) => [
+    IconButton(
+      onPressed: () {
+        if (query.isEmpty) {
+          close(context, null);
+        } else {
+          query = '';
+        }
+      },
+      icon: const Icon(Icons.close))
+    ];
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return Text("sel=$selectedPosts");
+    //MessageLine(pool: selectedPool!);
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return Text("");
   }
 }

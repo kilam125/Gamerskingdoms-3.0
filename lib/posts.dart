@@ -14,7 +14,6 @@ import 'package:gamers_kingdom/widgets/video_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart';
 
 import 'models/post.dart';
 
