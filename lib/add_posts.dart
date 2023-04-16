@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:video_compress/video_compress.dart';
 
@@ -34,12 +36,44 @@ class _AddPostsState extends State<AddPosts> {
   bool uploadImages = false;
   bool uploadVideo = false;
   bool uploadVoiceNote = false;
-
-  DateTime now = DateTime.now();
+  RecorderController recorderController = RecorderController(); // Initialise
+  late String fullPath;
+  late String localPath;
+  DateTime date = DateTime.now();
+  late PlayerController controller;
 
   List<XFile> listXFileImages = [];
   List<Image> listImages = [];
   XFile? videoFile;
+  bool showSendButton = false;
+
+  bool showMicrowave = false;
+  bool audioRecorded = false;
+
+  bool isPlaying = false;
+
+  permissionCheck() async {
+    await recorderController.checkPermission();
+  }
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+  initPath() async {
+    localPath = await _localPath;
+    fullPath = "$localPath/recording_${date.day}_${date.month}_${date.year}_${date.hour}_${date.minute}_${date.second}";
+    debugPrint("PATH : $fullPath");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initPath();
+    controller = PlayerController();
+    permissionCheck();
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -82,6 +116,7 @@ class _AddPostsState extends State<AddPosts> {
               ),
               Row(
                 children: [
+                  if(!audioRecorded)
                   IconButton(
                     padding: EdgeInsets.zero,
                     onPressed: () async {
@@ -109,6 +144,7 @@ class _AddPostsState extends State<AddPosts> {
                     }, 
                     icon: const Icon(Icons.image, size: 30,)
                   ),
+                  if(!audioRecorded)
                   IconButton(
                     padding: EdgeInsets.zero,
                     onPressed: () async {
@@ -128,15 +164,95 @@ class _AddPostsState extends State<AddPosts> {
                     }, 
                     icon: const Icon(Icons.movie, size: 30,)
                   ),
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: (){
-        
-                    }, 
-                    icon: const Icon(Icons.mic, size: 30,)
+                  const Spacer(),
+                  GestureDetector(
+                    onLongPress: () async {
+                      FocusScope.of(context).unfocus();
+                      setState(() {
+                        showMicrowave = true;
+                        isPlaying = true;
+                        audioRecorded = true;
+                      });
+                      await recorderController.record(path: fullPath);
+                    },
+                    onLongPressEnd: (details) async {
+                      await recorderController.pause();
+                      setState(() {
+                        isPlaying = false;
+                        showSendButton = true;
+                        uploadVoiceNote = true;
+                      });
+                    },
+                    child: const Icon(Icons.mic, size: 30,)
                   )
                 ],
               ),
+              if(showMicrowave)
+              Row(
+                children: [
+                  Flexible(
+                    flex: 1,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      icon: Icon(
+                        isPlaying ? Icons.pause_circle : Icons.play_circle,
+                        size: 20,
+                        color: Colors.black,
+                      ),
+                      onPressed: () {
+                        if (isPlaying) {
+                          recorderController.pause();
+                          setState(() {
+                            isPlaying = false;
+                            uploadVoiceNote = true;
+                          });
+                        } else {
+                          recorderController.record();
+                          setState(() {
+                            isPlaying = true;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  Flexible(
+                    flex: 8,
+                    child: AudioWaveforms(
+                      size: Size(MediaQuery.of(context).size.width, 10.0),
+                      recorderController: recorderController,
+                      enableGesture: true,
+                      waveStyle: const WaveStyle(
+                        middleLineColor: Colors.transparent,
+                        waveColor: Color.fromRGBO(62, 62, 147, 1),
+                        showDurationLabel: false,
+                        spacing: 5.0,
+                        showBottom: true,
+                        extendWaveform: true,
+                        showMiddleLine: true,
+                      ),
+                    ),
+                  ),
+                  Flexible(
+                    flex: 1,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      icon: const Icon(
+                        Icons.delete,
+                        size: 20,
+                        color: Colors.black,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          recorderController.reset();
+                          showMicrowave = false;
+                          uploadVoiceNote = false;
+                          audioRecorded = false;
+                        });
+                      },
+                    ),
+                  )
+                ],
+              ), 
               if(uploadImages)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -170,6 +286,7 @@ class _AddPostsState extends State<AddPosts> {
                       }
                       debugPrint(downloadUrls.toString());
                       await FirebaseFirestore.instance.collection("posts").add({
+                        "userName":user.displayName,
                         "attachmentType":attachmentTypeByBool(),
                         "attachmentUrl":downloadUrls.first,
                         "comments":[],
@@ -186,12 +303,13 @@ class _AddPostsState extends State<AddPosts> {
                       List<Uint8List> result = [filesAsBytes];
                       for(Uint8List elem in result){
                         if(!mounted)return;
-                        final TaskSnapshot upload = await FirebaseStorage.instance.ref(user.email).child(videoFile!.name+now.day.toString()+now.minute.toString()+now.year.toString()+now.minute.toString()+now.second.toString()).putData(elem, SettableMetadata(contentType: 'video/mp4'));
+                        final TaskSnapshot upload = await FirebaseStorage.instance.ref(user.email).child(videoFile!.name+date.day.toString()+date.minute.toString()+date.year.toString()+date.minute.toString()+date.second.toString()).putData(elem, SettableMetadata(contentType: 'video/mp4'));
                         final String downloadUrl = await upload.ref.getDownloadURL();
                         downloadUrls.add(downloadUrl);
                       }
                       debugPrint(downloadUrls.toString());
                       await FirebaseFirestore.instance.collection("posts").add({
+                        "userName":user.displayName,
                         "attachmentType":attachmentTypeByBool(),
                         "attachmentUrl":downloadUrls.first,
                         "comments":[],
@@ -203,9 +321,34 @@ class _AddPostsState extends State<AddPosts> {
                       });
                       debugPrint("Done");
                     } else if(uploadVoiceNote){
-        
+                      debugPrint("upload voice note");
+                      List<String> downloadUrls = [];
+                      String? file = await recorderController.stop();
+                      if(file!=null){
+                        Uint8List filesAsBytes = await File(file).readAsBytes();
+                        if(!mounted)return;
+                        final TaskSnapshot upload = await FirebaseStorage.instance.ref(user.email)
+                          .child("audio_recorded${date.day}${date.minute}${date.year}${date.minute}${date.second}")
+                          .putData(filesAsBytes, SettableMetadata(contentType: 'audio/mp3'));
+                        final String downloadUrl = await upload.ref.getDownloadURL();
+                        downloadUrls.add(downloadUrl);
+                        debugPrint(downloadUrls.toString());
+                        await FirebaseFirestore.instance.collection("posts").add({
+                          "userName":user.displayName,
+                          "attachmentType":2,
+                          "attachmentUrl":downloadUrls.first,
+                          "comments":[],
+                          "content":content.text,
+                          "datePost":DateTime.now(),
+                          "likers":[],
+                          "likes":0,
+                          "owner":user.userRef,
+                        });
+                        debugPrint("Done");
+                      }
                     } else {
                       await FirebaseFirestore.instance.collection("posts").add({
+                        "userName":user.displayName,
                         "attachmentType":null,
                         "attachmentUrl":null,
                         "comments":[],

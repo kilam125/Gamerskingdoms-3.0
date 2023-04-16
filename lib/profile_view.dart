@@ -4,7 +4,7 @@ import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
-import 'package:gamers_kingdom/pop_up/pop_up.dart';
+import 'package:gamers_kingdom/profile.dart';
 import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/post_widget.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
@@ -14,9 +14,11 @@ import 'package:provider/provider.dart';
 
 class ProfileView extends StatefulWidget {
   final UserProfile user;
+  final bool ownUser;
   const ProfileView({
     super.key,
-    required this.user
+    required this.user,
+    this.ownUser = false
   });
   static const String routeName = "/ProfileView";
   @override
@@ -50,7 +52,24 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: [
+          if(widget.ownUser)
+          IconButton(
+            onPressed: (){
+              Navigator.of(
+                context, 
+                rootNavigator: false
+              ).push(
+                MaterialPageRoute(builder: (context){
+                  return Profile(user: widget.user);
+                })
+              );
+            }, 
+            icon: const Icon(Icons.edit)
+          )
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.only(top:16.0, left: 8, right: 8.0),
         child: StreamBuilder(

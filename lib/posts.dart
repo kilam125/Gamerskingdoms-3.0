@@ -1,5 +1,7 @@
 
 
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flop_list_view/flop_list_view.dart';
@@ -11,9 +13,12 @@ import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/profile_view.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
+import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:just_audio/just_audio.dart';
 
 import 'models/post.dart';
 
@@ -38,14 +43,20 @@ class _PostsState extends State<Posts> {
   bool uploadImages = false;
   bool uploadVideo = false;
   bool uploadVoiceNote = false;
+  DateTime date = DateTime.now();
 
   List<XFile> listXFileImages = [];
   XFile? videoFile; 
   final _flopListController = FlopListController();
+  final player = AudioPlayer(); // Create a player
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
   Widget getPictureWidget(String url){
@@ -77,7 +88,7 @@ class _PostsState extends State<Posts> {
     else if(attachmentType == AttachmentType.video){
       return getVideoWidget(attachmentUrl);
     } else {
-      return Container();
+      return VoiceNoteWidget(url: attachmentUrl);
     }
   }
 
@@ -312,7 +323,8 @@ class _PostsState extends State<Posts> {
                             Navigator.of(context).pushNamed(
                               ProfileView.routeName,
                               arguments: {
-                                "user":user
+                                "user":user,
+                                "ownUser":false
                               }
                             );
                           },

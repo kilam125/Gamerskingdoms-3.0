@@ -94,7 +94,10 @@ class _DashboardState extends State<Dashboard> {
                     settings: const RouteSettings(
                       name:ProfileView.routeName,
                     ),
-                    builder: (context) => ProfileView(user: (settings.arguments as Map)["user"])
+                    builder: (context) => ProfileView(
+                      user: (settings.arguments as Map)["user"],
+                      ownUser: (settings.arguments as Map)["ownUser"],
+                    )
                   );
                 } else if(settings.name!.contains(PageComments.routeName)){
                   return MaterialPageRoute(
@@ -126,6 +129,7 @@ class _DashboardState extends State<Dashboard> {
                               titleByIndex(activeIndex)
                             ),
                             actions: [
+                              if(activeIndex == 0)
                               Padding(
                                 padding: const EdgeInsets.only(right: 8.0),
                                 child: IconButton(
@@ -137,7 +141,7 @@ class _DashboardState extends State<Dashboard> {
                                   onPressed: () async {
                                     await showSearch(
                                       context: context, 
-                                      delegate: MySearchDelegate()
+                                      delegate: MySearchDelegate(selectedPosts: context.read<List<Post>>())
                                     );
                                     if (!mounted) return;
                                     FocusManager.instance.primaryFocus!.unfocus();
@@ -148,28 +152,17 @@ class _DashboardState extends State<Dashboard> {
                                 padding: const EdgeInsets.only(right: 16.0),
                                 child: GestureDetector(
                                   onTap: (){
-                                    Navigator.of(context, rootNavigator: false).push(
-                                      MaterialPageRoute(builder: (context){
-                                        return Profile(user: user);
-                                      })
+                                    Navigator.of(context).pushNamed(
+                                      ProfileView.routeName,
+                                      arguments: {
+                                        "user":user,
+                                        "ownUser":true
+                                      }
                                     );
                                   },
                                   child: const Icon(
                                     Icons.person,
                                     size: 30,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 16.0),
-                                child: GestureDetector(
-                                  onTap: (){
-                                    Navigator.of(context).pushNamed(NotificationPage.routeName);
-                                  },
-                                  child: const Icon(
-                                    Icons.notifications,
-                                    size: 30,
-                                    color: Colors.black,
                                   ),
                                 ),
                               ),
@@ -215,17 +208,24 @@ class _DashboardState extends State<Dashboard> {
 }
 
 class MySearchDelegate extends SearchDelegate {
-  List<Post>? selectedPosts;
+  List<Post> selectedPosts;
   //final bool Function(List<Post>) filter;
 
-  MySearchDelegate();
+  MySearchDelegate(
+    {
+      required this.selectedPosts
+    }
+  );
 
   @override
   String get searchFieldLabel => 'Rechercher...';
 
   @override
   Widget? buildLeading(BuildContext context) =>
-      IconButton(onPressed: () => close(context, null), icon: const Icon(Icons.arrow_back));
+  IconButton(
+    onPressed: () => close(context, null), 
+    icon: const Icon(Icons.arrow_back)
+  );
 
   @override
   List<Widget>? buildActions(BuildContext context) => [
@@ -248,6 +248,21 @@ class MySearchDelegate extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return Text("");
+/*     QuerySnapshot s = await FirebaseFirestore.instance.collection("users").where("displayName",isEqualTo: query).get();
+    List<DocumentReference> docRefList = s.docs.map((e) => e.reference).toList();
+    debugPrint("Query : $query");
+    List filteredList = selectedPosts.where((element) => docRefList.contains(element.owner)).toList(); */
+    return ListView.builder(
+      itemCount: 0,
+      itemBuilder: (context, i) {
+        return GestureDetector(
+          onTap: () {
+/*             selectedPool = pools[i];
+            query = pools[i].name;
+            showResults(context); */
+          },
+          child:Text(""),
+        );
+      });
   }
 }
