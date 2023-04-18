@@ -30,7 +30,6 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
 
   initController() async {
     await player.setUrl(widget.url);
-
     player.setLoopMode(LoopMode.off);
     player.durationStream.listen((durationDuration) {
       debugPrint("Duration changed");
@@ -38,8 +37,8 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
         if (durationDuration!.inSeconds == positionDuration.inSeconds) {
           debugPrint("ITS THE END");
           await Future.delayed(const Duration(milliseconds: 500));
-          player.stop();
-          player.seek(Duration.zero);
+          await player.stop();
+          await player.seek(Duration.zero);
         }
       });
     });
@@ -75,14 +74,16 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
                       highlightColor: Colors.transparent,
                       splashColor: Colors.transparent,
                       icon: playing
-                          ? const Icon(Icons.pause,
+                          ? const Icon(
+                            Icons.pause,
                               color: Color.fromRGBO(
                                 62,
                                 62,
                                 147,
                                 1,
                               ),
-                              size: 20)
+                            size: 20
+                          )
                           : const Icon(Icons.play_arrow, color: Color.fromRGBO(62, 62, 147, 1), size: 20),
                       onPressed: () async {
                         bool playing = snapshot.data as bool;

@@ -86,7 +86,7 @@ class _MyAppState extends State<MyApp> {
               fontWeight:FontWeight.w400,
               color: Colors.black,
               letterSpacing: 1
-            )
+            ),
         ),
         iconTheme: const IconThemeData(
           color:  Color.fromARGB(255, 0, 0, 0),
@@ -189,13 +189,13 @@ class _MyAppState extends State<MyApp> {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.0),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12.0),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
         ),
         textTheme: TextTheme(
           titleLarge: GoogleFonts.lalezar(
             fontSize:35,
             fontWeight:FontWeight.w400,
-            color: Theme.of(context).primaryColor,
+            color: Colors.black,
             letterSpacing: 1
           ),
           titleMedium: GoogleFonts.lalezar(

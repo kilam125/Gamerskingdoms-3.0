@@ -14,6 +14,7 @@ class Post extends ChangeNotifier {
   int likes;
   List likers;
   DocumentReference postRef;
+  String userName;
 
   List get getLikers => likers;
 
@@ -91,6 +92,7 @@ class Post extends ChangeNotifier {
     required this.comments,
     required this.content,
     required this.datePost,
+    required this.userName,
     this.attachmentType,
     this.attachmentUrl,
     this.likes = 0,
@@ -100,6 +102,7 @@ class Post extends ChangeNotifier {
   factory Post.fromFirestore({required DocumentSnapshot data}){
     return Post(
       postRef: data.reference,
+      userName: data["userName"],
       attachmentType:Util.intToAttachmentType(data["attachmentType"]),
       attachmentUrl: data["attachmentUrl"],
       comments: data["comments"], 

@@ -59,6 +59,7 @@ class _PostsState extends State<Posts> {
   void initState() {
     super.initState();
   }
+
   Widget getPictureWidget(String url){
     return SizedBox(
       height: 300,
@@ -69,7 +70,6 @@ class _PostsState extends State<Posts> {
         height: 300,
         width: MediaQuery.of(context).size.width,
       ),
-      
     );
   }
 
@@ -354,8 +354,8 @@ class _PostsState extends State<Posts> {
                           }
                         }, 
                         icon: Icon(
-                          Icons.star_outline_sharp,
-                          color: post.likers.contains(using.userRef) ? Colors.blue : Colors.black,
+                          post.likers.contains(using.userRef) ? Icons.star : Icons.star_border,
+                          color: post.likers.contains(using.userRef) ? const Color.fromARGB(255, 216, 174, 84) : Colors.black,
                           size: 30,
                         )
                       ),
