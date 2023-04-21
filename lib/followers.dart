@@ -60,6 +60,13 @@ class _FollowersState extends State<Followers> {
                       child: ProgressWidget(),
                     );
                   }
+                  if(!snapshot.hasData){
+                    return const SizedBox(
+                      height: 30,
+                      width: 30,
+                      child: ProgressWidget(),
+                    );
+                  }
                   return FollowerLine(user: UserProfile.fromFirestore(data: snapshot.data!),);
                 }
               );

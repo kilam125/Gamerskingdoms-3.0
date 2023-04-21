@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flop_list_view/flop_list_view.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
@@ -386,7 +387,12 @@ class _PostsState extends State<Posts> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text(post.content!),
+                    child: Text(
+                      post.content!,
+                      style: const TextStyle(
+                        fontSize: 16
+                      ),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

@@ -125,7 +125,7 @@ class _ProfileViewState extends State<ProfileView> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -158,7 +158,10 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
                 SliverToBoxAdapter(
                   child: Text(
-                    widget.user.bio!
+                    widget.user.bio!,
+                    style: const TextStyle(
+                      fontSize: 16
+                    ),
                   ),
                 ),
                 if(!(context.read<UserProfile>().userRef == widget.user.userRef))
@@ -225,7 +228,11 @@ class _ProfileViewState extends State<ProfileView> {
                             borderRadius: BorderRadius.all(Radius.circular(8.0)),
                             color: Color.fromARGB(255, 211, 213, 216),
                           ),
-                          child: PostWidget(post: posts[index], user: widget.user)
+                          child: PostWidget(
+                            post: posts[index], 
+                            user: widget.user,
+                            index: index,
+                          )
                         ),
                       )
                     )

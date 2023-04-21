@@ -29,6 +29,7 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
 
 
   initController() async {
+    debugPrint("Voice note url : ${widget.url}");
     await player.setUrl(widget.url);
     player.setLoopMode(LoopMode.off);
     player.durationStream.listen((durationDuration) {

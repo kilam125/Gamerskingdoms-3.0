@@ -9,7 +9,7 @@ import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/widgets/comment_line.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:sliver_tools/sliver_tools.dart';
+
 class PageComments extends StatefulWidget {
   final UserProfile userProfile;
   final int index;
@@ -18,7 +18,7 @@ class PageComments extends StatefulWidget {
     required this.userProfile,
     super.key
   });
-  static String routeName = "/Dashboard";
+  static String routeName = "/PageComments";
   @override
   State<PageComments> createState() => _PageCommentsState();
 }
@@ -39,7 +39,7 @@ class _PageCommentsState extends State<PageComments> {
 
   @override
   Widget build(BuildContext context) {
-    Post post = context.watch<List<Post>>()[widget.index];
+    Post post = context.read<List<Post>>()[widget.index];
     return Scaffold(
       appBar: AppBar(
         title: const Text("Comments"),

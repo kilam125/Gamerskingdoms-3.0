@@ -202,7 +202,7 @@ class _MyAppState extends State<MyApp> {
             fontSize:20,
             height: 1,
             fontWeight:FontWeight.w400,
-            color: Colors.white,
+            color: Colors.black,
             letterSpacing: 1
           ),
           titleSmall: GoogleFonts.lalezar(

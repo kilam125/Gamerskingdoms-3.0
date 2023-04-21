@@ -14,10 +14,12 @@ import 'package:provider/provider.dart';
 class PostWidget extends StatelessWidget {
   final Post post;
   final UserProfile user;
+  final int index;
   const PostWidget({
     super.key,
     required this.post,
-    required this.user
+    required this.user,
+    required this.index
   });
 
   static Widget getPictureWidget(String url){
@@ -118,7 +120,12 @@ class PostWidget extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Text(post.content!),
+          child: Text(
+            post.content!,
+            style: const TextStyle(
+              fontSize: 16
+            ),
+          ),
         ),
         attachementViewByType(post.attachmentType, post.attachmentUrl),
         Padding(
@@ -128,7 +135,7 @@ class PostWidget extends StatelessWidget {
               Navigator.of(context).pushNamed(
                 PageComments.routeName,
                 arguments: {
-                  "index":context.read<List<Post>>().indexOf(post),
+                  "index":index,
                   "userProfile":user
                 }
               );

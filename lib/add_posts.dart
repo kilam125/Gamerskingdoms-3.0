@@ -107,7 +107,10 @@ class _AddPostsState extends State<AddPosts> {
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     label: Padding(
                       padding: EdgeInsets.only(bottom: 20.0),
-                      child: Text("Content"),
+                      child: Text(
+                        "Content",
+                        style: TextStyle(color: Colors.black),
+                      ),
                     ),
                     hintText: "Write your content !"
                   ),
@@ -322,21 +325,21 @@ class _AddPostsState extends State<AddPosts> {
                       debugPrint("Done");
                     } else if(uploadVoiceNote){
                       debugPrint("upload voice note");
-                      List<String> downloadUrls = [];
                       String? file = await recorderController.stop();
                       if(file!=null){
                         Uint8List filesAsBytes = await File(file).readAsBytes();
                         if(!mounted)return;
-                        final TaskSnapshot upload = await FirebaseStorage.instance.ref(user.email)
-                          .child("audio_recorded${date.day}${date.minute}${date.year}${date.minute}${date.second}")
-                          .putData(filesAsBytes, SettableMetadata(contentType: 'audio/mp3'));
+                        final TaskSnapshot upload = await FirebaseStorage.instance
+                          .ref("${user.email}_audio_recorded_${date.day}${date.minute}${date.year}${date.minute}${date.second}")
+                          .putData(
+                            filesAsBytes, 
+                            SettableMetadata(contentType: 'audio/mp3')
+                          );
                         final String downloadUrl = await upload.ref.getDownloadURL();
-                        downloadUrls.add(downloadUrl);
-                        debugPrint(downloadUrls.toString());
                         await FirebaseFirestore.instance.collection("posts").add({
                           "userName":user.displayName,
                           "attachmentType":2,
-                          "attachmentUrl":downloadUrls.first,
+                          "attachmentUrl":downloadUrl,
                           "comments":[],
                           "content":content.text,
                           "datePost":DateTime.now(),
