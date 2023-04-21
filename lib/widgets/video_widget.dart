@@ -53,22 +53,28 @@ class _VideoWidgetState extends State<VideoWidget> {
                 });
               }
             },
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                SizedBox(
-                  height: 300,
-                  width: 300,
-                  child: VideoPlayer(controller)
-                ),
-                if(!isPlaying)
-                Container(
-                  height: 300,
-                  width: 300,
-                  color: Colors.black.withOpacity(.3),
-                  child: const Icon(Icons.play_circle, size: 50, color: Colors.white,),
-                )
-              ],
+            child: Container(
+              constraints: const BoxConstraints(
+                minHeight: 300,
+                minWidth: 300
+              ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  SizedBox(
+                    height: 300,
+                    width: 300,
+                    child: VideoPlayer(controller)
+                  ),
+                  if(!isPlaying)
+                  Container(
+                    height: 300,
+                    width: 300,
+                    color: Colors.black.withOpacity(.3),
+                    child: const Icon(Icons.play_circle, size: 50, color: Colors.white,),
+                  )
+                ],
+              ),
             ),
           );
         } else {
