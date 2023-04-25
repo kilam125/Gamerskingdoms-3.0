@@ -60,7 +60,6 @@ class _DashboardState extends State<Dashboard> {
       AddPosts(navCallback: navCallback),
       Followers(navCallback: navCallback),
     ];
-
     return StreamBuilder<Object>(
       stream: FirebaseFirestore.instance
         .collection("users")

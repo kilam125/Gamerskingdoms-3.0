@@ -62,44 +62,46 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
     return Row(
       children: [
         Flexible(
-            flex: 3,
-            child: StreamBuilder(
-                stream: player.playingStream,
-                builder: (context, snapshot) {
-                  debugPrint("Snapshot data : ${snapshot.data}");
-                  if (!snapshot.hasData) {
-                    return const ProgressWidget();
-                  }
+          flex: 3,
+          child: StreamBuilder(
+            stream: player.playingStream,
+            builder: (context, snapshot) {
+              debugPrint("Snapshot data : ${snapshot.data}");
+              if (!snapshot.hasData) {
+                return const ProgressWidget();
+              }
+              bool playing = snapshot.data as bool;
+              return IconButton(
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                icon: playing ? const Icon(
+                  Icons.pause,
+                    color: Color.fromRGBO(
+                      62,
+                      62,
+                      147,
+                      1,
+                    ),
+                  size: 20
+                )
+                : const Icon(Icons.play_arrow, color: Color.fromRGBO(62, 62, 147, 1), size: 20),
+                onPressed: () async {
                   bool playing = snapshot.data as bool;
-                  return IconButton(
-                      highlightColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      icon: playing
-                          ? const Icon(
-                            Icons.pause,
-                              color: Color.fromRGBO(
-                                62,
-                                62,
-                                147,
-                                1,
-                              ),
-                            size: 20
-                          )
-                          : const Icon(Icons.play_arrow, color: Color.fromRGBO(62, 62, 147, 1), size: 20),
-                      onPressed: () async {
-                        bool playing = snapshot.data as bool;
-                        debugPrint("PLAYER : $playing");
-                        if (playing) {
-                          setState(() {
-                            player.pause();
-                          });
-                        } else {
-                          setState(() {
-                            player.play();
-                          });
-                        }
-                      });
-                })),
+                  debugPrint("PLAYER : $playing");
+                  if (playing) {
+                    setState(() {
+                      player.pause();
+                    });
+                  } else {
+                    setState(() {
+                      player.play();
+                    });
+                  }
+                }
+              );
+              }
+            )
+          ),
         Flexible(
           flex: 16,
           fit: FlexFit.tight,

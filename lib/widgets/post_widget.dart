@@ -7,6 +7,7 @@ import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
+import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -50,7 +51,7 @@ class PostWidget extends StatelessWidget {
     } else if(attachmentType == AttachmentType.video){
       return getVideoWidget(attachmentUrl);
     } else if(attachmentType == AttachmentType.voice){
-
+      return VoiceNoteWidget(url: attachmentUrl);
     }
     return Container();
   }
@@ -118,6 +119,7 @@ class PostWidget extends StatelessWidget {
             color: Colors.black
           ),
         ),
+        if(post.content != null && post.content!.isNotEmpty)
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(

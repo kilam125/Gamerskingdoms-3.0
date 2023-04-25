@@ -152,7 +152,10 @@ class _AddPostsState extends State<AddPosts> {
                     padding: EdgeInsets.zero,
                     onPressed: () async {
                       final ImagePicker picker = ImagePicker();
-                      var result = await picker.pickVideo(source: ImageSource.gallery);
+                      var result = await picker.pickVideo(
+                        source: ImageSource.gallery,
+                        maxDuration: const Duration(minutes: 9)
+                      );
                       var compressResult = await VideoCompress.compressVideo(
                         result!.path,
                         quality:VideoQuality.LowQuality
@@ -176,7 +179,11 @@ class _AddPostsState extends State<AddPosts> {
                         isPlaying = true;
                         audioRecorded = true;
                       });
-                      await recorderController.record(path: fullPath);
+                      await recorderController.record(
+                        path: fullPath,
+                        bitRate: 96000,
+                        sampleRate: 48000
+                      );
                     },
                     onLongPressEnd: (details) async {
                       await recorderController.pause();
