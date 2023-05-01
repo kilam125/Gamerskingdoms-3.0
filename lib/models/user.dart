@@ -120,14 +120,23 @@ class UserProfile extends ChangeNotifier {
     required String? picture,
     required String bio
   }) async {
+    List<String> skillsToWrite = this.skills.map((e) => Util.skillsToString(e)).toList();
     await userRef.set({
       "displayName":displayName,
-      "skills":this.skills.map((e) => Util.skillsToString(e)).toList(),
+      "skills":skillsToWrite,
       "picture":picture,
       "bio":bio
     },
     SetOptions(merge: true)
   );
+    QuerySnapshot result = await FirebaseFirestore.instance.collection("posts").where("owner", isEqualTo: userRef).get();
+    await Future.forEach(
+      result.docs, (element) => element.reference.update(
+        {
+          "skills":skillsToWrite
+        }
+      )
+    );
  }
 
   UserProfile({
@@ -150,6 +159,7 @@ class UserProfile extends ChangeNotifier {
         "date":DateTime.now()
       });
   }
+
   factory UserProfile.fromFirestore({required DocumentSnapshot data}){
     Map dataMap = data.data() as Map;
     return UserProfile(

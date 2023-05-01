@@ -1,12 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/add_posts.dart';
 import 'package:gamers_kingdom/database_service.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
+import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
+import 'package:gamers_kingdom/filter.dart';
 import 'package:gamers_kingdom/followers.dart';
+import 'package:gamers_kingdom/models/filtered_skills.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/notifications_page.dart';
@@ -56,10 +58,13 @@ class _DashboardState extends State<Dashboard> {
     }
 
     List<Widget> pages = [
-      Posts(navCallback: navCallback),
+      Posts(
+        navCallback: navCallback, 
+      ),
       AddPosts(navCallback: navCallback),
       Followers(navCallback: navCallback),
     ];
+
     return StreamBuilder<Object>(
       stream: FirebaseFirestore.instance
         .collection("users")
@@ -84,6 +89,9 @@ class _DashboardState extends State<Dashboard> {
               value:Post.streamAllPosts(),
               updateShouldNotify:(oldList,currentList) => (currentList!=oldList),
               initialData: const [],
+            ),
+            ChangeNotifierProvider(
+              create: (_) => FilteredSkills(),
             )
           ],
           builder: (context, __) {
@@ -114,12 +122,19 @@ class _DashboardState extends State<Dashboard> {
                       userProfile: (settings.arguments as Map)["userProfile"],
                     )
                   );
-                }  else if(settings.name!.contains(NotificationPage.routeName)) {
+                } else if(settings.name!.contains(NotificationPage.routeName)) {
                   return MaterialPageRoute(
                     settings: RouteSettings(
                       name:NotificationPage.routeName,
                     ),
                     builder: (context) => const NotificationPage()
+                  );
+                } else if(settings.name!.contains(Filter.routeName)) {
+                  return MaterialPageRoute(
+                    settings: RouteSettings(
+                      name:Filter.routeName,
+                    ),
+                    builder: (context) => const Filter()
                   );
                 } else {
                   return MaterialPageRoute(builder: (context){
@@ -129,7 +144,13 @@ class _DashboardState extends State<Dashboard> {
                         return Scaffold(
                           appBar: AppBar(
                             centerTitle: true,
-                            leading: null,
+                            leading: (Provider.of<FilteredSkills>(context).getSkills.isNotEmpty && activeIndex == 0) ? 
+                            IconButton(
+                              onPressed: (){
+                                Provider.of<FilteredSkills>(context, listen: false).resetSkills();
+                              }, 
+                              icon: const Icon(Icons.filter_alt_off)
+                            ) : null,
                             title: Text(
                               titleByIndex(activeIndex)
                             ),
@@ -152,6 +173,22 @@ class _DashboardState extends State<Dashboard> {
                                     );
                                     if (!mounted) return;
                                     FocusManager.instance.primaryFocus!.unfocus();
+                                  },
+                                ),
+                              ),
+                              if(activeIndex == 0)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.tune,
+                                    color: Colors.black,
+                                    size: 30,
+                                  ),
+                                  onPressed: () async {
+                                    List<Skills> skills = (await Navigator.of(context).pushNamed(Filter.routeName)) as List<Skills>;
+                                    // ignore: use_build_context_synchronously
+                                    Provider.of<FilteredSkills>(context, listen: false).addSkillsToList(skills);
                                   },
                                 ),
                               ),
@@ -227,8 +264,7 @@ class MySearchDelegate extends SearchDelegate {
   String get searchFieldLabel => 'Rechercher...';
 
   @override
-  Widget? buildLeading(BuildContext context) =>
-  IconButton(
+  Widget? buildLeading(BuildContext context) => IconButton(
     onPressed: () => close(context, null), 
     icon: const Icon(Icons.arrow_back)
   );
@@ -236,20 +272,20 @@ class MySearchDelegate extends SearchDelegate {
   @override
   List<Widget>? buildActions(BuildContext context) => [
     IconButton(
+      icon: const Icon(Icons.close),
       onPressed: () {
-        if (query.isEmpty) {
-          close(context, null);
-        } else {
-          query = '';
-        }
-      },
-      icon: const Icon(Icons.close))
+          if (query.isEmpty) {
+            close(context, null);
+          } else {
+            query = '';
+          }
+        },
+      ),
     ];
 
   @override
   Widget buildResults(BuildContext context) {
     return Text("sel=$selectedPosts");
-    //MessageLine(pool: selectedPool!);
   }
 
   Widget getPictureWidget(String url, BuildContext context){
@@ -283,18 +319,33 @@ class MySearchDelegate extends SearchDelegate {
       return VoiceNoteWidget(url: attachmentUrl);
     }
   }
+  
+  double heightByAttachmentType(AttachmentType? attachmentType){
+    if(attachmentType == AttachmentType.picture){
+      return 400;
+    }
+    else if(attachmentType == AttachmentType.video){
+      return 650;
+    } else {
+      return 300;
+    }
+  }
 
   @override
   Widget buildSuggestions(BuildContext context) {
     List<Post> filteredList = selectedPosts.where((element) => element.userName.toLowerCase().contains(query.toLowerCase())).toList();
     UserProfile using = context.watch<UserProfile>();
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height,
       child: ListView.builder(
         itemBuilder: (context, index){
           debugPrint("Index $index");
           Post post = filteredList[index];
           return Container(
+            constraints: BoxConstraints(
+              minHeight:heightByAttachmentType(post.attachmentType),
+            ),
+            width: 375,
             margin: const EdgeInsets.all(16.0),
             decoration: const BoxDecoration(
               color: Color.fromARGB(255, 223, 222, 222),

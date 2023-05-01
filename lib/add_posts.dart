@@ -5,10 +5,12 @@ import 'dart:typed_data';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/pop_up/pop_up.dart';
+import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -170,6 +172,23 @@ class _AddPostsState extends State<AddPosts> {
                     }, 
                     icon: const Icon(Icons.movie, size: 30,)
                   ),
+                  if(!audioRecorded)
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () async {
+                      FilePickerResult? result = await FilePicker.platform.pickFiles(
+                        type: FileType.audio,
+                        allowMultiple: false,
+                      );
+                      if (result != null) {
+                        PlatformFile file = result.files.first;
+                        debugPrint('Selected audio file: ${file.path}');
+                      } else {
+                        // User canceled the picker
+                      }
+                    }, 
+                    icon: const Icon(Icons.audio_file, size: 30,)
+                  ),
                   const Spacer(),
                   GestureDetector(
                     onLongPress: () async {
@@ -305,6 +324,7 @@ class _AddPostsState extends State<AddPosts> {
                         "likers":[],
                         "likes":0,
                         "owner":user.userRef,
+                        "skills":user.skills.map((e) => Util.skillsToString(e)).toList()
                       });
                       debugPrint("Done");
                     } else if(uploadVideo){
@@ -328,6 +348,7 @@ class _AddPostsState extends State<AddPosts> {
                         "likers":[],
                         "likes":0,
                         "owner":user.userRef,
+                        "skills":user.skills.map((e) => Util.skillsToString(e)).toList()
                       });
                       debugPrint("Done");
                     } else if(uploadVoiceNote){
@@ -353,6 +374,7 @@ class _AddPostsState extends State<AddPosts> {
                           "likers":[],
                           "likes":0,
                           "owner":user.userRef,
+                          "skills":user.skills.map((e) => Util.skillsToString(e)).toList()
                         });
                         debugPrint("Done");
                       }
@@ -367,6 +389,7 @@ class _AddPostsState extends State<AddPosts> {
                         "likers":[],
                         "likes":0,
                         "owner":user.userRef,
+                        "skills":user.skills.map((e) => Util.skillsToString(e)).toList()
                       });
                     }
                     setState(() {

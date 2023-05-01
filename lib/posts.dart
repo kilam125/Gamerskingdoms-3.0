@@ -1,18 +1,16 @@
 
 
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable_text/expandable_text.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flop_list_view/flop_list_view.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
+import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
+import 'package:gamers_kingdom/models/filtered_skills.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/profile_view.dart';
+import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
 import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
@@ -28,7 +26,7 @@ class Posts extends StatefulWidget {
   final Function(int) navCallback;
   const Posts({
     super.key,
-    required this.navCallback
+    required this.navCallback,
   });
 
   @override
@@ -49,7 +47,6 @@ class _PostsState extends State<Posts> {
 
   List<XFile> listXFileImages = [];
   XFile? videoFile; 
-  final _flopListController = FlopListController();
   final player = AudioPlayer(); // Create a player
 
   Future<String> get _localPath async {
@@ -95,6 +92,7 @@ class _PostsState extends State<Posts> {
       return VoiceNoteWidget(url: attachmentUrl);
     }
   }
+  
   double heightByAttachmentType(AttachmentType? attachmentType){
     if(attachmentType == AttachmentType.picture){
       return 400;
@@ -109,14 +107,27 @@ class _PostsState extends State<Posts> {
   @override
   Widget build(BuildContext context) {
     UserProfile using = context.watch<UserProfile>();
-    if(context.watch<List<Post>>().isEmpty){
-      return const Center(child: Text("No Post yet"),);
+    FilteredSkills filter = Provider.of<FilteredSkills>(context);
+    debugPrint("Filtered skills : ${filter.getSkills}");
+    List<Post> posts = filter.getSkills.isEmpty ? 
+        context.watch<List<Post>>():
+        context.watch<List<Post>>().where(
+          (element) {
+            return element.skills.any((element) {
+                return filter.getSkills.contains(Util.stringToSkills(element));
+              }
+            );
+          }
+        
+        ).toList();
+    if(posts.isEmpty){
+      return const Center(child: Text("No Post found"),);
     }
     return ListView.builder(
       itemBuilder: (context, index){
         debugPrint("Index $index");
         // Post post = Post.fromFirestore(data: snapshot.data!.docs[index]);
-        Post post = context.watch<List<Post>>()[index];
+        Post post = posts[index];
         bool hasAttachment = (post.attachmentType != null && post.attachmentUrl != null);
         return Container(
           constraints: BoxConstraints(
@@ -282,7 +293,7 @@ class _PostsState extends State<Posts> {
         );
       },
       // itemCount: context.watch<List<Post>>().length,
-      itemCount: context.watch<List<Post>>().length,
+      itemCount:posts.length
     );
   }
 }

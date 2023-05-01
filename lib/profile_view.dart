@@ -164,6 +164,19 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                   ),
                 ),
+                SliverToBoxAdapter(
+                  child: Wrap(
+                    children: List.generate(
+                      widget.user.skills.length, 
+                      (index) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Chip(
+                          label: Text(Util.skillsToString(widget.user.skills[index])),
+                        ),
+                      )
+                    ),
+                  ),
+                ),
                 if(!(context.read<UserProfile>().userRef == widget.user.userRef))
                 SliverToBoxAdapter(
                   child:(widget.user.followers!.contains(context.read<UserProfile>().userRef))?

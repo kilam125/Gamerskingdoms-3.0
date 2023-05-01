@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
+import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/models/comment.dart';
 import 'package:gamers_kingdom/util/util.dart';
 
@@ -15,8 +16,8 @@ class Post extends ChangeNotifier {
   List likers;
   DocumentReference postRef;
   String userName;
+  List skills;
 
-  List get getLikers => likers;
 
   Future<void> addLike(DocumentReference ref) async {
     likes++;
@@ -54,6 +55,10 @@ class Post extends ChangeNotifier {
       SetOptions(merge: true)
     );
   }
+
+  get getSkills => skills;
+
+ set setSkills( skills) => this.skills = skills;  List get getLikers => likers;
 
  set setLikers(List<DocumentReference> likers) => this.likers = likers;
 
@@ -96,7 +101,8 @@ class Post extends ChangeNotifier {
     this.attachmentType,
     this.attachmentUrl,
     this.likes = 0,
-    this.likers = const []
+    this.likers = const [],
+    this.skills = const []
   });
 
   factory Post.fromFirestore({required DocumentSnapshot data}){
@@ -111,6 +117,7 @@ class Post extends ChangeNotifier {
       likers: data["likers"] ?? [],
       likes: data["likes"] ?? 0,
       owner: data["owner"],
+      skills: data["skills"] ?? [],
     );
   }
 
