@@ -9,8 +9,6 @@ import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
 import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 class PostWidget extends StatelessWidget {
   final Post post;
@@ -103,7 +101,8 @@ class PostWidget extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 16.0),
                     child: Text(
-                      DateFormat.yMMMMd().format(post.datePost)
+                      ""
+                      //DateFormat.yMMMMd().format(post.datePost)
                     ),
                   )
                 ],

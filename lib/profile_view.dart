@@ -86,6 +86,7 @@ class _ProfileViewState extends State<ProfileView> {
               slivers: [
                 SliverToBoxAdapter(
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Container(
                           clipBehavior: Clip.antiAlias,
@@ -124,6 +125,28 @@ class _ProfileViewState extends State<ProfileView> {
                             ],
                           ),
                         ),
+                      ],
+                    )
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          widget.user.bio!,
+                          style: const TextStyle(
+                            fontSize: 16
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                           child: Row(
@@ -153,15 +176,7 @@ class _ProfileViewState extends State<ProfileView> {
                             ],
                           ),
                         )
-                      ],
-                    )
-                ),
-                SliverToBoxAdapter(
-                  child: Text(
-                    widget.user.bio!,
-                    style: const TextStyle(
-                      fontSize: 16
-                    ),
+                    ],
                   ),
                 ),
                 SliverToBoxAdapter(

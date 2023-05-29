@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
-import 'package:gamers_kingdom/models/filtered_skills.dart';
 import 'package:gamers_kingdom/util/util.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
-import 'package:provider/provider.dart';
 
 class Filter extends StatefulWidget {
   const Filter({

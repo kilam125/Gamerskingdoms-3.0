@@ -4,7 +4,6 @@ import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/profile_view.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
-import 'package:intl/intl.dart';
 
 import '../models/comment.dart';
 
@@ -93,7 +92,7 @@ class CommentLine extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(right:16.0),
                       child: Text(
-                        DateFormat.yMMMMd().format(comment.date)
+                        ""//DateFormat.yMMMMd().format(comment.date)
                       ),
                     ),
                   )

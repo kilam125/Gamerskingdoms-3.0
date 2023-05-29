@@ -13,7 +13,14 @@ class UserProfile extends ChangeNotifier {
   String email;
   DocumentReference userRef;
   List? friendRequest;
+  List fcmTokens;
 
+  get getFcmTokens => fcmTokens;
+
+  void addFcmTokens(String token){
+    fcmTokens.add(token);
+    notifyListeners();
+  }
   get getUserRef => userRef;
 
   get getPicture => picture;
@@ -148,7 +155,8 @@ class UserProfile extends ChangeNotifier {
     this.followers,
     this.following,
     this.bio,
-    this.friendRequest
+    this.friendRequest,
+    this.fcmTokens = const []
   });
 
   static Future<DocumentReference> createFriendRequest({required DocumentReference requester, required DocumentReference target}) async {
@@ -171,7 +179,8 @@ class UserProfile extends ChangeNotifier {
       followers: dataMap.containsKey("followers") ? dataMap["followers"] : [],
       following: dataMap.containsKey("following") ? dataMap["following"] : [],
       friendRequest: dataMap.containsKey("friendRequest") ? dataMap["friendRequest"] : [],
-      userRef: data.reference
+      userRef: data.reference,
+      fcmTokens: dataMap.containsKey("fcmTokens") ? dataMap["fcmTokens"] : []
     );
   }
 }

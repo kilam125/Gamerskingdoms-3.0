@@ -1,13 +1,51 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/firebase_options.dart';
 import 'package:gamers_kingdom/login_page.dart';
-import 'package:gamers_kingdom/notifications_page.dart';
-import 'package:gamers_kingdom/profile_view.dart';
 import 'package:gamers_kingdom/sign_up.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+
+Future<void> showNotification(Map<String, dynamic> messageData, FlutterLocalNotificationsPlugin fl) async {
+  const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+    'your_channel_id',
+    'your_channel_name',
+    importance: Importance.max,
+    priority: Priority.high,
+  );
+
+  const NotificationDetails platformChannelSpecifics =
+      NotificationDetails(android: androidPlatformChannelSpecifics);
+
+  await fl.show(
+    0,
+    messageData['title'],
+    messageData['body'],
+    platformChannelSpecifics,
+    payload: messageData['data'],
+  );
+}
+
+
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint("Handling a background message");
+/*   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+  flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  debugPrint(message.toString());
+  showNotification(message.data, flutterLocalNotificationsPlugin); */
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,10 +65,71 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _navigatorKey = GlobalKey<NavigatorState>();
-  
+
+  Future<void> settingsPermissions() async{
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      NotificationSettings settings = await messaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        debugPrint('User granted permission');
+      } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+        debugPrint('User granted provisional permission');
+      } else {
+        debugPrint('User declined or has not accepted permission');
+      }
+      // Get any messages which caused the application to open from
+      // a terminated state.
+      await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+        alert: true, // Required to display a heads up notification
+        badge: true,
+        sound: true,
+      );
+  }
+
   @override
   void initState() {
     super.initState();
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/launcher_icon');
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    settingsPermissions();
+    FirebaseMessaging.instance.getInitialMessage().then((message) {
+        debugPrint('Message clicked!');
+      });
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      // Handle foreground messages
+      debugPrint('Received message: ${message.notification?.body}');
+      showNotification(message.notification!.toMap(), flutterLocalNotificationsPlugin);
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      // Handle background and terminated app messages
+      debugPrint('Opened app from notification: ${message.notification?.body}');
+    });
+
+    if(!kIsWeb){
+      if(Platform.isIOS)
+      {
+        FirebaseMessaging.onBackgroundMessage((message) async {
+          debugPrint("Background Message received ${message.data.toString()}");
+        });
+      } else if (Platform.isAndroid){
+        FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+      }
+    }
+
     FirebaseAuth.instance.authStateChanges().listen((user) {
       bool result = user != null;
       debugPrint("InListening : ${result?"/Dashboard":"/LoginPage"}");

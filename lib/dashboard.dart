@@ -1,12 +1,17 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gamers_kingdom/add_posts.dart';
 import 'package:gamers_kingdom/database_service.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
-import 'package:gamers_kingdom/filter.dart';
+import 'package:gamers_kingdom/filter.dart' as ft;
 import 'package:gamers_kingdom/followers.dart';
 import 'package:gamers_kingdom/models/filtered_skills.dart';
 import 'package:gamers_kingdom/models/post.dart';
@@ -33,10 +38,17 @@ class Dashboard extends StatefulWidget {
   State<Dashboard> createState() => _DashboardState();
 }
 
+
 class _DashboardState extends State<Dashboard> {
   final formKey = GlobalKey<FormState>();
   final globalKey = GlobalKey(debugLabel: 'btm_app_bar');
   int activeIndex = 0;
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+
+  @override
+  void initState(){
+    super.initState();
+  }
 
   titleByIndex(activeIndex){
     switch(activeIndex){
@@ -64,7 +76,6 @@ class _DashboardState extends State<Dashboard> {
       AddPosts(navCallback: navCallback),
       Followers(navCallback: navCallback),
     ];
-
     return StreamBuilder<Object>(
       stream: FirebaseFirestore.instance
         .collection("users")
@@ -129,18 +140,42 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     builder: (context) => const NotificationPage()
                   );
-                } else if(settings.name!.contains(Filter.routeName)) {
+                } else if(settings.name!.contains(ft.Filter.routeName)) {
                   return MaterialPageRoute(
                     settings: RouteSettings(
-                      name:Filter.routeName,
+                      name:ft.Filter.routeName,
                     ),
-                    builder: (context) => const Filter()
+                    builder: (context) => const ft.Filter()
                   );
                 } else {
                   return MaterialPageRoute(builder: (context){
                     return Builder(
                       builder: (context) {
                         UserProfile user = context.watch<UserProfile>();
+                        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                          var messaging = FirebaseMessaging.instance;
+                          messaging.onTokenRefresh.listen((newToken) async {
+                            debugPrint("On Token Refresh");
+                            //Util.addFcmTokenAfterConnection(newFcmToken: newToken, user: context.read<Client>().getClientRef(), isCoach: false);
+                            await context.read<UserProfile>().userRef.set(
+                              {
+                                "fcmTokens":FieldValue.arrayUnion([newToken]),
+                              },
+                              SetOptions(merge: true)
+                            );
+                          });
+                          messaging.getToken().then((value) async {
+                            debugPrint("Setting token : $value");
+                            if(!(context.read<UserProfile>().getFcmTokens.contains(value))){
+                              await context.read<UserProfile>().userRef.set(
+                                {
+                                  "fcmTokens":FieldValue.arrayUnion([value]),
+                                },
+                                SetOptions(merge: true)
+                              );
+                            }
+                          });
+                        });
                         return Scaffold(
                           appBar: AppBar(
                             centerTitle: true,
@@ -186,7 +221,7 @@ class _DashboardState extends State<Dashboard> {
                                     size: 30,
                                   ),
                                   onPressed: () async {
-                                    List<Skills> skills = (await Navigator.of(context).pushNamed(Filter.routeName)) as List<Skills>;
+                                    List<Skills> skills = (await Navigator.of(context).pushNamed(ft.Filter.routeName)) as List<Skills>;
                                     // ignore: use_build_context_synchronously
                                     Provider.of<FilteredSkills>(context, listen: false).addSkillsToList(skills);
                                   },
