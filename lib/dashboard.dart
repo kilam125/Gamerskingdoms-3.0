@@ -1,9 +1,7 @@
-import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gamers_kingdom/add_posts.dart';
@@ -13,6 +11,7 @@ import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/filter.dart' as ft;
 import 'package:gamers_kingdom/followers.dart';
+import 'package:gamers_kingdom/home.dart';
 import 'package:gamers_kingdom/models/filtered_skills.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
@@ -26,6 +25,40 @@ import 'package:gamers_kingdom/widgets/video_widget.dart';
 import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
+Future<void> showNotification(Map<String, dynamic> messageData, FlutterLocalNotificationsPlugin fl) async {
+  const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+    'your_channel_id',
+    'your_channel_name',
+    importance: Importance.max,
+    priority: Priority.high,
+  );
+
+  const NotificationDetails platformChannelSpecifics =
+      NotificationDetails(android: androidPlatformChannelSpecifics);
+
+  await fl.show(
+    0,
+    messageData['title'],
+    messageData['body'],
+    platformChannelSpecifics,
+    payload: messageData['data'],
+  );
+}
+
+
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint("Handling a background message");
+/*   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+  flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  debugPrint(message.toString());
+  showNotification(message.data, flutterLocalNotificationsPlugin); */
+}
 
 class Dashboard extends StatefulWidget {
   final String email;
@@ -120,7 +153,7 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     builder: (context) => ProfileView(
                       user: (settings.arguments as Map)["user"],
-                      ownUser: (settings.arguments as Map)["ownUser"],
+                      ownUser: (settings.arguments as Map)["ownUser"] ?? false,
                     )
                   );
                 } else if(settings.name!.contains(PageComments.routeName)){
@@ -149,7 +182,8 @@ class _DashboardState extends State<Dashboard> {
                   );
                 } else {
                   return MaterialPageRoute(builder: (context){
-                    return Builder(
+                    return const Home();
+                    /*return Builder(
                       builder: (context) {
                         UserProfile user = context.watch<UserProfile>();
                         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -274,7 +308,7 @@ class _DashboardState extends State<Dashboard> {
                           body: pages[activeIndex],
                         );
                       }
-                    );
+                    );*/
                   });
                 }
               }

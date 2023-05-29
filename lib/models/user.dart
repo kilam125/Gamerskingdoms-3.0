@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
@@ -183,4 +185,19 @@ class UserProfile extends ChangeNotifier {
       fcmTokens: dataMap.containsKey("fcmTokens") ? dataMap["fcmTokens"] : []
     );
   }
+
+/*   factory UserProfile.fromJson({required Map dataMap}){
+    return UserProfile(
+      email: dataMap["email"],
+      displayName: dataMap["displayName"], 
+      skills: (dataMap["skills"] as List).map((e) => Util.stringToSkills(e)).toList(),
+      picture: dataMap["picture"],
+      bio: dataMap["bio"],
+      followers: dataMap.containsKey("followers") ? dataMap["followers"] : [],
+      following: dataMap.containsKey("following") ? dataMap["following"] : [],
+      friendRequest: dataMap.containsKey("friendRequest") ? dataMap["friendRequest"] : [],
+      userRef: DocumentReference(),
+      fcmTokens: dataMap.containsKey("fcmTokens") ? dataMap["fcmTokens"] : []
+    );
+  } */
 }

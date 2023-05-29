@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -9,6 +11,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/firebase_options.dart';
 import 'package:gamers_kingdom/login_page.dart';
+import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/profile_view.dart';
 import 'package:gamers_kingdom/sign_up.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -114,9 +118,27 @@ class _MyAppState extends State<MyApp> {
       showNotification(message.notification!.toMap(), flutterLocalNotificationsPlugin);
     });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
       // Handle background and terminated app messages
       debugPrint('Opened app from notification: ${message.notification?.body}');
+      debugPrint('Data: ${message.data}');
+      if(message.data["route"] == ProfileView.routeName){
+        DocumentSnapshot doc = await FirebaseFirestore.instance.collection("users").doc(message.data["userId"]).get();
+/*         Navigator.of(context).pushNamed(
+          ProfileView.routeName,
+          arguments: {
+            "user":UserProfile.fromFirestore(data: doc)
+          }
+        ); */
+        Navigator.of(
+          context, 
+          rootNavigator: false
+        ).push(
+          MaterialPageRoute(builder: (context){
+            return ProfileView(user: UserProfile.fromFirestore(data: doc));
+          })
+        );
+      }
     });
 
     if(!kIsWeb){
