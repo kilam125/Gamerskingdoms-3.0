@@ -1,7 +1,10 @@
 
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gamers_kingdom/add_posts.dart';
@@ -26,6 +29,9 @@ import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+final globalKey = GlobalKey(debugLabel: 'btm_app_bar');
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: "Main Navigator");
+
 Future<void> showNotification(Map<String, dynamic> messageData, FlutterLocalNotificationsPlugin fl) async {
   const AndroidNotificationDetails androidPlatformChannelSpecifics =
     AndroidNotificationDetails(
@@ -47,19 +53,6 @@ Future<void> showNotification(Map<String, dynamic> messageData, FlutterLocalNoti
   );
 }
 
-
-Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint("Handling a background message");
-/*   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
-  const InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-  );
-  flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  debugPrint(message.toString());
-  showNotification(message.data, flutterLocalNotificationsPlugin); */
-}
-
 class Dashboard extends StatefulWidget {
   final String email;
   const Dashboard({
@@ -74,9 +67,7 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   final formKey = GlobalKey<FormState>();
-  final globalKey = GlobalKey(debugLabel: 'btm_app_bar');
   int activeIndex = 0;
-  final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
   @override
   void initState(){
@@ -141,6 +132,7 @@ class _DashboardState extends State<Dashboard> {
           builder: (context, __) {
             UserProfile user = context.watch<UserProfile>();
             return Navigator(
+              key: globalKey,
               onGenerateRoute: (settings){
                 if(settings.name == Profile.routeName){
                   return MaterialPageRoute(builder: (context){
