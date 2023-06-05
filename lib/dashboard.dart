@@ -29,8 +29,7 @@ import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-final globalKey = GlobalKey(debugLabel: 'btm_app_bar');
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: "Main Navigator");
+//final globalKey = GlobalKey(debugLabel: 'btm_app_bar');
 
 Future<void> showNotification(Map<String, dynamic> messageData, FlutterLocalNotificationsPlugin fl) async {
   const AndroidNotificationDetails androidPlatformChannelSpecifics =
@@ -132,7 +131,7 @@ class _DashboardState extends State<Dashboard> {
           builder: (context, __) {
             UserProfile user = context.watch<UserProfile>();
             return Navigator(
-              key: globalKey,
+              //key: globalKey,
               onGenerateRoute: (settings){
                 if(settings.name == Profile.routeName){
                   return MaterialPageRoute(builder: (context){
@@ -274,7 +273,6 @@ class _DashboardState extends State<Dashboard> {
                             ],
                           ),
                           bottomNavigationBar: BottomNavigationBar(
-                            key: globalKey,
                             type: BottomNavigationBarType.fixed,
                             currentIndex: activeIndex,
                             elevation: 10,

@@ -26,7 +26,6 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  final formKey = GlobalKey<FormState>();
   TextEditingController displayName = TextEditingController();
   TextEditingController bio = TextEditingController();
   List<Skills> skills = List.generate(Skills.values.length, (index) => Skills.values[index]);

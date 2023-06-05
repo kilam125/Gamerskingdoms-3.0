@@ -55,9 +55,6 @@ class _MyAppState extends State<MyApp> {
         }
       } else {
         debugPrint("Not Authenticated");
-/*         _navigatorKey.currentState!.pushReplacementNamed(
-          HomePage.routeName,
-        ); */
       }
     });
   }

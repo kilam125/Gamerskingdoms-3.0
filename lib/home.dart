@@ -71,6 +71,35 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Future<void> setupInteractedMessage() async {
+    // Get any messages which caused the application to open from
+    // a terminated state.
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+
+    // If the message also contains a data property with a "type" of "chat",
+    // navigate to a chat screen
+    if (initialMessage != null) {
+      _handleMessage(initialMessage);
+    }
+
+    // Also handle any interaction when the app is in the background via a
+    // Stream listener
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+  }
+  
+  void _handleMessage(RemoteMessage message) async {
+    if(message.data["route"] == ProfileView.routeName){
+      DocumentSnapshot doc = await FirebaseFirestore.instance.collection("users").doc(message.data["userId"]).get();
+      Navigator.of(context).pushNamed(
+        ProfileView.routeName,
+        arguments: {
+          "user":UserProfile.fromFirestore(data: doc)
+        }
+      );
+    }
+  }
+
   @override
   void initState(){
     super.initState();
@@ -81,29 +110,12 @@ class _HomeState extends State<Home> {
     );
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
     settingsPermissions();
-    FirebaseMessaging.instance.getInitialMessage().then((message) {
-        debugPrint('Message clicked!');
-      });
+    setupInteractedMessage();
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       // Handle foreground messages
       debugPrint('Received message: ${message.notification?.body}');
       showNotification(message.notification!.toMap(), flutterLocalNotificationsPlugin);
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
-      // Handle background and terminated app messages
-      debugPrint('Opened app from home: ${message.notification?.body}');
-      debugPrint('Data: ${message.data}');
-      if(message.data["route"] == ProfileView.routeName){
-        DocumentSnapshot doc = await FirebaseFirestore.instance.collection("users").doc(message.data["userId"]).get();
-        Navigator.of(context).pushNamed(
-          ProfileView.routeName,
-          arguments: {
-            "user":UserProfile.fromFirestore(data: doc)
-          }
-        );
-      }
     });
 
     if(!kIsWeb){
