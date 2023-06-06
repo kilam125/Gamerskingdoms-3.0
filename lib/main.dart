@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -7,21 +8,27 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:gamers_kingdom/api/firebase_push.dart';
 import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/firebase_options.dart';
 import 'package:gamers_kingdom/login_page.dart';
-import 'package:gamers_kingdom/models/user.dart';
-import 'package:gamers_kingdom/profile_view.dart';
 import 'package:gamers_kingdom/sign_up.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+
+final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(const MyApp());
+  runZonedGuarded<Future<void>>(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+    );
+    await FirebasePush().initNotifications();
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+
+    runApp(const MyApp());
+  }, (error, stack) => FirebaseCrashlytics.instance.recordError(error, stack));
 }
 
 class MyApp extends StatefulWidget {
@@ -33,7 +40,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
@@ -46,7 +52,7 @@ class _MyAppState extends State<MyApp> {
         debugPrint("Checking mail validation");
         if (user.emailVerified) {
           debugPrint("Mail already verified");
-          _navigatorKey.currentState!.pushReplacementNamed(
+          navigatorKey.currentState!.pushReplacementNamed(
             Dashboard.routeName,
             arguments: {
               "email":user.email
@@ -76,7 +82,7 @@ class _MyAppState extends State<MyApp> {
     final MaterialColor blackSwatch = MaterialColor(const Color.fromARGB(255, 0, 0, 0).value, blackMap);
 
     return MaterialApp(
-      navigatorKey: _navigatorKey,
+      navigatorKey: navigatorKey,
       title: 'Gamers Kingdoms',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

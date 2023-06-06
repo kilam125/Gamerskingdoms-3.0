@@ -18,18 +18,6 @@ import 'followers.dart';
 import 'models/filtered_skills.dart';
 import 'models/post.dart';
 
-Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint("Handling a background message from home");
-/*   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
-  const InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-  );
-  flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  debugPrint(message.toString());
-  showNotification(message.data, flutterLocalNotificationsPlugin); */
-}
-
 class Home extends StatefulWidget {
   const Home({super.key});
   static String routeName = "/Home";
@@ -41,93 +29,10 @@ class _HomeState extends State<Home> {
   final formKey = GlobalKey<FormState>();
   final globalKey = GlobalKey(debugLabel: 'btm_app_bar');
   int activeIndex = 0;
-  final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-
-  Future<void> settingsPermissions() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
-
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      debugPrint('User granted permission');
-    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-      debugPrint('User granted provisional permission');
-    } else {
-      debugPrint('User declined or has not accepted permission');
-    }
-    // Get any messages which caused the application to open from
-    // a terminated state.
-    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-      alert: true, // Required to display a heads up notification
-      badge: true,
-      sound: true,
-    );
-  }
-
-  Future<void> setupInteractedMessage() async {
-    // Get any messages which caused the application to open from
-    // a terminated state.
-    RemoteMessage? initialMessage =
-        await FirebaseMessaging.instance.getInitialMessage();
-
-    // If the message also contains a data property with a "type" of "chat",
-    // navigate to a chat screen
-    if (initialMessage != null) {
-      _handleMessage(initialMessage);
-    }
-
-    // Also handle any interaction when the app is in the background via a
-    // Stream listener
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
-  }
-  
-  void _handleMessage(RemoteMessage message) async {
-    if(message.data["route"] == ProfileView.routeName){
-      DocumentSnapshot doc = await FirebaseFirestore.instance.collection("users").doc(message.data["userId"]).get();
-      Navigator.of(context).pushNamed(
-        ProfileView.routeName,
-        arguments: {
-          "user":UserProfile.fromFirestore(data: doc)
-        }
-      );
-    }
-  }
 
   @override
   void initState(){
     super.initState();
-    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/launcher_icon');
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-    );
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
-    settingsPermissions();
-    setupInteractedMessage();
-
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      // Handle foreground messages
-      debugPrint('Received message: ${message.notification?.body}');
-      showNotification(message.notification!.toMap(), flutterLocalNotificationsPlugin);
-    });
-
-    if(!kIsWeb){
-      if(Platform.isIOS)
-      {
-        FirebaseMessaging.onBackgroundMessage((message) async {
-          debugPrint("Background Message received ${message.data.toString()}");
-        });
-      } else if (Platform.isAndroid){
-        FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-      }
-    }
   }
 
   titleByIndex(activeIndex){
