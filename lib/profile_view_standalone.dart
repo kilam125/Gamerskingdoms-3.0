@@ -10,22 +10,23 @@ import 'package:gamers_kingdom/widgets/post_widget.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
-import 'package:provider/provider.dart';
 
-class ProfileView extends StatefulWidget {
-  final UserProfile user;
+class ProfileViewStandalone extends StatefulWidget {
+  final UserProfile followerData;
+  final UserProfile recipientData;
   final bool ownUser;
-  const ProfileView({
+  const ProfileViewStandalone({
     super.key,
-    required this.user,
+    required this.followerData,
+    required this.recipientData,
     this.ownUser = false
   });
   static const String routeName = "/ProfileView";
   @override
-  State<ProfileView> createState() => _ProfileViewState();
+  State<ProfileViewStandalone> createState() => _ProfileViewStandaloneState();
 }
 
-class _ProfileViewState extends State<ProfileView> {
+class _ProfileViewStandaloneState extends State<ProfileViewStandalone> {
   TextEditingController displayName = TextEditingController();
   TextEditingController bio = TextEditingController();
   List<Skills> skills = List.generate(Skills.values.length, (index) => Skills.values[index]);
@@ -36,15 +37,15 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   void initState() {
     super.initState();
-    displayName.text = widget.user.displayName;
+    displayName.text = widget.followerData.displayName;
     debugPrint("Selected Skills ${selectedSkills.toString()}");
-    debugPrint("User Skills ${widget.user.skills.toString()}");
-    selectedSkills  = widget.user.skills;
+    debugPrint("User Skills ${widget.followerData.skills.toString()}");
+    selectedSkills  = widget.followerData.skills;
     items = skills
       .map((skill) => MultiSelectItem<Skills>(skill, Util.skillsToString(skill)))
       .toList();
-    if(widget.user.bio != null){
-      bio.text = widget.user.bio!;
+    if(widget.followerData.bio != null){
+      bio.text = widget.followerData.bio!;
     }
   }
   
@@ -61,7 +62,7 @@ class _ProfileViewState extends State<ProfileView> {
                 rootNavigator: false
               ).push(
                 MaterialPageRoute(builder: (context){
-                  return Profile(user: widget.user);
+                  return Profile(user: widget.followerData);
                 })
               );
             }, 
@@ -73,7 +74,7 @@ class _ProfileViewState extends State<ProfileView> {
         padding: const EdgeInsets.only(top:16.0, left: 8, right: 8.0),
         child: StreamBuilder(
           stream: FirebaseFirestore.instance.collection("posts")
-            .where("owner", isEqualTo: widget.user.userRef)
+            .where("owner", isEqualTo: widget.followerData.userRef)
             //.orderBy("datePost", descending: true)
             .snapshots(),
           builder: (context, snapshot) {
@@ -92,7 +93,7 @@ class _ProfileViewState extends State<ProfileView> {
                           decoration: const BoxDecoration(
                             shape: BoxShape.circle
                           ),
-                          child: widget.user.picture == null ?
+                          child: widget.followerData.picture == null ?
                             Image.asset(
                               "assets/images/userpic.png", 
                               fit: BoxFit.fill,
@@ -100,7 +101,7 @@ class _ProfileViewState extends State<ProfileView> {
                               width: 50,
                             )
                           :Image.network(
-                            widget.user.picture!,
+                            widget.followerData.picture!,
                             fit: BoxFit.fill,
                             height: 50,
                             width: 50,
@@ -113,7 +114,7 @@ class _ProfileViewState extends State<ProfileView> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                widget.user.displayName.capitalize(),
+                                widget.followerData.displayName.capitalize(),
                                 style: GoogleFonts.lalezar(
                                   fontSize:16,
                                   fontWeight:FontWeight.w400,
@@ -134,7 +135,7 @@ class _ProfileViewState extends State<ProfileView> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          widget.user.bio!,
+                          widget.followerData.bio!,
                           style: const TextStyle(
                             fontSize: 16
                           ),
@@ -155,7 +156,7 @@ class _ProfileViewState extends State<ProfileView> {
                                 padding: const EdgeInsets.symmetric(horizontal :8.0),
                                 child: Column(
                                   children: [
-                                    Text(widget.user.followers!.length.toString()),
+                                    Text(widget.followerData.followers!.length.toString()),
                                     Text(
                                       "Followers",
                                       style: Theme.of(context).textTheme.titleSmall,
@@ -165,7 +166,7 @@ class _ProfileViewState extends State<ProfileView> {
                               ),
                               Column(
                                 children: [
-                                  Text(widget.user.following!.length.toString()),
+                                  Text(widget.followerData.following!.length.toString()),
                                   Text(
                                     "Following",
                                     style: Theme.of(context).textTheme.titleSmall,
@@ -181,25 +182,25 @@ class _ProfileViewState extends State<ProfileView> {
                 SliverToBoxAdapter(
                   child: Wrap(
                     children: List.generate(
-                      widget.user.skills.length, 
+                      widget.followerData.skills.length, 
                       (index) => Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Chip(
-                          label: Text(Util.skillsToString(widget.user.skills[index])),
+                          label: Text(Util.skillsToString(widget.followerData.skills[index])),
                         ),
                       )
                     ),
                   ),
                 ),
-                if(!(context.read<UserProfile>().userRef == widget.user.userRef))
+                if(!(widget.recipientData.userRef == widget.followerData.userRef))
                 SliverToBoxAdapter(
-                  child:(widget.user.followers!.contains(context.read<UserProfile>().userRef))?
+                  child:(widget.followerData.followers!.contains(widget.recipientData.userRef))?
                   GestureDetector(
                     onTap: () async {
                       if(!mounted)return;
-                      widget.user.removeFollower(context.read<UserProfile>().userRef);
+                      widget.followerData.removeFollower(widget.recipientData.userRef);
                       if(!mounted)return;
-                      context.read<UserProfile>().removeFollowing(widget.user.userRef);
+                      widget.recipientData.removeFollowing(widget.followerData.userRef);
                     },
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -215,11 +216,11 @@ class _ProfileViewState extends State<ProfileView> {
                   ElevatedButton(
                     child: const Text("Follow"),
                     onPressed: () async {
-                      await UserProfile.createFriendRequest(requester: context.read<UserProfile>().userRef, target: widget.user.userRef);
+                      await UserProfile.createFriendRequest(requester: widget.recipientData.userRef, target: widget.followerData.userRef);
                       if(!mounted)return;
-                      widget.user.addFollower(context.read<UserProfile>().userRef);
+                      widget.followerData.addFollower(widget.recipientData.userRef);
                       if(!mounted)return;
-                      context.read<UserProfile>().addFollowing(widget.user.userRef);
+                      widget.recipientData.addFollowing(widget.followerData.userRef);
                     },
                   )
                 ),
@@ -257,7 +258,7 @@ class _ProfileViewState extends State<ProfileView> {
                           ),
                           child: PostWidget(
                             post: posts[index], 
-                            user: widget.user,
+                            user: widget.followerData,
                             index: index,
                           )
                         ),

@@ -1,18 +1,25 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
+import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/profile_view.dart';
+import 'package:gamers_kingdom/profile_view_standalone.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 
 import '../models/comment.dart';
 
 class CommentLine extends StatelessWidget {
   final Comment comment;
+  final DocumentSnapshot<Object?>? postOwner;
+  final bool nested;
   const CommentLine(
     {
       super.key,
-      required this.comment
+      required this.comment,
+      this.nested = false,
+      this.postOwner
     });
 
   @override
@@ -33,12 +40,26 @@ class CommentLine extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: (){
-                Navigator.of(context).pushNamed(
-                  ProfileView.routeName,
-                  arguments: {
-                    "user":user
-                  }
-                );
+                if(!nested){
+                  Navigator.of(context).pushNamed(
+                    ProfileView.routeName,
+                    arguments: {
+                      "user":user
+                    }
+                  );
+                } else {
+                  navigatorKey.currentState!.push(
+                    MaterialPageRoute(
+                      settings: const RouteSettings(
+                        name:ProfileViewStandalone.routeName,
+                      ),
+                      builder: (context) => ProfileViewStandalone(
+                        followerData : UserProfile.fromFirestore(data: userSnapshot.data!),
+                        recipientData : UserProfile.fromFirestore(data: postOwner!)
+                      )
+                    )
+                  );
+                }
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

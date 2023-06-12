@@ -3,10 +3,17 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:gamers_kingdom/comment_view_standalone.dart';
+import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/main.dart';
+import 'package:gamers_kingdom/models/comment.dart';
+import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/post_view_owner_standalone.dart';
 import 'package:gamers_kingdom/profile_view.dart';
+import 'package:gamers_kingdom/profile_view_standalone.dart';
 import 'package:gamers_kingdom/sign_up.dart';
+import 'package:gamers_kingdom/unknown_route.dart';
 
   Future<void> showNotification(Map<String, dynamic> messageData, FlutterLocalNotificationsPlugin fl) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
@@ -47,59 +54,75 @@ import 'package:gamers_kingdom/sign_up.dart';
       final String route = message.data["route"];
       debugPrint("Route : $route");
       if(route == ProfileView.routeName){
-        //DocumentSnapshot doc = await FirebaseFirestore.instance.collection("users").doc(message.data["userId"]).get();
-        navigatorKey.currentState!.pushNamed(
-          SignUp.routeName,
-          arguments: {
-            //"user":UserProfile.fromFirestore(data: doc)
-          }
+        DocumentSnapshot followerDoc = await FirebaseFirestore.instance.collection("users").doc(message.data["userId"]).get();
+        DocumentSnapshot recipientDoc = await FirebaseFirestore.instance.collection("users").doc(message.data["recipientId"]).get();
+        navigatorKey.currentState!.push(
+          MaterialPageRoute(
+            settings: RouteSettings(
+              name:ProfileViewStandalone.routeName,
+              arguments: {
+                "route":message.data
+              }
+            ),
+            builder: (context) => ProfileViewStandalone(
+              followerData : UserProfile.fromFirestore(data: followerDoc),
+              recipientData : UserProfile.fromFirestore(data: recipientDoc)
+            )
+          )
+        );
+      } else if(route == PostViewOwnerStandalone.routeName) {
+        Post post = Post.fromFirestore(data: await FirebaseFirestore.instance.collection("posts").doc(message.data["postId"]).get());
+        navigatorKey.currentState!.push(
+          MaterialPageRoute(
+            settings: RouteSettings(
+              name:PostViewOwnerStandalone.routeName,
+              arguments: {
+                "route":message.data
+              }
+            ),
+            builder: (context) => PostViewOwnerStandalone(
+              post: post,
+            )
+          )
+        );
+      } else if(route == CommentViewStandalone.routeName) {
+        Post post = Post.fromFirestore(data: await FirebaseFirestore.instance.collection("posts").doc(message.data["postId"]).get());
+        Comment comment = Comment.fromFirestore(doc: await FirebaseFirestore.instance.collection("comments").doc(message.data["commentId"]).get());
+        navigatorKey.currentState!.push(
+          MaterialPageRoute(
+            settings: RouteSettings(
+              name:CommentViewStandalone.routeName,
+              arguments: {
+                "route":message.data
+              }
+            ),
+            builder: (context) => CommentViewStandalone(
+              post: post,
+              comment: comment,
+            )
+          )
+        );
+      } else {
+        DocumentSnapshot followerDoc = await FirebaseFirestore.instance.collection("users").doc(message.data["userId"]).get();
+        DocumentSnapshot recipientDoc = await FirebaseFirestore.instance.collection("users").doc(message.data["recipientId"]).get();
+        navigatorKey.currentState!.push(
+          MaterialPageRoute(
+            settings: RouteSettings(
+              name:ProfileViewStandalone.routeName,
+              arguments: {
+                "route":message.data
+              }
+            ),
+            builder: (context) => ProfileViewStandalone(
+              followerData : UserProfile.fromFirestore(data: followerDoc),
+              recipientData : UserProfile.fromFirestore(data: recipientDoc)
+            )
+          )
         );
       }
     } else {
       FirebaseCrashlytics.instance.log("[NOTIF][handleMessage] Message is null");
       debugPrint("[NOTIF][handleMessage] Message is null");
-    }
-  }
-
-  Future<void> handleMessageInBck(RemoteMessage? message) async {
-    debugPrint("[NOTIF] In handleMessageInBck");
-    FirebaseCrashlytics.instance.log("[NOTIF][handleMessageInFr] in handleMessageInBck");
-    if(message != null){
-      final String route = message.data["route"];
-      debugPrint("Route : $route");
-      if(route == ProfileView.routeName){
-        //DocumentSnapshot doc = await FirebaseFirestore.instance.collection("users").doc(message.data["userId"]).get();
-        navigatorKey.currentState!.pushNamed(
-          SignUp.routeName,
-          arguments: {
-            //"user":UserProfile.fromFirestore(data: doc)
-          }
-        );
-      }
-    } else {
-      FirebaseCrashlytics.instance.log("[NOTIF][handleMessageInBck] Message is null");
-      debugPrint("[NOTIF][handleMessageInBck] Message is null");
-    }
-  }
-
-  Future<void> handleMessageInFr(RemoteMessage? message) async {
-    debugPrint("[NOTIF] In handleMessageInFr");
-    FirebaseCrashlytics.instance.log("[NOTIF][handleMessageInFr] in handleMessageInFr");
-    if(message != null){
-      final String route = message.data["route"];
-      debugPrint("Route : $route");
-      if(route == ProfileView.routeName){
-        //DocumentSnapshot doc = await FirebaseFirestore.instance.collection("users").doc(message.data["userId"]).get();
-        navigatorKey.currentState!.pushNamed(
-          SignUp.routeName,
-          arguments: {
-            //"user":UserProfile.fromFirestore(data: doc)
-          }
-        );
-      }
-    } else {
-      FirebaseCrashlytics.instance.log("[NOTIF][handleMessageInFr] Message is null");
-      debugPrint("[NOTIF][handleMessageInFr] Message is null");
     }
   }
 
@@ -110,8 +133,8 @@ import 'package:gamers_kingdom/sign_up.dart';
       sound: true,
     );
     FirebaseMessaging.instance.getInitialMessage().then(handleMessage);
-    FirebaseMessaging.onBackgroundMessage(handleMessageInBck);
-    FirebaseMessaging.onMessageOpenedApp.listen(handleMessageInFr);
+    FirebaseMessaging.onBackgroundMessage(handleMessage);
+    FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
 /*     FirebaseMessaging.onMessage.listen((message) {
       showNotification(message.notification!.toMap(), fl);
     }); */

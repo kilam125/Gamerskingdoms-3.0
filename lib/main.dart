@@ -8,27 +8,26 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:gamers_kingdom/api/firebase_push.dart';
 import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/firebase_options.dart';
 import 'package:gamers_kingdom/login_page.dart';
 import 'package:gamers_kingdom/sign_up.dart';
+import 'package:gamers_kingdom/unknown_route.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
-  runZonedGuarded<Future<void>>(() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-    );
-    await FirebasePush().initNotifications();
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
-
-    runApp(const MyApp());
-  }, (error, stack) => FirebaseCrashlytics.instance.recordError(error, stack));
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await FirebasePush().initNotifications();
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -44,7 +43,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-
     FirebaseAuth.instance.authStateChanges().listen((user) {
       bool result = user != null;
       debugPrint("InListening : ${result?"/Dashboard":"/LoginPage"}");
@@ -246,6 +244,17 @@ class _MyAppState extends State<MyApp> {
         )
       ),
       initialRoute:FirebaseAuth.instance.currentUser == null ? HomePage.routeName : Dashboard.routeName,
+      onUnknownRoute: (settings) => MaterialPageRoute(
+        settings: RouteSettings(
+          name:UnknownRoute.routeName,
+        ),
+        builder: (context) => const UnknownRoute()
+      ),
+      home: Scaffold(
+        key: const Key("Home Scaffold"),
+        backgroundColor: Colors.white,
+        body: PlatformCircularProgressIndicator(),
+      ),
       onGenerateRoute: (settings){
         debugPrint("Name : ${settings.name}");
         if(settings.name!.contains(SignUp.routeName)){
@@ -259,6 +268,7 @@ class _MyAppState extends State<MyApp> {
           return MaterialPageRoute(
             settings: RouteSettings(
               name:Dashboard.routeName,
+              arguments: settings.arguments
             ),
             builder: (context) => Dashboard(
               email: FirebaseAuth.instance.currentUser!.email!,
@@ -272,7 +282,24 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => const HomePage()
           );
         }
-        return null;
+        if(FirebaseAuth.instance.currentUser == null) {
+          return MaterialPageRoute(
+            settings: RouteSettings(
+              name:HomePage.routeName,
+            ),
+            builder: (context) => const HomePage()
+          );
+        } else {
+          return MaterialPageRoute(
+            settings: RouteSettings(
+              name:Dashboard.routeName,
+              arguments: settings.arguments
+            ),
+            builder: (context) => Dashboard(
+              email: FirebaseAuth.instance.currentUser!.email!,
+            )
+          );
+        }
       },
     );
   }

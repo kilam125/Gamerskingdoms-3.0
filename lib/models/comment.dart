@@ -1,5 +1,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gamers_kingdom/enums/attachment_type.dart';
+import 'package:gamers_kingdom/util/util.dart';
 
 class Comment{
   final DocumentReference commentator;
@@ -8,6 +10,7 @@ class Comment{
   final DateTime date;
   final String? content;
   final String? attachmentUrl;
+  final AttachmentType? attachmentType;
 
   const Comment(
     {
@@ -16,6 +19,7 @@ class Comment{
       required this.attachmentPresent,
       required this.date,
       this.attachmentUrl,
+      this.attachmentType,
       this.content
     }
   );
@@ -27,6 +31,7 @@ class Comment{
       "attachmentPresent":attachmentPresent,
       "date":date,
       "attachmentUrl":attachmentUrl,
+      "attachmentType":Util.attachmentTypeToInt(attachmentType),
       "content":content
     };
   }
@@ -38,7 +43,8 @@ class Comment{
       attachmentPresent: doc["attachmentPresent"],
       date: (doc["date"] as Timestamp).toDate(),
       content: doc["content"],
-      attachmentUrl: doc["attachmentUrl"]
+      attachmentUrl: doc["attachmentUrl"],
+      attachmentType:Util.intToAttachmentType(doc["attachmentType"]),
     );
   }
 }

@@ -273,7 +273,8 @@ class _PageCommentsState extends State<PageComments> {
                                     attachmentPresent: false, 
                                     date: DateTime.now(),
                                     content: textController.text,
-                                    attachmentUrl: null
+                                    attachmentUrl: null,
+                                    attachmentType: null
                                   )
                                 );
                                 textController.clear();

@@ -101,4 +101,29 @@ class Util{
     }
     return null;
   }
+
+  static int? attachmentTypeToInt(AttachmentType? num){
+    if(num == AttachmentType.picture){
+      return 0;
+    }
+    if(num == AttachmentType.video){
+      return 1;
+    }
+    if(num == AttachmentType.voice){
+      return 2;
+    }
+    return null;
+  }
+
+  static double heightByAttachmentType(AttachmentType? attachmentType){
+    if(attachmentType == AttachmentType.picture){
+      return 400;
+    }
+    else if(attachmentType == AttachmentType.video){
+      return 650;
+    } else {
+      return 300;
+    }
+  }
+
 }

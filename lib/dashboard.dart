@@ -23,11 +23,14 @@ import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/posts.dart';
 import 'package:gamers_kingdom/profile.dart';
 import 'package:gamers_kingdom/profile_view.dart';
+import 'package:gamers_kingdom/unknown_route.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
 import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
+final secondNavigatorKey = GlobalKey<NavigatorState>();
 
 class Dashboard extends StatefulWidget {
   final String email;
@@ -63,6 +66,15 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
+    Map? mp = (ModalRoute.of(context)!.settings.arguments as Map?);
+    if(mp != null && mp["route"] != null){
+      secondNavigatorKey.currentState!.pushNamed(
+        ProfileView.routeName,
+/*         arguments: {
+          "user":UserProfile.fromFirestore(data: doc)
+        } */
+      );
+    }
     navCallback(int index){
       setState(() {
         activeIndex = index;
@@ -76,6 +88,7 @@ class _DashboardState extends State<Dashboard> {
       AddPosts(navCallback: navCallback),
       Followers(navCallback: navCallback),
     ];
+    
     return StreamBuilder<Object>(
       stream: FirebaseFirestore.instance
         .collection("users")
@@ -108,7 +121,13 @@ class _DashboardState extends State<Dashboard> {
           builder: (context, __) {
             UserProfile user = context.watch<UserProfile>();
             return Navigator(
-              //key: globalKey,
+              key: secondNavigatorKey,
+              onUnknownRoute: (settings) => MaterialPageRoute(
+                settings: RouteSettings(
+                  name:UnknownRoute.routeName,
+                ),
+                builder: (context) => const UnknownRoute()
+              ),
               onGenerateRoute: (settings){
                 if(settings.name == Profile.routeName){
                   return MaterialPageRoute(builder: (context){

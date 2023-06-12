@@ -93,17 +93,6 @@ class _PostsState extends State<Posts> {
     }
   }
   
-  double heightByAttachmentType(AttachmentType? attachmentType){
-    if(attachmentType == AttachmentType.picture){
-      return 400;
-    }
-    else if(attachmentType == AttachmentType.video){
-      return 650;
-    } else {
-      return 300;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     UserProfile using = context.watch<UserProfile>();
@@ -131,7 +120,7 @@ class _PostsState extends State<Posts> {
         bool hasAttachment = (post.attachmentType != null && post.attachmentUrl != null);
         return Container(
           constraints: BoxConstraints(
-            minHeight:heightByAttachmentType(post.attachmentType),
+            minHeight:Util.heightByAttachmentType(post.attachmentType),
           ),
           width: 375,
           margin: const EdgeInsets.all(16.0),
