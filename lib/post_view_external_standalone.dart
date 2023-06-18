@@ -5,29 +5,26 @@ import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/util/util.dart';
-import 'package:gamers_kingdom/widgets/comment_line.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
 import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import 'models/comment.dart';
-
-class CommentViewStandalone extends StatefulWidget {
+class PostViewExternal extends StatefulWidget {
   final Post post;
-  final Comment comment;
   final bool ownUser = true;
-  const CommentViewStandalone({
+  const PostViewExternal({
     super.key,
     required this.post,
-    required this.comment
   });
-  static const String routeName = "/CommentViewStandalone";
+  static const String routeName = "/PostViewExternal";
   @override
-  State<CommentViewStandalone> createState() => _CommentViewStandaloneState();
+  State<PostViewExternal> createState() => _PostViewExternalState();
 }
 
-class _CommentViewStandaloneState extends State<CommentViewStandalone> {
+class _PostViewExternalState extends State<PostViewExternal> {
   @override
   void initState() {
     super.initState();
@@ -94,8 +91,8 @@ class _CommentViewStandaloneState extends State<CommentViewStandalone> {
               );
             }
             UserProfile user = UserProfile.fromFirestore(data:  ownerSnapshot.data!);
-            return ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
@@ -147,8 +144,33 @@ class _CommentViewStandaloneState extends State<CommentViewStandalone> {
                 ),
                 if(hasAttachment)
                 attachementViewByType(widget.post.attachmentType!, widget.post.attachmentUrl!),
+                Row(
+                  children: [
+                    Icon(
+                      widget.post.likers.contains(user.userRef) ? Icons.star : Icons.star_border,
+                      color: widget.post.likers.contains(user.userRef) ? const Color.fromARGB(255, 216, 174, 84) : Colors.black,
+                      size: 30,
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        Navigator.pushNamed(
+                          context, 
+                          PageComments.routeName,
+                          arguments: {
+                            "index":0,
+                            "userProfile":user
+                          }
+                        );
+                      }, 
+                      icon: const Icon(
+                        Icons.add_comment,
+                        size: 28,
+                      )
+                    ),
+                  ],
+                ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text(
                     "${widget.post.likes} likes",
                     style: Theme.of(context).textTheme.headlineSmall,
@@ -165,13 +187,29 @@ class _CommentViewStandaloneState extends State<CommentViewStandalone> {
                     ), 
                   ),
                 ),
-                const Divider(color: Colors.grey,),
-                CommentLine(
-                  comment: widget.comment,
-                  nested: true,
-                  postOwner: ownerSnapshot.data!
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.of(context).pushNamed(
+                        PageComments.routeName,
+                        arguments: {
+                          "index":0,
+                          "userProfile":user
+                        }
+                      );
+                    },
+                    child: Text(
+                      "Check ${widget.post.comments.length} comments",
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: const Color.fromARGB(255, 62, 62, 62),
+                        decoration: TextDecoration.underline
+                      ),
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 15,)
               ],
             );
           }

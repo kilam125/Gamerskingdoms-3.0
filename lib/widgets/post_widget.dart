@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
+import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/page_comments.dart';
@@ -14,11 +15,12 @@ class PostWidget extends StatelessWidget {
   final Post post;
   final UserProfile user;
   final int index;
+
   const PostWidget({
     super.key,
     required this.post,
     required this.user,
-    required this.index
+    required this.index,
   });
 
   static Widget getPictureWidget(String url){
@@ -98,11 +100,11 @@ class PostWidget extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 16.0),
-                    child: Text(
-                      ""
-                      //DateFormat.yMMMMd().format(post.datePost)
+                  if(index==0)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Chip(
+                      label: Text("Latest"),
                     ),
                   )
                 ],
@@ -133,7 +135,7 @@ class PostWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: GestureDetector(
             onTap: (){
-              Navigator.of(context).pushNamed(
+              navigatorKey.currentState!.pushNamed(
                 PageComments.routeName,
                 arguments: {
                   "index":index,

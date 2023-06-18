@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart';
+import 'package:gamers_kingdom/comments_view_standalone.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
+import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
-import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
@@ -14,10 +15,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 class PostViewOwnerStandalone extends StatefulWidget {
   final Post post;
+  final UserProfile viewer;
   final bool ownUser = true;
   const PostViewOwnerStandalone({
     super.key,
     required this.post,
+    required this.viewer
   });
   static const String routeName = "/PostViewOwnerStandalone";
   @override
@@ -25,11 +28,11 @@ class PostViewOwnerStandalone extends StatefulWidget {
 }
 
 class _PostViewOwnerStandaloneState extends State<PostViewOwnerStandalone> {
+
   @override
   void initState() {
     super.initState();
   }
-
 
   Widget getPictureWidget(String url){
     return Container(
@@ -90,7 +93,7 @@ class _PostViewOwnerStandaloneState extends State<PostViewOwnerStandalone> {
                 child: Center(child: ProgressWidget())
               );
             }
-            UserProfile user = UserProfile.fromFirestore(data:  ownerSnapshot.data!);
+            UserProfile user = UserProfile.fromFirestore(data: ownerSnapshot.data!);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -144,31 +147,6 @@ class _PostViewOwnerStandaloneState extends State<PostViewOwnerStandalone> {
                 ),
                 if(hasAttachment)
                 attachementViewByType(widget.post.attachmentType!, widget.post.attachmentUrl!),
-                Row(
-                  children: [
-                    Icon(
-                      widget.post.likers.contains(user.userRef) ? Icons.star : Icons.star_border,
-                      color: widget.post.likers.contains(user.userRef) ? const Color.fromARGB(255, 216, 174, 84) : Colors.black,
-                      size: 30,
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        Navigator.pushNamed(
-                          context, 
-                          PageComments.routeName,
-                          arguments: {
-                            "index":0,
-                            "userProfile":user
-                          }
-                        );
-                      }, 
-                      icon: const Icon(
-                        Icons.add_comment,
-                        size: 28,
-                      )
-                    ),
-                  ],
-                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text(
@@ -191,12 +169,17 @@ class _PostViewOwnerStandaloneState extends State<PostViewOwnerStandalone> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: GestureDetector(
                     onTap: (){
-                      Navigator.of(context).pushNamed(
-                        PageComments.routeName,
-                        arguments: {
-                          "index":0,
-                          "userProfile":user
-                        }
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          settings: RouteSettings(
+                            name:PageCommentsStandalone.routeName,
+                          ),
+                          builder: (context) => PageCommentsStandalone(
+                            post: widget.post, 
+                            userProfile: user,
+                            viewer: widget.viewer
+                          )
+                        )
                       );
                     },
                     child: Text(

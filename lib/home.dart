@@ -55,9 +55,7 @@ class _HomeState extends State<Home> {
     }
 
     List<Widget> pages = [
-      Posts(
-        navCallback: navCallback, 
-      ),
+      Posts(navCallback: navCallback),
       AddPosts(navCallback: navCallback),
       Followers(navCallback: navCallback),
     ];

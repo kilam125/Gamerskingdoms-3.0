@@ -4,7 +4,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gamers_kingdom/comment_view_standalone.dart';
-import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/comment.dart';
 import 'package:gamers_kingdom/models/post.dart';
@@ -12,8 +11,6 @@ import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/post_view_owner_standalone.dart';
 import 'package:gamers_kingdom/profile_view.dart';
 import 'package:gamers_kingdom/profile_view_standalone.dart';
-import 'package:gamers_kingdom/sign_up.dart';
-import 'package:gamers_kingdom/unknown_route.dart';
 
   Future<void> showNotification(Map<String, dynamic> messageData, FlutterLocalNotificationsPlugin fl) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
@@ -72,6 +69,7 @@ import 'package:gamers_kingdom/unknown_route.dart';
         );
       } else if(route == PostViewOwnerStandalone.routeName) {
         Post post = Post.fromFirestore(data: await FirebaseFirestore.instance.collection("posts").doc(message.data["postId"]).get());
+        DocumentSnapshot followerDoc = await FirebaseFirestore.instance.collection("users").doc(message.data["userId"]).get();
         navigatorKey.currentState!.push(
           MaterialPageRoute(
             settings: RouteSettings(
@@ -82,6 +80,7 @@ import 'package:gamers_kingdom/unknown_route.dart';
             ),
             builder: (context) => PostViewOwnerStandalone(
               post: post,
+              viewer: UserProfile.fromFirestore(data: followerDoc),
             )
           )
         );

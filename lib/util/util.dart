@@ -116,6 +116,7 @@ class Util{
   }
 
   static double heightByAttachmentType(AttachmentType? attachmentType){
+    debugPrint("attachment type is : $attachmentType");
     if(attachmentType == AttachmentType.picture){
       return 400;
     }
