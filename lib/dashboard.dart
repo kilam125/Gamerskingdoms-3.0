@@ -89,94 +89,99 @@ class _DashboardState extends State<Dashboard> {
       Followers(navCallback: navCallback),
     ];
     
-    return StreamBuilder<Object>(
-      stream: FirebaseFirestore.instance
-        .collection("users")
-        .where("email", isEqualTo: widget.email)
-        .snapshots(),
-      builder: (context, snapshot) {
-        if(!snapshot.hasData){
-          return const ProgressWidget();
-        }
-        QuerySnapshot qds = snapshot.data as QuerySnapshot;
-        return MultiProvider(
-          providers: [
-            StreamProvider<UserProfile>.value(
-              updateShouldNotify:(oldList, currentList) {
-                debugPrint("Updating");
-                return (currentList != oldList);
-              },
-              initialData: UserProfile.fromFirestore(data: qds.docs.first),
-              value: DatabaseService.streamUser(qds.docs.first.id),
-            ),
-            StreamProvider<List<Post>>.value(
-              value:Post.streamAllPosts(),
-              updateShouldNotify:(oldList,currentList) => (currentList!=oldList),
-              initialData: const [],
-            ),
-            ChangeNotifierProvider(
-              create: (_) => FilteredSkills(),
-            )
-          ],
-          builder: (context, __) {
-            UserProfile user = context.watch<UserProfile>();
-            return Navigator(
-              key: secondNavigatorKey,
-              onUnknownRoute: (settings) => MaterialPageRoute(
-                settings: RouteSettings(
-                  name:UnknownRoute.routeName,
-                ),
-                builder: (context) => const UnknownRoute()
+    return WillPopScope(
+      onWillPop: (){
+        return Future.value(false);
+      },
+      child: StreamBuilder<Object>(
+        stream: FirebaseFirestore.instance
+          .collection("users")
+          .where("email", isEqualTo: widget.email)
+          .snapshots(),
+        builder: (context, snapshot) {
+          if(!snapshot.hasData){
+            return const ProgressWidget();
+          }
+          QuerySnapshot qds = snapshot.data as QuerySnapshot;
+          return MultiProvider(
+            providers: [
+              StreamProvider<UserProfile>.value(
+                updateShouldNotify:(oldList, currentList) {
+                  debugPrint("Updating");
+                  return (currentList != oldList);
+                },
+                initialData: UserProfile.fromFirestore(data: qds.docs.first),
+                value: DatabaseService.streamUser(qds.docs.first.id),
               ),
-              onGenerateRoute: (settings){
-                if(settings.name == Profile.routeName){
-                  return MaterialPageRoute(builder: (context){
-                    return Profile(user: user);
-                  });
-                }  else if(settings.name!.contains(ProfileView.routeName)){
-                  return MaterialPageRoute(
-                    settings: const RouteSettings(
-                      name:ProfileView.routeName,
-                    ),
-                    builder: (context) => ProfileView(
-                      user: (settings.arguments as Map)["user"],
-                      ownUser: (settings.arguments as Map)["ownUser"] ?? false,
-                    )
-                  );
-                } else if(settings.name!.contains(PageComments.routeName)){
-                  return MaterialPageRoute(
-                    settings: RouteSettings(
-                      name:PageComments.routeName,
-                    ),
-                    builder: (context) => PageComments(
-                      index: (settings.arguments as Map)["index"],
-                      userProfile: (settings.arguments as Map)["userProfile"],
-                    )
-                  );
-                } else if(settings.name!.contains(NotificationPage.routeName)) {
-                  return MaterialPageRoute(
-                    settings: RouteSettings(
-                      name:NotificationPage.routeName,
-                    ),
-                    builder: (context) => const NotificationPage()
-                  );
-                } else if(settings.name!.contains(ft.Filter.routeName)) {
-                  return MaterialPageRoute(
-                    settings: RouteSettings(
-                      name:ft.Filter.routeName,
-                    ),
-                    builder: (context) => const ft.Filter()
-                  );
-                } else {
-                  return MaterialPageRoute(builder: (context){
-                    return const Home();
-                  });
+              StreamProvider<List<Post>>.value(
+                value:Post.streamAllPosts(),
+                updateShouldNotify:(oldList,currentList) => (currentList!=oldList),
+                initialData: const [],
+              ),
+              ChangeNotifierProvider(
+                create: (_) => FilteredSkills(),
+              )
+            ],
+            builder: (context, __) {
+              UserProfile user = context.watch<UserProfile>();
+              return Navigator(
+                key: secondNavigatorKey,
+                onUnknownRoute: (settings) => MaterialPageRoute(
+                  settings: RouteSettings(
+                    name:UnknownRoute.routeName,
+                  ),
+                  builder: (context) => const UnknownRoute()
+                ),
+                onGenerateRoute: (settings){
+                  if(settings.name == Profile.routeName){
+                    return MaterialPageRoute(builder: (context){
+                      return Profile(user: user);
+                    });
+                  }  else if(settings.name!.contains(ProfileView.routeName)){
+                    return MaterialPageRoute(
+                      settings: const RouteSettings(
+                        name:ProfileView.routeName,
+                      ),
+                      builder: (context) => ProfileView(
+                        user: (settings.arguments as Map)["user"],
+                        ownUser: (settings.arguments as Map)["ownUser"] ?? false,
+                      )
+                    );
+                  } else if(settings.name!.contains(PageComments.routeName)){
+                    return MaterialPageRoute(
+                      settings: RouteSettings(
+                        name:PageComments.routeName,
+                      ),
+                      builder: (context) => PageComments(
+                        index: (settings.arguments as Map)["index"],
+                        userProfile: (settings.arguments as Map)["userProfile"],
+                      )
+                    );
+                  } else if(settings.name!.contains(NotificationPage.routeName)) {
+                    return MaterialPageRoute(
+                      settings: RouteSettings(
+                        name:NotificationPage.routeName,
+                      ),
+                      builder: (context) => const NotificationPage()
+                    );
+                  } else if(settings.name!.contains(ft.Filter.routeName)) {
+                    return MaterialPageRoute(
+                      settings: RouteSettings(
+                        name:ft.Filter.routeName,
+                      ),
+                      builder: (context) => const ft.Filter()
+                    );
+                  } else {
+                    return MaterialPageRoute(builder: (context){
+                      return const Home();
+                    });
+                  }
                 }
-              }
-            );
-          },
-        );
-      }
+              );
+            },
+          );
+        }
+      ),
     );
   }
 }

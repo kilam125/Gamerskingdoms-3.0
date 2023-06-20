@@ -1,12 +1,14 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/profile_view.dart';
 import 'package:gamers_kingdom/profile_view_standalone.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
+import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
 
 import '../models/comment.dart';
 
@@ -66,7 +68,7 @@ class CommentLine extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Flexible(
-                    flex: 5,
+                    flex: 1,
                     child: Row(
                       children: [
                         Flexible(
@@ -108,7 +110,7 @@ class CommentLine extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Flexible(
+/*                   Flexible(
                     flex: 5,
                     child: Padding(
                       padding: const EdgeInsets.only(right:16.0),
@@ -116,7 +118,7 @@ class CommentLine extends StatelessWidget {
                         ""//DateFormat.yMMMMd().format(comment.date)
                       ),
                     ),
-                  )
+                  ) */
                 ],
               ),
             ),
@@ -124,7 +126,9 @@ class CommentLine extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(comment.content!),
-            )
+            ),
+            if(comment.attachmentType == AttachmentType.voice && comment.attachmentUrl != null)
+            VoiceNoteWidget(url: comment.attachmentUrl!)
           ],
         );
       }

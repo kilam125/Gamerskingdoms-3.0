@@ -1,8 +1,23 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
 
 class Util{
+  static Future<String> uploadFileToFirebaseStorage(String pathToUpload, File file) async {
+    Uint8List filesAsBytes = await (file).readAsBytes();
+    final TaskSnapshot upload = await FirebaseStorage.instance
+      .ref(pathToUpload)
+      .putData(
+        filesAsBytes, 
+        SettableMetadata(contentType: 'audio/mp3')
+      );
+    final String downloadUrl = await upload.ref.getDownloadURL();
+    return downloadUrl;
+  }
   static Skills stringToSkills(String str){
     switch (str.toLowerCase().trim()){
       case "leader":

@@ -38,12 +38,13 @@ class _AddPostsState extends State<AddPosts> {
   bool uploadImages = false;
   bool uploadVideo = false;
   bool uploadVoiceNote = false;
+  bool uploadAudioFile = false;
   RecorderController recorderController = RecorderController(); // Initialise
   late String fullPath;
   late String localPath;
   DateTime date = DateTime.now();
   late PlayerController controller;
-
+  late File? audioFile;
   List<XFile> listXFileImages = [];
   List<Image> listImages = [];
   XFile? videoFile;
@@ -183,8 +184,10 @@ class _AddPostsState extends State<AddPosts> {
                       if (result != null) {
                         PlatformFile file = result.files.first;
                         debugPrint('Selected audio file: ${file.path}');
-                      } else {
-                        // User canceled the picker
+                        setState(() {
+                          audioFile = File(file.path!);
+                          uploadAudioFile = true;
+                        });
                       }
                     }, 
                     icon: const Icon(Icons.audio_file, size: 30,)
@@ -287,7 +290,7 @@ class _AddPostsState extends State<AddPosts> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [...listImages]
               ),
-              if(uploadVideo)
+              if(uploadVideo || uploadAudioFile)
               Container(
                 height: 100,
                 width: 100,
@@ -378,6 +381,31 @@ class _AddPostsState extends State<AddPosts> {
                         });
                         debugPrint("Done");
                       }
+                    } else if(uploadAudioFile){
+                      debugPrint("upload voice note");
+                      if(audioFile!=null){
+                        Uint8List filesAsBytes = await (audioFile)!.readAsBytes();
+                        if(!mounted)return;
+                        final TaskSnapshot upload = await FirebaseStorage.instance
+                          .ref("${user.email}_audio_recorded_${date.day}${date.minute}${date.year}${date.minute}${date.second}")
+                          .putData(
+                            filesAsBytes, 
+                            SettableMetadata(contentType: 'audio/mp3')
+                          );
+                        final String downloadUrl = await upload.ref.getDownloadURL();
+                        await FirebaseFirestore.instance.collection("posts").add({
+                          "userName":user.displayName,
+                          "attachmentType":2,
+                          "attachmentUrl":downloadUrl,
+                          "comments":[],
+                          "content":content.text,
+                          "datePost":DateTime.now(),
+                          "likers":[],
+                          "likes":0,
+                          "owner":user.userRef,
+                          "skills":user.skills.map((e) => Util.skillsToString(e)).toList()
+                        });
+                        debugPrint("Done");
                     } else {
                       await FirebaseFirestore.instance.collection("posts").add({
                         "userName":user.displayName,
@@ -402,7 +430,8 @@ class _AddPostsState extends State<AddPosts> {
                       message: "You've posted successfully"
                     );
                     widget.navCallback(0);
-                  }, 
+                    }
+                  },
                   child: const Text("Post")
                 ),
               )

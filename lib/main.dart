@@ -250,11 +250,11 @@ class _MyAppState extends State<MyApp> {
         ),
         builder: (context) => const UnknownRoute()
       ),
-      home: Scaffold(
+/*       home: Scaffold(
         key: const Key("Home Scaffold"),
         backgroundColor: Colors.white,
         body: PlatformCircularProgressIndicator(),
-      ),
+      ), */
       onGenerateRoute: (settings){
         debugPrint("Name : ${settings.name}");
         if(settings.name!.contains(SignUp.routeName)){
@@ -316,24 +316,29 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     debugPrint("Routename : HomePage");
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-          child: Column(
-            children: [
-              Flexible(
-                flex: 3,
-                child: Image.asset("assets/icon/main_logo_transparent.png")
-              ),
-              Flexible(
-                flex: 7,
-                child: LoginPage(
-                  parentContext:context
-                )
-              ),
-            ],
+    return WillPopScope(
+      onWillPop: (){
+        return Future.value(false);
+      },
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+            child: Column(
+              children: [
+                Flexible(
+                  flex: 3,
+                  child: Image.asset("assets/icon/main_logo_transparent.png")
+                ),
+                Flexible(
+                  flex: 7,
+                  child: LoginPage(
+                    parentContext:context
+                  )
+                ),
+              ],
+            ),
           ),
         ),
       ),

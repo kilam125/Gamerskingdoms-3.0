@@ -1,11 +1,16 @@
+import 'dart:io';
+
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/comment.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/comment_line.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
@@ -254,7 +259,7 @@ class _PageCommentsState extends State<PageComments> {
                         ),
                       ),
                     ),
-                    (showSendButton && textController.text.isNotEmpty)
+                    ((showSendButton && textController.text.isNotEmpty) || (showSendButton && audioRecorded))
                       ? IconButton(
                           padding: EdgeInsets.zero,
                           icon: const Icon(
@@ -264,6 +269,28 @@ class _PageCommentsState extends State<PageComments> {
                           ),
                           onPressed: () async {
                             if(audioRecorded){
+                              String? path = await recorderController.stop();
+                              if(path != null){
+                                File audioFile = File(path);
+                                String pathToUpload = "${context.read<UserProfile>().email}_audio_recorded_${date.day}${date.minute}${date.year}${date.minute}${date.second}";
+                                String downloadUrl = await Util.uploadFileToFirebaseStorage(pathToUpload, audioFile);
+                                await post.addComment(
+                                  Comment(
+                                    commentator: context.read<UserProfile>().userRef, 
+                                    post: post.postRef, 
+                                    attachmentPresent: false, 
+                                    date: DateTime.now(),
+                                    content: textController.text,
+                                    attachmentUrl: downloadUrl,
+                                    attachmentType: AttachmentType.voice
+                                  )
+                                );
+                                textController.clear();
+                                setState(() {
+                                  showMicrowave = false;
+                                });
+                                scrollController.jumpTo(scrollController.position.maxScrollExtent*2);
+                              }
                             } else {
                               if(textController.text.isNotEmpty){
                                 await post.addComment(
@@ -300,6 +327,7 @@ class _PageCommentsState extends State<PageComments> {
                               setState(() {
                                 isPlaying = false;
                                 showSendButton = true;
+                                audioRecorded = true;
                               });
                             },
                             child: const Icon(

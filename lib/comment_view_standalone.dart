@@ -171,6 +171,13 @@ class _CommentViewStandaloneState extends State<CommentViewStandalone> {
                   nested: true,
                   postOwner: ownerSnapshot.data!
                 ),
+                if(widget.comment.content!=null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(widget.comment.content!),
+                ),
+                if(widget.comment.attachmentType == AttachmentType.voice && widget.comment.attachmentUrl != null)
+                VoiceNoteWidget(url: widget.comment.attachmentUrl!),
                 const SizedBox(height: 15,)
               ],
             );
