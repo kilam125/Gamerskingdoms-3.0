@@ -395,7 +395,7 @@ class _AddPostsState extends State<AddPosts> {
                         final String downloadUrl = await upload.ref.getDownloadURL();
                         await FirebaseFirestore.instance.collection("posts").add({
                           "userName":user.displayName,
-                          "attachmentType":2,
+                          "attachmentType":3,
                           "attachmentUrl":downloadUrl,
                           "comments":[],
                           "content":content.text,

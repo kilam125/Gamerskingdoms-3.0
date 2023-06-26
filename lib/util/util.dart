@@ -114,6 +114,9 @@ class Util{
     if(num == 2){
       return AttachmentType.voice;
     }
+    if(num == 3){
+      return AttachmentType.audio;
+    }
     return null;
   }
 
@@ -126,6 +129,9 @@ class Util{
     }
     if(num == AttachmentType.voice){
       return 2;
+    }
+    if(num == AttachmentType.audio){
+      return 3;
     }
     return null;
   }

@@ -1,5 +1,6 @@
 enum AttachmentType {
   voice,
   picture,
-  video
+  video,
+  audio
 }
