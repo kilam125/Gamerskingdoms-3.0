@@ -366,6 +366,7 @@ class _AddPostsState extends State<AddPosts> {
                             filesAsBytes, 
                             SettableMetadata(contentType: 'audio/mp3')
                           );
+                        debugPrint("Data upload done");
                         final String downloadUrl = await upload.ref.getDownloadURL();
                         await FirebaseFirestore.instance.collection("posts").add({
                           "userName":user.displayName,
@@ -379,6 +380,7 @@ class _AddPostsState extends State<AddPosts> {
                           "owner":user.userRef,
                           "skills":user.skills.map((e) => Util.skillsToString(e)).toList()
                         });
+                        debugPrint("Posted");
                         debugPrint("Done");
                       }
                     } else if(uploadAudioFile){
@@ -420,6 +422,7 @@ class _AddPostsState extends State<AddPosts> {
                         "skills":user.skills.map((e) => Util.skillsToString(e)).toList()
                       });
                     }
+                    }
                     setState(() {
                       isLoading = false;
                     });
@@ -430,7 +433,6 @@ class _AddPostsState extends State<AddPosts> {
                       message: "You've posted successfully"
                     );
                     widget.navCallback(0);
-                    }
                   },
                   child: const Text("Post")
                 ),

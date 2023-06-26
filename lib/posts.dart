@@ -11,6 +11,7 @@ import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/profile_view.dart';
 import 'package:gamers_kingdom/util/util.dart';
+import 'package:gamers_kingdom/widgets/audio_widget.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
 import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
@@ -87,6 +88,8 @@ class _PostsState extends State<Posts> {
     }
     else if(attachmentType == AttachmentType.video){
       return getVideoWidget(attachmentUrl);
+    } else if(attachmentType == AttachmentType.audio){
+      return AudioWidget(url: attachmentUrl);
     } else {
       //return Container(height: 300, width: 300, color: Colors.purple);
       return VoiceNoteWidget(url: attachmentUrl);

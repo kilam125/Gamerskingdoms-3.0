@@ -80,7 +80,6 @@ class _MyAppState extends State<MyApp> {
     final MaterialColor blackSwatch = MaterialColor(const Color.fromARGB(255, 0, 0, 0).value, blackMap);
 
     return MaterialApp(
-      navigatorKey: navigatorKey,
       title: 'Gamers Kingdoms',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

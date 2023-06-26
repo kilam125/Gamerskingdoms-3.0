@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:just_audio/just_audio.dart';
 
-class VoiceNoteWidget extends StatefulWidget {
+class AudioWidget extends StatefulWidget {
   final String url; 
-  const VoiceNoteWidget({
+  const AudioWidget({
     super.key,
     required this.url
   });
 
   @override
-  State<VoiceNoteWidget> createState() => _VoiceNoteWidgetState();
+  State<AudioWidget> createState() => _AudioWidgetState();
 }
 
-class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
+class _AudioWidgetState extends State<AudioWidget> {
   final player = AudioPlayer(); // Create a player
   Duration duration = Duration.zero;
   Duration position = Duration.zero;
@@ -106,45 +106,46 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
           flex: 14,
           fit: FlexFit.tight,
           child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0.0),
-              child: Column(
-                children: [
-                  StreamBuilder(
-                      stream: player.durationStream,
-                      builder: (context, snapshotDt) {
-                        if (!snapshotDt.hasData) {
-                          return const ProgressWidget();
-                        }
-                        Duration dt = snapshotDt.data as Duration;
-                        return StreamBuilder<Duration>(
-                            stream: player.positionStream,
-                            builder: (context, snapshotPos) {
-                              if (!snapshotPos.hasData) {
-                                return const ProgressWidget();
-                              }
-                              Duration ps = snapshotPos.data as Duration;
-                              if (ps.inSeconds == dt.inSeconds) {
-                                debugPrint("END");
-                              }
-                              return Slider(
-                                min: 0,
-                                max: dt.inSeconds.toDouble(),
-                                value: ps.inSeconds.toDouble(),
-                                activeColor: const Color.fromRGBO(62, 62, 147, 1),
-                                inactiveColor: const Color.fromRGBO(143, 148, 204, 1),
-                                onChanged: (value) async {
-                                  //player.setClip(start:Duration(seconds: value.toInt()), end: Duration(seconds: dt.inSeconds.toInt()));
-                                },
-                              );
-                            });
-                      }),
-                ],
-              )),
+            padding: const EdgeInsets.symmetric(horizontal: 0.0),
+            child: Column(
+              children: [
+                StreamBuilder(
+                    stream: player.durationStream,
+                    builder: (context, snapshotDt) {
+                      if (!snapshotDt.hasData) {
+                        return const ProgressWidget();
+                      }
+                      Duration dt = snapshotDt.data as Duration;
+                      return StreamBuilder<Duration>(
+                          stream: player.positionStream,
+                          builder: (context, snapshotPos) {
+                            if (!snapshotPos.hasData) {
+                              return const ProgressWidget();
+                            }
+                            Duration ps = snapshotPos.data as Duration;
+                            if (ps.inSeconds == dt.inSeconds) {
+                              debugPrint("END");
+                            }
+                            return Slider(
+                              min: 0,
+                              max: dt.inSeconds.toDouble(),
+                              value: ps.inSeconds.toDouble(),
+                              activeColor: const Color.fromARGB(255, 242, 24, 46),
+                              inactiveColor: const Color.fromARGB(255, 167, 69, 69),
+                              onChanged: (value) async {
+                                //player.setClip(start:Duration(seconds: value.toInt()), end: Duration(seconds: dt.inSeconds.toInt()));
+                              },
+                            );
+                          });
+                    }),
+              ],
+            )
+          ),
         ),
         const Flexible(
           flex: 2,
           fit: FlexFit.tight,
-          child: Icon(Icons.mic),
+          child: Icon(Icons.audio_file),
         )
       ],
     );

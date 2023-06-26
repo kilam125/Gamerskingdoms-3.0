@@ -15,6 +15,7 @@ import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/filter.dart' as ft;
 import 'package:gamers_kingdom/followers.dart';
 import 'package:gamers_kingdom/home.dart';
+import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/filtered_skills.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
@@ -30,7 +31,6 @@ import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-final secondNavigatorKey = GlobalKey<NavigatorState>();
 
 class Dashboard extends StatefulWidget {
   final String email;
@@ -68,7 +68,7 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     Map? mp = (ModalRoute.of(context)!.settings.arguments as Map?);
     if(mp != null && mp["route"] != null){
-      secondNavigatorKey.currentState!.pushNamed(
+      navigatorKey.currentState!.pushNamed(
         ProfileView.routeName,
 /*         arguments: {
           "user":UserProfile.fromFirestore(data: doc)
@@ -125,7 +125,7 @@ class _DashboardState extends State<Dashboard> {
             builder: (context, __) {
               UserProfile user = context.watch<UserProfile>();
               return Navigator(
-                key: secondNavigatorKey,
+                //key: secondNavigatorKey,
                 onUnknownRoute: (settings) => MaterialPageRoute(
                   settings: RouteSettings(
                     name:UnknownRoute.routeName,
