@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
+import 'package:gamers_kingdom/followers.dart';
+import 'package:gamers_kingdom/followers_standalone.dart';
+import 'package:gamers_kingdom/following_standalone.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/profile.dart';
@@ -151,26 +154,50 @@ class _ProfileViewState extends State<ProfileView> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal :8.0),
+                              GestureDetector(
+                                onTap: (){
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) => ChangeNotifierProvider(
+                                        create: (context) => Provider.of<UserProfile>(context, listen: false),
+                                        builder: (context, child) => const FollowersStandalone(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal :8.0),
+                                  child: Column(
+                                    children: [
+                                      Text(widget.user.followers!.length.toString()),
+                                      Text(
+                                        "Followers",
+                                        style: Theme.of(context).textTheme.titleSmall,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: (){
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) => ListenableProvider(
+                                        create: (context) => Provider.of<UserProfile>(context, listen: false),
+                                        builder: (context, child) => const FollowingStandalone(),
+                                      ),
+                                    ),
+                                  );
+                                },
                                 child: Column(
                                   children: [
-                                    Text(widget.user.followers!.length.toString()),
+                                    Text(widget.user.following!.length.toString()),
                                     Text(
-                                      "Followers",
+                                      "Following",
                                       style: Theme.of(context).textTheme.titleSmall,
                                     ),
                                   ],
                                 ),
-                              ),
-                              Column(
-                                children: [
-                                  Text(widget.user.following!.length.toString()),
-                                  Text(
-                                    "Following",
-                                    style: Theme.of(context).textTheme.titleSmall,
-                                  ),
-                                ],
                               )
                             ],
                           ),

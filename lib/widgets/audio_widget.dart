@@ -130,8 +130,8 @@ class _AudioWidgetState extends State<AudioWidget> {
                               min: 0,
                               max: dt.inSeconds.toDouble(),
                               value: ps.inSeconds.toDouble(),
-                              activeColor: const Color.fromARGB(255, 242, 24, 46),
-                              inactiveColor: const Color.fromARGB(255, 167, 69, 69),
+                              activeColor: const Color.fromARGB(255, 48, 123, 52),
+                              inactiveColor: const Color.fromARGB(255, 40, 57, 41),
                               onChanged: (value) async {
                                 //player.setClip(start:Duration(seconds: value.toInt()), end: Duration(seconds: dt.inSeconds.toInt()));
                               },
@@ -145,7 +145,7 @@ class _AudioWidgetState extends State<AudioWidget> {
         const Flexible(
           flex: 2,
           fit: FlexFit.tight,
-          child: Icon(Icons.audio_file),
+          child: Icon(Icons.audio_file, size: 30),
         )
       ],
     );

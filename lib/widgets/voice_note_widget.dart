@@ -144,7 +144,7 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
         const Flexible(
           flex: 2,
           fit: FlexFit.tight,
-          child: Icon(Icons.mic),
+          child: Icon(Icons.mic, size: 30),
         )
       ],
     );

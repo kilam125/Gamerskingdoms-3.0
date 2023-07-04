@@ -221,7 +221,7 @@ class _PageCommentsState extends State<PageComments> {
                           textCapitalization: TextCapitalization.sentences,
                           autocorrect: true,
                           enableSuggestions: true,
-                          style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500),
+                          style: const TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.w400),
                           decoration: InputDecoration(
                             contentPadding: const EdgeInsets.only(left: 20),
                             hintStyle: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500),
