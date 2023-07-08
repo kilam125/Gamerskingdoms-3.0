@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
-import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/models/comment.dart';
 import 'package:gamers_kingdom/util/util.dart';
 

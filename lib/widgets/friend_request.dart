@@ -31,7 +31,7 @@ class FriendRequestWidget extends StatelessWidget {
         ),
       ),
       title: Text(user.displayName),
-      trailing: Row(),
+      trailing: const Row(),
     );
   }
 }

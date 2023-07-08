@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
-import 'package:gamers_kingdom/followers.dart';
 import 'package:gamers_kingdom/followers_standalone.dart';
 import 'package:gamers_kingdom/following_standalone.dart';
 import 'package:gamers_kingdom/models/post.dart';

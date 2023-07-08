@@ -1,19 +1,11 @@
 
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:gamers_kingdom/add_posts.dart';
 import 'package:gamers_kingdom/database_service.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
-import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/filter.dart' as ft;
-import 'package:gamers_kingdom/followers.dart';
 import 'package:gamers_kingdom/home.dart';
 import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/filtered_skills.dart';
@@ -21,7 +13,6 @@ import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/notifications_page.dart';
 import 'package:gamers_kingdom/page_comments.dart';
-import 'package:gamers_kingdom/posts.dart';
 import 'package:gamers_kingdom/profile.dart';
 import 'package:gamers_kingdom/profile_view.dart';
 import 'package:gamers_kingdom/unknown_route.dart';
@@ -75,19 +66,6 @@ class _DashboardState extends State<Dashboard> {
         } */
       );
     }
-    navCallback(int index){
-      setState(() {
-        activeIndex = index;
-      });
-    }
-
-    List<Widget> pages = [
-      Posts(
-        navCallback: navCallback, 
-      ),
-      AddPosts(navCallback: navCallback),
-      Followers(navCallback: navCallback),
-    ];
     
     return WillPopScope(
       onWillPop: (){
