@@ -6,6 +6,7 @@ import 'package:gamers_kingdom/followers_standalone.dart';
 import 'package:gamers_kingdom/following_standalone.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/posts.dart';
 import 'package:gamers_kingdom/profile.dart';
 import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/post_widget.dart';
@@ -27,7 +28,7 @@ class ProfileView extends StatefulWidget {
   State<ProfileView> createState() => _ProfileViewState();
 }
 
-class _ProfileViewState extends State<ProfileView> {
+class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin{
   TextEditingController displayName = TextEditingController();
   TextEditingController bio = TextEditingController();
   List<Skills> skills = List.generate(Skills.values.length, (index) => Skills.values[index]);
@@ -35,9 +36,11 @@ class _ProfileViewState extends State<ProfileView> {
   late final List<MultiSelectItem<Skills>> items;
   bool isLoading = false;
   bool isLoadingButton = false;
+  late TabController controller;
   @override
   void initState() {
     super.initState();
+    controller = TabController(length: 2, vsync: this);
     displayName.text = widget.user.displayName;
     debugPrint("Selected Skills ${selectedSkills.toString()}");
     debugPrint("User Skills ${widget.user.skills.toString()}");
@@ -83,197 +86,260 @@ class _ProfileViewState extends State<ProfileView> {
               return const Center(child: ProgressWidget());
             }
             List<Post> posts = snapshot.data!.docs.map((e) => Post.fromFirestore(data: e)).toList();
-            return CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Container(
-                          clipBehavior: Clip.antiAlias,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle
-                          ),
-                          child: widget.user.picture == null ?
-                            Image.asset(
-                              "assets/images/userpic.png", 
+            return NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverToBoxAdapter(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Container(
+                            clipBehavior: Clip.antiAlias,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle
+                            ),
+                            child: widget.user.picture == null ?
+                              Image.asset(
+                                "assets/images/userpic.png", 
+                                fit: BoxFit.fill,
+                                height: 50,
+                                width: 50,
+                              )
+                            :Image.network(
+                              widget.user.picture!,
                               fit: BoxFit.fill,
                               height: 50,
                               width: 50,
-                            )
-                          :Image.network(
-                            widget.user.picture!,
-                            fit: BoxFit.fill,
-                            height: 50,
-                            width: 50,
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                widget.user.displayName.capitalize(),
-                                style: GoogleFonts.lalezar(
-                                  fontSize:16,
-                                  fontWeight:FontWeight.w400,
-                                  color: Theme.of(context).primaryColor,
-                                  letterSpacing: 1
-                                )
-                              ),
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  widget.user.displayName.capitalize(),
+                                  style: GoogleFonts.lalezar(
+                                    fontSize:16,
+                                    fontWeight:FontWeight.w400,
+                                    color: Theme.of(context).primaryColor,
+                                    letterSpacing: 1
+                                  )
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    )
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          widget.user.bio!,
-                          style: const TextStyle(
-                            fontSize: 16
+                        ],
+                      )
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            widget.user.bio!,
+                            style: const TextStyle(
+                              fontSize: 16
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              GestureDetector(
-                                onTap: (){
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (BuildContext context) => ChangeNotifierProvider(
-                                        create: (context) => Provider.of<UserProfile>(context, listen: false),
-                                        builder: (context, child) => const FollowersStandalone(),
+                  SliverToBoxAdapter(
+                    child: Column(
+                      children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                GestureDetector(
+                                  onTap: (){
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) => ListenableProvider(
+                                          create: (context) => Provider.of<UserProfile>(context, listen: false),
+                                          builder: (context, child) => const FollowersStandalone(),
+                                        ),
                                       ),
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal :8.0),
+                                    child: Column(
+                                      children: [
+                                        Text(widget.user.followers!.length.toString()),
+                                        Text(
+                                          "Followers",
+                                          style: Theme.of(context).textTheme.titleSmall,
+                                        ),
+                                      ],
                                     ),
-                                  );
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal :8.0),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: (){
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) => ListenableProvider(
+                                          create: (context) => Provider.of<UserProfile>(context, listen: false),
+                                          builder: (context, child) => const FollowingStandalone(),
+                                        ),
+                                      ),
+                                    );
+                                  },
                                   child: Column(
                                     children: [
-                                      Text(widget.user.followers!.length.toString()),
+                                      Text(widget.user.following!.length.toString()),
                                       Text(
-                                        "Followers",
+                                        "Following",
                                         style: Theme.of(context).textTheme.titleSmall,
                                       ),
                                     ],
                                   ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: (){
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (BuildContext context) => ListenableProvider(
-                                        create: (context) => Provider.of<UserProfile>(context, listen: false),
-                                        builder: (context, child) => const FollowingStandalone(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Column(
-                                  children: [
-                                    Text(widget.user.following!.length.toString()),
-                                    Text(
-                                      "Following",
-                                      style: Theme.of(context).textTheme.titleSmall,
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
+                                )
+                              ],
+                            ),
+                          )
+                      ],
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Wrap(
+                      children: List.generate(
+                        widget.user.skills.length, 
+                        (index) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Chip(
+                            label: Text(Util.skillsToString(widget.user.skills[index])),
                           ),
                         )
-                    ],
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Wrap(
-                    children: List.generate(
-                      widget.user.skills.length, 
-                      (index) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Chip(
-                          label: Text(Util.skillsToString(widget.user.skills[index])),
-                        ),
-                      )
+                      ),
                     ),
                   ),
-                ),
-                if(!(context.read<UserProfile>().userRef == widget.user.userRef))
-                SliverToBoxAdapter(
-                  child:(widget.user.followers!.contains(context.read<UserProfile>().userRef))?
-                  GestureDetector(
-                    onTap: () async {
-                      if(!mounted)return;
-                      widget.user.removeFollower(context.read<UserProfile>().userRef);
-                      if(!mounted)return;
-                      context.read<UserProfile>().removeFollowing(widget.user.userRef);
-                    },
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Icon(Icons.check),
-                        ),
-                        Text("Followed")
-                      ],
-                    ),
-                  ) :
-                  ElevatedButton(
-                    child: const Text("Follow"),
-                    onPressed: () async {
-                      await UserProfile.createFriendRequest(requester: context.read<UserProfile>().userRef, target: widget.user.userRef);
-                      if(!mounted)return;
-                      widget.user.addFollower(context.read<UserProfile>().userRef);
-                      if(!mounted)return;
-                      context.read<UserProfile>().addFollowing(widget.user.userRef);
-                    },
-                  )
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        const Divider(color: Colors.grey, thickness: 1.0,),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Posts (${posts.length})",
+                  if(!(context.read<UserProfile>().userRef == widget.user.userRef))
+                  SliverToBoxAdapter(
+                    child:(widget.user.followers!.contains(context.read<UserProfile>().userRef))?
+                    GestureDetector(
+                      onTap: () async {
+                        if(!mounted)return;
+                        widget.user.removeFollower(context.read<UserProfile>().userRef);
+                        if(!mounted)return;
+                        context.read<UserProfile>().removeFollowing(widget.user.userRef);
+                      },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(Icons.check),
+                          ),
+                          Text("Followed")
+                        ],
+                      ),
+                    ) :
+                    ElevatedButton(
+                      child: const Text("Follow"),
+                      onPressed: () async {
+                        await UserProfile.createFriendRequest(requester: context.read<UserProfile>().userRef, target: widget.user.userRef);
+                        if(!mounted)return;
+                        widget.user.addFollower(context.read<UserProfile>().userRef);
+                        if(!mounted)return;
+                        context.read<UserProfile>().addFollowing(widget.user.userRef);
+                      },
+                    )
+                  ),
+                  const SliverToBoxAdapter(
+                    child: Divider(color: Colors.grey, thickness: 1.0,),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TabBar(
+                        indicatorColor: Colors.cyan,
+                        controller: controller,
+                        tabs: [
+                          GestureDetector(
+                            onTap: (){
+                              controller.animateTo(0);
+                            },
+                            child: Text(
+                              "Followers Posts",
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
-                ),
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    List.generate(
-                      posts.length, 
-                      (index) => GestureDetector(
+                          ),
+                          GestureDetector(
+                            onTap: (){
+                              controller.animateTo(1);
+                            },
+                            child: Text(
+                              "My Posts (${posts.length})",
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ),
+                ];
+              },
+              body: TabBarView(
+                controller: controller,
+                children: [
+                  StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                      .collection("posts")
+                      .where("owner",whereIn: widget.user.following)
+                      .snapshots(),
+                    builder: (context, snapshot) {
+                      if(!snapshot.hasData){
+                        return const ProgressWidget();
+                      }
+                      if(snapshot.data!.docs.isEmpty){
+                        return const Center(child: Text("No post followers"));
+                      }
+                      List<Post> followingPost = snapshot.data!.docs.map((e) => Post.fromFirestore(data: e)).toList();
+                      return ListView.builder(
+                        itemCount: followingPost.length,
+                        itemBuilder: ((context, index) {
+                          Post ps = followingPost[index];
+                          return GestureDetector(
+                            onTap: (){},
+                            child: Container(
+                              margin: const EdgeInsets.all(8.0),
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                                color: Color.fromARGB(255, 211, 213, 216),
+                              ),
+                              child: StreamBuilder(
+                                stream: ps.owner.get().asStream(),
+                                builder: (context, ownerSnapshot) {
+                                  if(!ownerSnapshot.hasData){
+                                    return const ProgressWidget();
+                                  }
+                                  UserProfile owner = UserProfile.fromFirestore(data:  ownerSnapshot.data!);
+                                  return PostWidget(
+                                    post: ps, 
+                                    user: owner,
+                                    index: index,
+                                  );
+                                }
+                              )
+                            ),
+                            );
+                          }
+                        )
+                      );
+                    }
+                  ),
+                  ListView.builder(
+                    itemCount: posts.length,
+                    itemBuilder: ((context, index) {
+                      return GestureDetector(
                         onTap: (){},
                         child: Container(
                           margin: const EdgeInsets.all(8.0),
@@ -287,11 +353,12 @@ class _ProfileViewState extends State<ProfileView> {
                             index: index,
                           )
                         ),
-                      )
+                        );
+                      }
                     )
-                  )
-                ),
-              ],
+                  ),
+                ],
+              ),
             );
           }
         ),

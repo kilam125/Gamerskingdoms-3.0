@@ -37,99 +37,107 @@ class CommentLine extends StatelessWidget {
           );
         }
         UserProfile user = UserProfile.fromFirestore(data: userSnapshot.data!);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: (){
-                if(!nested){
-                  Navigator.of(context).pushNamed(
-                    ProfileView.routeName,
-                    arguments: {
-                      "user":user
-                    }
-                  );
-                } else {
-                  navigatorKey.currentState!.push(
-                    MaterialPageRoute(
-                      settings: const RouteSettings(
-                        name:ProfileViewStandalone.routeName,
-                      ),
-                      builder: (context) => ProfileViewStandalone(
-                        followerData : UserProfile.fromFirestore(data: userSnapshot.data!),
-                        recipientData : UserProfile.fromFirestore(data: postOwner!)
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          padding: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: const Color.fromARGB(255, 208, 208, 208),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: (){
+                  if(!nested){
+                    Navigator.of(context).pushNamed(
+                      ProfileView.routeName,
+                      arguments: {
+                        "user":user
+                      }
+                    );
+                  } else {
+                    navigatorKey.currentState!.push(
+                      MaterialPageRoute(
+                        settings: const RouteSettings(
+                          name:ProfileViewStandalone.routeName,
+                        ),
+                        builder: (context) => ProfileViewStandalone(
+                          followerData : UserProfile.fromFirestore(data: userSnapshot.data!),
+                          recipientData : UserProfile.fromFirestore(data: postOwner!)
+                        )
                       )
-                    )
-                  );
-                }
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Flexible(
-                    flex: 1,
-                    child: Row(
-                      children: [
-                        Flexible(
-                          flex: 4,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
-                            clipBehavior: Clip.antiAlias,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle
-                            ),
-                            child: user.picture == null ?
-                              ClipRRect(
+                    );
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Flexible(
+                            flex: 4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
+                              clipBehavior: Clip.antiAlias,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle
+                              ),
+                              child: user.picture == null ?
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(30),
+                                  child: Image.asset(
+                                    "assets/images/userpic.png", 
+                                    fit: BoxFit.fill,
+                                    height: 30,
+                                    width: 30,
+                                  ),
+                                )
+                                :ClipRRect(
                                 borderRadius: BorderRadius.circular(30),
-                                child: Image.asset(
-                                  "assets/images/userpic.png", 
+                                child: Image.network(
+                                  user.picture!,
                                   fit: BoxFit.fill,
                                   height: 30,
                                   width: 30,
                                 ),
-                              )
-                              :ClipRRect(
-                              borderRadius: BorderRadius.circular(30),
-                              child: Image.network(
-                                user.picture!,
-                                fit: BoxFit.fill,
-                                height: 30,
-                                width: 30,
                               ),
                             ),
                           ),
-                        ),
-                        Flexible(
-                          flex: 6,
-                          child: Text(
-                            user.displayName.capitalize(),
-                            style: Theme.of(context).textTheme.titleSmall,
+                          Flexible(
+                            flex: 6,
+                            child: Text(
+                              user.displayName.capitalize(),
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-/*                   Flexible(
-                    flex: 5,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right:16.0),
-                      child: Text(
-                        ""//DateFormat.yMMMMd().format(comment.date)
+                        ],
                       ),
                     ),
-                  ) */
-                ],
+        /*                   Flexible(
+                      flex: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right:16.0),
+                        child: Text(
+                          ""//DateFormat.yMMMMd().format(comment.date)
+                        ),
+                      ),
+                    ) */
+                  ],
+                ),
               ),
-            ),
-            if(comment.content!=null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(comment.content!),
-            ),
-            if(comment.attachmentType == AttachmentType.voice && comment.attachmentUrl != null)
-            VoiceNoteWidget(url: comment.attachmentUrl!)
-          ],
+              if(comment.content!=null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(comment.content!),
+              ),
+              if(comment.attachmentType == AttachmentType.voice && comment.attachmentUrl != null)
+              VoiceNoteWidget(url: comment.attachmentUrl!)
+            ],
+          ),
         );
       }
     );

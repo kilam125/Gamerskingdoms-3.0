@@ -85,13 +85,24 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        leading: (Provider.of<FilteredSkills>(context).getSkills.isNotEmpty && activeIndex == 0) ? 
-        IconButton(
-          onPressed: (){
-            Provider.of<FilteredSkills>(context, listen: false).resetSkills();
-          }, 
-          icon: const Icon(Icons.filter_alt_off)
-        ) : null,
+        leading: Row(
+          children: [
+            if(Provider.of<FilteredSkills>(context).getSkills.isNotEmpty && activeIndex == 0)
+            IconButton(
+              onPressed: (){
+                Provider.of<FilteredSkills>(context, listen: false).resetSkills();
+              }, 
+              icon: const Icon(Icons.filter_alt_off)
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 12.0),
+              child: Image.asset(
+                "assets/icon/main_logo_transparent.png",
+                width: 30,
+              ),
+            )
+          ],
+        ),
         title: Text(
           titleByIndex(activeIndex)
         ),

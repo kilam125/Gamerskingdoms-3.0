@@ -29,7 +29,7 @@ class PostWidget extends StatelessWidget {
       width: double.infinity,
       child: Image.network(
         url,
-        fit: BoxFit.fill,
+        fit: BoxFit.cover,
       ),
       
     );
@@ -42,6 +42,7 @@ class PostWidget extends StatelessWidget {
       child: VideoWidget(url: url),
     );
   }
+
   Widget attachementViewByType(AttachmentType? attachmentType, String? attachmentUrl){
     if(attachmentType == null || attachmentUrl == null){
       return Container();
@@ -55,6 +56,7 @@ class PostWidget extends StatelessWidget {
     }
     return Container();
   }
+  
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -135,7 +137,8 @@ class PostWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: GestureDetector(
             onTap: (){
-              navigatorKey.currentState!.pushNamed(
+              debugPrint("Tapped");
+              Navigator.of(context).pushNamed(
                 PageComments.routeName,
                 arguments: {
                   "index":index,

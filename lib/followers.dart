@@ -53,13 +53,6 @@ class _FollowersState extends State<Followers> {
               return StreamBuilder(
                 stream: (userProfile.followers![index] as DocumentReference).snapshots(),
                 builder: (context, snapshot) {
-                  if(userProfile.followers == null){
-                    return const SizedBox(
-                      height: 30,
-                      width: 30,
-                      child: ProgressWidget(),
-                    );
-                  }
                   if(!snapshot.hasData){
                     return const SizedBox(
                       height: 30,

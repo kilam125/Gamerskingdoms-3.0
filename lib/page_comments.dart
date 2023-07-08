@@ -113,7 +113,7 @@ class _PageCommentsState extends State<PageComments> {
                     ),
                   ),
                   const SliverToBoxAdapter(
-                    child: Divider(color: Colors.grey,),
+                    child: Divider(color: Color.fromARGB(255, 46, 46, 46),),
                   ),
                   SliverList(
                     delegate: SliverChildListDelegate(
