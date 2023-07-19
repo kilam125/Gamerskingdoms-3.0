@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/user.dart';
-import 'package:gamers_kingdom/profile_view.dart';
+import 'package:gamers_kingdom/own_profile_view.dart';
 
 class FollowerLine extends StatelessWidget {
   final UserProfile user;
@@ -17,7 +17,7 @@ class FollowerLine extends StatelessWidget {
     return ListTile(
       onTap: (){
         Navigator.of(context).pushNamed(
-          ProfileView.routeName,
+          OwnProfileView.routeName,
           arguments: {
             "user":user
           }

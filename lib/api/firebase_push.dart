@@ -9,7 +9,7 @@ import 'package:gamers_kingdom/models/comment.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/post_view_owner_standalone.dart';
-import 'package:gamers_kingdom/profile_view.dart';
+import 'package:gamers_kingdom/own_profile_view.dart';
 import 'package:gamers_kingdom/profile_view_standalone.dart';
 
   Future<void> showNotification(Map<String, dynamic> messageData, FlutterLocalNotificationsPlugin fl) async {
@@ -50,7 +50,7 @@ import 'package:gamers_kingdom/profile_view_standalone.dart';
     if(message != null){
       final String route = message.data["route"];
       debugPrint("Route : $route");
-      if(route == ProfileView.routeName){
+      if(route == OwnProfileView.routeName){
         DocumentSnapshot followerDoc = await FirebaseFirestore.instance.collection("users").doc(message.data["userId"]).get();
         DocumentSnapshot recipientDoc = await FirebaseFirestore.instance.collection("users").doc(message.data["recipientId"]).get();
         navigatorKey.currentState!.push(

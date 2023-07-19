@@ -21,12 +21,7 @@ class FollowersStandalone extends StatefulWidget {
 class _FollowersStandaloneState extends State<FollowersStandalone> {
   @override
   Widget build(BuildContext context) {
-    UserProfile userProfile = context.watch<UserProfile>();
-    if(userProfile.followers == null || userProfile.followers!.isEmpty) {
-      return const Center(
-        child: Text("You have no followers"),
-      );
-    }
+    UserProfile userProfile = context.read<UserProfile>();
     return Scaffold(
       appBar: AppBar(),
       body: Column(

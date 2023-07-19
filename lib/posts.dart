@@ -7,8 +7,9 @@ import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/filtered_skills.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/other_user_profile_view.dart';
 import 'package:gamers_kingdom/page_comments.dart';
-import 'package:gamers_kingdom/profile_view.dart';
+import 'package:gamers_kingdom/own_profile_view.dart';
 import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/audio_widget.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
@@ -174,7 +175,7 @@ class _PostsState extends State<Posts> {
                         child: GestureDetector(
                           onTap: (){
                             Navigator.of(context).pushNamed(
-                              ProfileView.routeName,
+                              OtherUserProfileView.routeName,
                               arguments: {
                                 "user":user,
                                 "ownUser":false

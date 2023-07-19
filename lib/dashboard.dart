@@ -12,9 +12,10 @@ import 'package:gamers_kingdom/models/filtered_skills.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/notifications_page.dart';
+import 'package:gamers_kingdom/other_user_profile_view.dart';
 import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/profile.dart';
-import 'package:gamers_kingdom/profile_view.dart';
+import 'package:gamers_kingdom/own_profile_view.dart';
 import 'package:gamers_kingdom/unknown_route.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
@@ -60,7 +61,7 @@ class _DashboardState extends State<Dashboard> {
     Map? mp = (ModalRoute.of(context)!.settings.arguments as Map?);
     if(mp != null && mp["route"] != null){
       navigatorKey.currentState!.pushNamed(
-        ProfileView.routeName,
+        OwnProfileView.routeName,
 /*         arguments: {
           "user":UserProfile.fromFirestore(data: doc)
         } */
@@ -115,17 +116,27 @@ class _DashboardState extends State<Dashboard> {
                     return MaterialPageRoute(builder: (context){
                       return Profile(user: user);
                     });
-                  }  else if(settings.name!.contains(ProfileView.routeName)){
+                  }  else if(settings.name!.contains(OwnProfileView.routeName)){
                     return MaterialPageRoute(
                       settings: const RouteSettings(
-                        name:ProfileView.routeName,
+                        name:OwnProfileView.routeName,
                       ),
-                      builder: (context) => ProfileView(
+                      builder: (context) => OwnProfileView(
                         user: (settings.arguments as Map)["user"],
                         ownUser: (settings.arguments as Map)["ownUser"] ?? false,
                       )
                     );
-                  } else if(settings.name!.contains(PageComments.routeName)){
+                  } else if(settings.name!.contains(OtherUserProfileView.routeName)){
+                    return MaterialPageRoute(
+                      settings: const RouteSettings(
+                        name:OtherUserProfileView.routeName,
+                      ),
+                      builder: (context) => OtherUserProfileView(
+                        user: (settings.arguments as Map)["user"],
+                      )
+                    );
+                  }
+                  else if(settings.name!.contains(PageComments.routeName)){
                     return MaterialPageRoute(
                       settings: RouteSettings(
                         name:PageComments.routeName,
@@ -314,7 +325,7 @@ class MySearchDelegate extends SearchDelegate {
                           child: GestureDetector(
                             onTap: (){
                               Navigator.of(context).pushNamed(
-                                ProfileView.routeName,
+                                OwnProfileView.routeName,
                                 arguments: {
                                   "user":user,
                                   "ownUser":false

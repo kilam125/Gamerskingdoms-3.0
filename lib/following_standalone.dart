@@ -22,11 +22,6 @@ class _FollowingStandaloneState extends State<FollowingStandalone> {
   @override
   Widget build(BuildContext context) {
     UserProfile userProfile = context.watch<UserProfile>();
-    if(userProfile.following == null || userProfile.following!.isEmpty) {
-      return const Center(
-        child: Text("You have no following"),
-      );
-    }
     return Scaffold(
       appBar: AppBar(),
       body: Column(

@@ -239,7 +239,10 @@ class _AddPostsState extends State<AddPosts> {
                             uploadVoiceNote = true;
                           });
                         } else {
-                          recorderController.record();
+                          recorderController.record(
+                            bitRate: 96000,
+                            sampleRate: 48000
+                          );
                           setState(() {
                             isPlaying = true;
                           });

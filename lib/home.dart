@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/posts.dart';
-import 'package:gamers_kingdom/profile_view.dart';
+import 'package:gamers_kingdom/own_profile_view.dart';
 import 'package:provider/provider.dart';
 import 'package:gamers_kingdom/filter.dart' as ft;
 
@@ -149,7 +149,7 @@ class _HomeState extends State<Home> {
             child: GestureDetector(
               onTap: (){
                 Navigator.of(context).pushNamed(
-                  ProfileView.routeName,
+                  OwnProfileView.routeName,
                   arguments: {
                     "user":user,
                     "ownUser":true

@@ -5,7 +5,7 @@ import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/user.dart';
-import 'package:gamers_kingdom/profile_view.dart';
+import 'package:gamers_kingdom/own_profile_view.dart';
 import 'package:gamers_kingdom/profile_view_standalone.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
@@ -51,7 +51,7 @@ class CommentLine extends StatelessWidget {
                 onTap: (){
                   if(!nested){
                     Navigator.of(context).pushNamed(
-                      ProfileView.routeName,
+                      OwnProfileView.routeName,
                       arguments: {
                         "user":user
                       }

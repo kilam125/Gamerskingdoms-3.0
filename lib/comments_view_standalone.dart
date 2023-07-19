@@ -161,7 +161,10 @@ class _PageCommentsStandaloneState extends State<PageCommentsStandalone> {
                                 isPlaying = false;
                               });
                             } else {
-                              recorderController.record();
+                              recorderController.record(
+                                bitRate: 96000,
+                                sampleRate: 48000
+                              );
                               setState(() {
                                 isPlaying = true;
                               });
@@ -300,7 +303,10 @@ class _PageCommentsStandaloneState extends State<PageCommentsStandalone> {
                                     isPlaying = true;
                                     audioRecorded = true;
                                   });
-                                  await recorderController.record();
+                                  await recorderController.record(
+                                    bitRate: 96000,
+                                    sampleRate: 48000
+                                  );
                                 },
                                 onLongPressEnd: (details) async {
                                   await recorderController.pause();
