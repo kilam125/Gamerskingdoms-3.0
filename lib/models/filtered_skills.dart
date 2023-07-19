@@ -6,8 +6,8 @@ class FilteredSkills extends ChangeNotifier {
 
   List<Skills> get getSkills => selectedSkills;
 
-  void addSkillsToList(List<Skills> item) {
-    selectedSkills.addAll(item);
+  void addSkillsToList(List<Skills> items) {
+    selectedSkills = items;
     debugPrint(selectedSkills.toString());
     notifyListeners();
   }

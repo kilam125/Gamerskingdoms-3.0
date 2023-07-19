@@ -274,10 +274,12 @@ class _PageCommentsState extends State<PageComments> {
                               String? path = await recorderController.stop();
                               if(path != null){
                                 File audioFile = File(path);
+                                // ignore: use_build_context_synchronously
                                 String pathToUpload = "${context.read<UserProfile>().email}_audio_recorded_${date.day}${date.minute}${date.year}${date.minute}${date.second}";
                                 String downloadUrl = await Util.uploadFileToFirebaseStorage(pathToUpload, audioFile);
                                 await post.addComment(
                                   Comment(
+                                    // ignore: use_build_context_synchronously
                                     commentator: context.read<UserProfile>().userRef, 
                                     post: post.postRef, 
                                     attachmentPresent: false, 
@@ -307,6 +309,7 @@ class _PageCommentsState extends State<PageComments> {
                                   )
                                 );
                                 textController.clear();
+                                setState(() {});
                                 scrollController.jumpTo(scrollController.position.maxScrollExtent*2);
                               }
                             }

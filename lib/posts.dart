@@ -9,7 +9,6 @@ import 'package:gamers_kingdom/models/filtered_skills.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/other_user_profile_view.dart';
 import 'package:gamers_kingdom/page_comments.dart';
-import 'package:gamers_kingdom/own_profile_view.dart';
 import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/audio_widget.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
@@ -94,18 +93,28 @@ class _PostsState extends State<Posts> {
   Widget build(BuildContext context) {
     UserProfile using = context.watch<UserProfile>();
     FilteredSkills filter = Provider.of<FilteredSkills>(context);
-    debugPrint("Filtered skills : ${filter.getSkills}");
-    List<Post> posts = filter.getSkills.isEmpty ? 
+    debugPrint("Filsstered skills : ${filter.getSkills}");
+    List<Post> posts;
+    if(filter.getSkills.isEmpty){
+      posts = context.watch<List<Post>>();
+    } else {
+      posts = context.watch<List<Post>>().where((post) {
+        debugPrint("Post skill : ${post.skills}");
+        List<String> ff = filter.getSkills.map((e) => Util.skillsToString(e)).toList();
+        debugPrint("String skill : $ff");
+        bool retour = post.skills.any((elem) {
+          debugPrint("Elem : $elem");
+          debugPrint("ff : $ff");
+          return ff.contains(elem);
+        });
+        debugPrint("Retour : $retour");
+        return retour;
+      }).toList();
+    }
+/*     List<Post> posts = filter.getSkills.isEmpty ? 
         context.watch<List<Post>>():
-        context.watch<List<Post>>().where(
-          (element) {
-            return element.skills.any((element) {
-                return filter.getSkills.contains(Util.stringToSkills(element));
-              }
-            );
-          }
-        
-        ).toList();
+        context.watch<List<Post>>().where((post) => post.skills.every((element) => filter.getSkills.contains(element))).toList(); */
+
     if(posts.isEmpty){
       return const Center(child: Text("No Post found"),);
     }

@@ -106,7 +106,6 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                         isLoading = true;
                       });
                       try{
-                        User? user;
                         UserCredential? userC;
                         if(FirebaseAuth.instance.currentUser == null){
                           debugPrint("Creating user");
@@ -114,8 +113,6 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                             email: emailController.text, 
                             password: passwordController.text,
                           );
-                        } else {
-                          user = FirebaseAuth.instance.currentUser;
                         }
                         AggregateQuerySnapshot aq = await fbf.collection("users")
                           .where("displayName",isEqualTo: pseudoController.text.toLowerCase().trim())

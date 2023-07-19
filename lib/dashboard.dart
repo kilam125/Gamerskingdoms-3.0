@@ -96,6 +96,10 @@ class _DashboardState extends State<Dashboard> {
                 value:Post.streamAllPosts(),
                 updateShouldNotify:(oldList,currentList) => (currentList!=oldList),
                 initialData: const [],
+                catchError: (context, error){
+                  debugPrint("Logout");
+                  return const [];
+                },
               ),
               ChangeNotifierProvider(
                 create: (_) => FilteredSkills(),

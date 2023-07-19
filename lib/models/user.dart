@@ -26,14 +26,14 @@ class UserProfile extends ChangeNotifier {
   get getPicture => picture;
 
  set setPicture(picture) {
-   picture = picture;
+   this.picture = picture;
    notifyListeners();
  }
 
   get getDisplayName => displayName;
 
  set setDisplayName(displayName) {
-    displayName = displayName;
+    this.displayName = displayName;
     notifyListeners();
  }
 
@@ -55,7 +55,7 @@ class UserProfile extends ChangeNotifier {
 
   get getBio => bio;
 
- set setBio( bio) => bio = bio;
+ set setBio( bio) => this.bio = bio;
 
   get getEmail => email;
 

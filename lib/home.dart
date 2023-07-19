@@ -85,6 +85,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        leadingWidth: 100,
         leading: Row(
           children: [
             if(Provider.of<FilteredSkills>(context).getSkills.isNotEmpty && activeIndex == 0)
@@ -92,7 +93,9 @@ class _HomeState extends State<Home> {
               onPressed: (){
                 Provider.of<FilteredSkills>(context, listen: false).resetSkills();
               }, 
-              icon: const Icon(Icons.filter_alt_off)
+              icon: const Icon(
+                Icons.filter_alt_off,
+              )
             ),
             Padding(
               padding: const EdgeInsets.only(left: 12.0),
@@ -139,6 +142,7 @@ class _HomeState extends State<Home> {
               ),
               onPressed: () async {
                 List<Skills> skills = (await Navigator.of(context).pushNamed(ft.Filter.routeName)) as List<Skills>;
+                debugPrint("Skills : $skills");
                 // ignore: use_build_context_synchronously
                 Provider.of<FilteredSkills>(context, listen: false).addSkillsToList(skills);
               },

@@ -7,7 +7,6 @@ import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/firebase_options.dart';
 import 'package:gamers_kingdom/login_page.dart';
 import 'package:gamers_kingdom/sign_up.dart';
-import 'package:gamers_kingdom/unknown_route.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
@@ -52,6 +51,10 @@ class _MyAppState extends State<MyApp> {
         }
       } else {
         debugPrint("Not Authenticated");
+        navigatorKey.currentState!.pushReplacementNamed(
+          HomePage.routeName,
+          arguments: {}
+        );
       }
     });
   }
@@ -75,6 +78,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Gamers Kingdoms',
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
       theme: ThemeData(
         primarySwatch: blackSwatch,
         primaryColor: const Color.fromARGB(255, 0, 0, 0),
@@ -238,15 +242,10 @@ class _MyAppState extends State<MyApp> {
       initialRoute:FirebaseAuth.instance.currentUser == null ? HomePage.routeName : Dashboard.routeName,
       onUnknownRoute: (settings) => MaterialPageRoute(
         settings: RouteSettings(
-          name:UnknownRoute.routeName,
+          name:HomePage.routeName,
         ),
-        builder: (context) => const UnknownRoute()
+        builder: (context) => const HomePage()
       ),
-/*       home: Scaffold(
-        key: const Key("Home Scaffold"),
-        backgroundColor: Colors.white,
-        body: PlatformCircularProgressIndicator(),
-      ), */
       onGenerateRoute: (settings){
         debugPrint("Name : ${settings.name}");
         if(settings.name!.contains(SignUp.routeName)){
@@ -266,15 +265,15 @@ class _MyAppState extends State<MyApp> {
               email: FirebaseAuth.instance.currentUser!.email!,
             )
           );
-        } else if(settings.name!.contains(HomePage.routeName)){
+        }/*  else {
           return MaterialPageRoute(
             settings: RouteSettings(
               name:HomePage.routeName,
             ),
             builder: (context) => const HomePage()
           );
-        }
-        if(FirebaseAuth.instance.currentUser == null) {
+        } */
+/*         if(FirebaseAuth.instance.currentUser == null) {
           return MaterialPageRoute(
             settings: RouteSettings(
               name:HomePage.routeName,
@@ -291,7 +290,7 @@ class _MyAppState extends State<MyApp> {
               email: FirebaseAuth.instance.currentUser!.email!,
             )
           );
-        }
+        } */
       },
     );
   }

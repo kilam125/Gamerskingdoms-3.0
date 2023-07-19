@@ -203,12 +203,12 @@ class _ProfileState extends State<Profile> {
                     user.bio = bio.text;
                     user.skills = selectedSkills;
                     await user.setUser(
-                      displayName: displayName.text, 
+                      displayName: user.displayName,
                       skills: selectedSkills, 
                       picture: user.picture == null ? 
                         null
                         : user.picture!, 
-                      bio: bio.text
+                      bio: user.bio!
                     );
                     if(!mounted)return;
                     Navigator.of(context).pop();

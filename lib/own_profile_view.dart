@@ -54,6 +54,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
   
   @override
   Widget build(BuildContext context) {
+    UserProfile user = context.watch<UserProfile>();
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -65,7 +66,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                 rootNavigator: false
               ).push(
                 MaterialPageRoute(builder: (context){
-                  return Profile(user: widget.user);
+                  return Profile(user: user);
                 })
               );
             }, 
@@ -77,7 +78,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
         padding: const EdgeInsets.only(top:16.0, left: 8, right: 8.0),
         child: StreamBuilder(
           stream: FirebaseFirestore.instance.collection("posts")
-            .where("owner", isEqualTo: widget.user.userRef)
+            .where("owner", isEqualTo: user.userRef)
             //.orderBy("datePost", descending: true)
             .snapshots(),
           builder: (context, snapshot) {
@@ -90,14 +91,14 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                 return [
                   SliverToBoxAdapter(
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
                             clipBehavior: Clip.antiAlias,
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle
                             ),
-                            child: widget.user.picture == null ?
+                            child: user.picture == null ?
                               Image.asset(
                                 "assets/images/userpic.png", 
                                 fit: BoxFit.fill,
@@ -105,7 +106,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                                 width: 50,
                               )
                             :Image.network(
-                              widget.user.picture!,
+                              user.picture!,
                               fit: BoxFit.fill,
                               height: 50,
                               width: 50,
@@ -113,20 +114,14 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  widget.user.displayName.capitalize(),
-                                  style: GoogleFonts.lalezar(
-                                    fontSize:16,
-                                    fontWeight:FontWeight.w400,
-                                    color: Theme.of(context).primaryColor,
-                                    letterSpacing: 1
-                                  )
-                                ),
-                              ],
+                            child: Text(
+                              user.displayName.capitalize(),
+                              style: GoogleFonts.lalezar(
+                                fontSize:16,
+                                fontWeight:FontWeight.w400,
+                                color: Theme.of(context).primaryColor,
+                                letterSpacing: 1
+                              )
                             ),
                           ),
                         ],
@@ -139,7 +134,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            widget.user.bio!,
+                            user.bio!,
                             style: const TextStyle(
                               fontSize: 16
                             ),
@@ -171,7 +166,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                                   padding: const EdgeInsets.symmetric(horizontal :8.0),
                                   child: Column(
                                     children: [
-                                      Text(widget.user.followers!.length.toString()),
+                                      Text(user.followers!.length.toString()),
                                       Text(
                                         "Followers",
                                         style: Theme.of(context).textTheme.titleSmall,
@@ -193,7 +188,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                                 },
                                 child: Column(
                                   children: [
-                                    Text(widget.user.following!.length.toString()),
+                                    Text(user.following!.length.toString()),
                                     Text(
                                       "Following",
                                       style: Theme.of(context).textTheme.titleSmall,
@@ -210,25 +205,25 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                   SliverToBoxAdapter(
                     child: Wrap(
                       children: List.generate(
-                        widget.user.skills.length, 
+                        user.skills.length, 
                         (index) => Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Chip(
-                            label: Text(Util.skillsToString(widget.user.skills[index])),
+                            label: Text(Util.skillsToString(user.skills[index])),
                           ),
                         )
                       ),
                     ),
                   ),
-                  if(!(context.read<UserProfile>().userRef == widget.user.userRef))
+                  if(!(context.read<UserProfile>().userRef == user.userRef))
                   SliverToBoxAdapter(
-                    child:(widget.user.followers!.contains(context.read<UserProfile>().userRef))?
+                    child:(user.followers!.contains(context.read<UserProfile>().userRef))?
                     GestureDetector(
                       onTap: () async {
                         if(!mounted)return;
-                        widget.user.removeFollower(context.read<UserProfile>().userRef);
+                        user.removeFollower(context.read<UserProfile>().userRef);
                         if(!mounted)return;
-                        context.read<UserProfile>().removeFollowing(widget.user.userRef);
+                        context.read<UserProfile>().removeFollowing(user.userRef);
                       },
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -244,11 +239,11 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                     ElevatedButton(
                       child: const Text("Follow"),
                       onPressed: () async {
-                        await UserProfile.createFriendRequest(requester: context.read<UserProfile>().userRef, target: widget.user.userRef);
+                        await UserProfile.createFriendRequest(requester: context.read<UserProfile>().userRef, target: user.userRef);
                         if(!mounted)return;
-                        widget.user.addFollower(context.read<UserProfile>().userRef);
+                        user.addFollower(context.read<UserProfile>().userRef);
                         if(!mounted)return;
-                        context.read<UserProfile>().addFollowing(widget.user.userRef);
+                        context.read<UserProfile>().addFollowing(user.userRef);
                       },
                     )
                   ),
@@ -293,7 +288,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                   StreamBuilder(
                     stream: FirebaseFirestore.instance
                       .collection("posts")
-                      .where("owner", arrayContains: widget.user.following)
+                      .where("owner", arrayContains: user.following)
                       .snapshots(),
                     builder: (context, snapshot) {
                       if(!snapshot.hasData){
@@ -349,7 +344,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                           ),
                           child: PostWidget(
                             post: posts[index], 
-                            user: widget.user,
+                            user: user,
                             index: index,
                           )
                         ),
