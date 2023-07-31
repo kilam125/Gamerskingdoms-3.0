@@ -157,7 +157,7 @@ class _AddPostsState extends State<AddPosts> {
                       final ImagePicker picker = ImagePicker();
                       var result = await picker.pickVideo(
                         source: ImageSource.gallery,
-                        maxDuration: const Duration(minutes: 9)
+                        maxDuration: const Duration(minutes: 1, seconds: 30)
                       );
                       var compressResult = await VideoCompress.compressVideo(
                         result!.path,

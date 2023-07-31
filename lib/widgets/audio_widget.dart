@@ -131,7 +131,7 @@ class _AudioWidgetState extends State<AudioWidget> {
                               max: dt.inSeconds.toDouble(),
                               value: ps.inSeconds.toDouble(),
                               activeColor: const Color.fromARGB(255, 48, 123, 52),
-                              inactiveColor: const Color.fromARGB(255, 40, 57, 41),
+                              inactiveColor: const Color.fromARGB(255, 76, 107, 78),
                               onChanged: (value) async {
                                 //player.setClip(start:Duration(seconds: value.toInt()), end: Duration(seconds: dt.inSeconds.toInt()));
                               },

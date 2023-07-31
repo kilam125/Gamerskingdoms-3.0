@@ -5,6 +5,7 @@ import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/posts.dart';
 import 'package:gamers_kingdom/own_profile_view.dart';
+import 'package:gamers_kingdom/profile_by_skills.dart';
 import 'package:provider/provider.dart';
 import 'package:gamers_kingdom/filter.dart' as ft;
 
@@ -144,7 +145,13 @@ class _HomeState extends State<Home> {
                 List<Skills> skills = (await Navigator.of(context).pushNamed(ft.Filter.routeName)) as List<Skills>;
                 debugPrint("Skills : $skills");
                 // ignore: use_build_context_synchronously
-                Provider.of<FilteredSkills>(context, listen: false).addSkillsToList(skills);
+                //Provider.of<FilteredSkills>(context, listen: false).addSkillsToList(skills);
+                // ignore: use_build_context_synchronously
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => ProfileBySkills(skills: skills),
+                  ),
+                );
               },
             ),
           ),

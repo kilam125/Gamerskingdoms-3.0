@@ -87,7 +87,7 @@ class _MyAppState extends State<MyApp> {
           iconTheme: const IconThemeData(color: Colors.black),
           actionsIconTheme: const IconThemeData(color: Colors.black),
           titleTextStyle: GoogleFonts.lalezar(
-              fontSize:30,
+              fontSize:28,
               fontWeight:FontWeight.w400,
               color: Colors.black,
               letterSpacing: 1

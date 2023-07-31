@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
+import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/util/util.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
@@ -30,7 +31,7 @@ class _FilterState extends State<Filter> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Search posts by skills"),
+        title: const Text("Search profile by skills"),
       ),
       body: ListView(
         children: [
@@ -58,7 +59,15 @@ class _FilterState extends State<Filter> {
             padding: const EdgeInsets.only(top: 20.0, left: 100, right: 100),
             child: ElevatedButton(
               onPressed: () async {
-                Navigator.of(context).pop(selectedSkills);
+                if(skills.isNotEmpty){
+                  Navigator.of(context).pop(selectedSkills);
+                } else {
+                  PopUp.okPopUp(
+                    context: context, 
+                    title: "Wait !", 
+                    message: "You need to select at least one skills"
+                  );
+                }
               }, 
               child: const Text("Search")
             ),
