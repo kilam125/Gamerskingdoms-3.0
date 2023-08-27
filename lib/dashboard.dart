@@ -146,7 +146,7 @@ class _DashboardState extends State<Dashboard> {
                         name:PageComments.routeName,
                       ),
                       builder: (context) => PageComments(
-                        index: (settings.arguments as Map)["index"],
+                        postRef: (settings.arguments as Map)["postRef"],
                         userProfile: (settings.arguments as Map)["userProfile"],
                       )
                     );
@@ -374,7 +374,8 @@ class MySearchDelegate extends SearchDelegate {
                               PageComments.routeName,
                               arguments: {
                                 "index":index,
-                                "userProfile":user
+                                "userProfile":user,
+                                "postRef":post.postRef,
                               }
                             );
                           }, 
@@ -403,6 +404,7 @@ class MySearchDelegate extends SearchDelegate {
                           Navigator.of(context).pushNamed(
                             PageComments.routeName,
                             arguments: {
+                              "postRef":post.postRef,
                               "index":index,
                               "userProfile":user
                             }

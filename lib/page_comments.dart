@@ -16,10 +16,10 @@ import 'package:provider/provider.dart';
 
 class PageComments extends StatefulWidget {
   final UserProfile userProfile;
-  final int index;
+  final DocumentReference postRef;
   const PageComments({
-    required this.index,
     required this.userProfile,
+    required this.postRef,
     super.key
   });
   static String routeName = "/PageComments";
@@ -43,7 +43,7 @@ class _PageCommentsState extends State<PageComments> {
 
   @override
   Widget build(BuildContext context) {
-    Post post = context.read<List<Post>>()[widget.index];
+    Post post = context.read<List<Post>>().firstWhere((post) =>(post.postRef == widget.postRef));
     return Scaffold(
       appBar: AppBar(
         title: const Text("Comments"),

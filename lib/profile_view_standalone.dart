@@ -257,9 +257,9 @@ class _ProfileViewStandaloneState extends State<ProfileViewStandalone> {
                             color: Color.fromARGB(255, 211, 213, 216),
                           ),
                           child: PostWidget(
+                            latest: index == posts.length-1,
                             post: posts[index], 
                             user: widget.followerData,
-                            index: index,
                           )
                         ),
                       )

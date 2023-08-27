@@ -228,6 +228,7 @@ class _PostsState extends State<Posts> {
                             context, 
                             PageComments.routeName,
                             arguments: {
+                              "postRef":post.postRef,
                               "index":index,
                               "userProfile":user
                             }
@@ -265,6 +266,7 @@ class _PostsState extends State<Posts> {
                         Navigator.of(context).pushNamed(
                           PageComments.routeName,
                           arguments: {
+                            "postRef":post.postRef,
                             "index":index,
                             "userProfile":user
                           }

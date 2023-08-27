@@ -115,8 +115,8 @@ class _OtherUserProfileViewState extends State<OtherUserProfileView> with Ticker
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
                         children: [
                           Text(
                             widget.user.bio!,
@@ -224,6 +224,7 @@ class _OtherUserProfileViewState extends State<OtherUserProfileView> with Ticker
                     ElevatedButton(
                       child: const Text("Follow"),
                       onPressed: () async {
+                        debugPrint("Tapped");
                         await UserProfile.createFriendRequest(requester: context.read<UserProfile>().userRef, target: widget.user.userRef);
                         if(!mounted)return;
                         widget.user.addFollower(context.read<UserProfile>().userRef);
@@ -263,21 +264,18 @@ class _OtherUserProfileViewState extends State<OtherUserProfileView> with Ticker
                   ListView.builder(
                     itemCount: posts.length,
                     itemBuilder: ((context, index) {
-                      return GestureDetector(
-                        onTap: (){},
-                        child: Container(
-                          margin: const EdgeInsets.all(8.0),
-                          decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                            color: Color.fromARGB(255, 211, 213, 216),
-                          ),
-                          child: PostWidget(
-                            post: posts[index], 
-                            user: widget.user,
-                            index: index,
-                          )
+                      return Container(
+                        margin: const EdgeInsets.all(8.0),
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                          color: Color.fromARGB(255, 211, 213, 216),
                         ),
-                        );
+                        child: PostWidget(
+                          latest: index == posts.length-1,
+                          post: posts[index], 
+                          user: widget.user,
+                        )
+                      );
                       }
                     )
                   ),

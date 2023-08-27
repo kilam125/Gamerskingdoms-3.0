@@ -425,6 +425,28 @@ class _AddPostsState extends State<AddPosts> {
                         "skills":user.skills.map((e) => Util.skillsToString(e)).toList()
                       });
                     }
+                    } else {
+                      if(content.text.isEmpty){
+                        await PopUp.okPopUp(
+                          context: context, 
+                          title: "Wait", 
+                          message: "You can't post an empty message"
+                        );
+                      } else {
+                        await FirebaseFirestore.instance.collection("posts").add({
+                          "userName":user.displayName,
+                          "attachmentType":null,
+                          "attachmentUrl":null,
+                          "comments":[],
+                          "content":content.text,
+                          "datePost":DateTime.now(),
+                          "likers":[],
+                          "likes":0,
+                          "owner":user.userRef,
+                          "skills":user.skills.map((e) => Util.skillsToString(e)).toList()
+                        });
+                        debugPrint("Done");
+                      }
                     }
                     setState(() {
                       isLoading = false;

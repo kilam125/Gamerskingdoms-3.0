@@ -302,30 +302,27 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                         itemCount: followingPost.length,
                         itemBuilder: ((context, index) {
                           Post ps = followingPost[index];
-                          return GestureDetector(
-                            onTap: (){},
-                            child: Container(
-                              margin: const EdgeInsets.all(8.0),
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                                color: Color.fromARGB(255, 211, 213, 216),
-                              ),
-                              child: StreamBuilder(
-                                stream: ps.owner.get().asStream(),
-                                builder: (context, ownerSnapshot) {
-                                  if(!ownerSnapshot.hasData){
-                                    return const ProgressWidget();
-                                  }
-                                  UserProfile owner = UserProfile.fromFirestore(data:  ownerSnapshot.data!);
-                                  return PostWidget(
-                                    post: ps, 
-                                    user: owner,
-                                    index: index,
-                                  );
-                                }
-                              )
+                          return Container(
+                            margin: const EdgeInsets.all(8.0),
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                              color: Color.fromARGB(255, 211, 213, 216),
                             ),
-                            );
+                            child: StreamBuilder(
+                              stream: ps.owner.get().asStream(),
+                              builder: (context, ownerSnapshot) {
+                                if(!ownerSnapshot.hasData){
+                                  return const ProgressWidget();
+                                }
+                                UserProfile owner = UserProfile.fromFirestore(data:  ownerSnapshot.data!);
+                                return PostWidget(
+                                  latest: index == followingPost.length-1,
+                                  post: ps, 
+                                  user: owner,
+                                );
+                              }
+                            )
+                          );
                           }
                         )
                       );
@@ -343,9 +340,9 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                             color: Color.fromARGB(255, 211, 213, 216),
                           ),
                           child: PostWidget(
-                            post: posts[index], 
+                            latest: index == 0,
+                            post: posts[posts.length-index-1], 
                             user: user,
-                            index: index,
                           )
                         ),
                         );

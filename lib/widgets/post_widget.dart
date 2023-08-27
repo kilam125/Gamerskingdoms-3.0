@@ -13,13 +13,12 @@ import 'package:google_fonts/google_fonts.dart';
 class PostWidget extends StatelessWidget {
   final Post post;
   final UserProfile user;
-  final int index;
-
+  final bool latest;
   const PostWidget({
     super.key,
     required this.post,
     required this.user,
-    required this.index,
+    required this.latest
   });
 
   static Widget getPictureWidget(String url){
@@ -33,7 +32,7 @@ class PostWidget extends StatelessWidget {
       
     );
   }
-  
+
   Widget getVideoWidget(String url) {
     return SizedBox(
       height: 300,
@@ -55,7 +54,7 @@ class PostWidget extends StatelessWidget {
     }
     return Container();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -101,7 +100,7 @@ class PostWidget extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const Spacer(),
-                  if(index==0)
+                  if(latest)
                   const Padding(
                     padding: EdgeInsets.only(right: 8.0),
                     child: Chip(
@@ -140,8 +139,8 @@ class PostWidget extends StatelessWidget {
               Navigator.of(context).pushNamed(
                 PageComments.routeName,
                 arguments: {
-                  "index":index,
-                  "userProfile":user
+                  "userProfile":user,
+                  "postRef":post.postRef
                 }
               );
             },
