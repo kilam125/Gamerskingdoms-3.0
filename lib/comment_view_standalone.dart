@@ -154,6 +154,7 @@ class _CommentViewStandaloneState extends State<CommentViewStandalone> {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
+                if(widget.post.content != null)
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: ExpandableText(
@@ -170,11 +171,6 @@ class _CommentViewStandaloneState extends State<CommentViewStandalone> {
                   comment: widget.comment,
                   nested: true,
                   postOwner: ownerSnapshot.data!
-                ),
-                if(widget.comment.content!=null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(widget.comment.content!),
                 ),
                 if(widget.comment.attachmentType == AttachmentType.voice && widget.comment.attachmentUrl != null)
                 VoiceNoteWidget(url: widget.comment.attachmentUrl!),

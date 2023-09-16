@@ -451,13 +451,15 @@ class _AddPostsState extends State<AddPosts> {
                     setState(() {
                       isLoading = false;
                     });
-                    if(!mounted)return;
-                    await PopUp.okPopUp(
-                      context: context, 
-                      title: "Done", 
-                      message: "You've posted successfully"
-                    );
-                    widget.navCallback(0);
+                    if((uploadImages || uploadVideo || uploadVoiceNote || uploadAudioFile || content.text.isNotEmpty)){
+                      if(!mounted)return;
+                      await PopUp.okPopUp(
+                        context: context, 
+                        title: "Done", 
+                        message: "You've posted successfully"
+                      );
+                      widget.navCallback(0);
+                    }
                   },
                   child: const Text("Post")
                 ),

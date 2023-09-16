@@ -11,7 +11,6 @@
         android:label="Gamers Kindoms"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
-        android:largeHeap="true"
         android:hardwareAccelerated="false"
     >
         <activity

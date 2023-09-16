@@ -86,6 +86,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
               return const Center(child: ProgressWidget());
             }
             List<Post> posts = snapshot.data!.docs.map((e) => Post.fromFirestore(data: e)).toList();
+            posts.sort((a, b) => a.datePost.isAfter(b.datePost) ? 1 : -1);
             return NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) {
                 return [
@@ -262,7 +263,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                               controller.animateTo(0);
                             },
                             child: Text(
-                              "Followers Posts",
+                              "Following Posts",
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
                           ),
@@ -288,14 +289,15 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                   StreamBuilder(
                     stream: FirebaseFirestore.instance
                       .collection("posts")
-                      .where("owner", arrayContains: user.following)
+                      .where("owner", whereIn: user.following)
                       .snapshots(),
                     builder: (context, snapshot) {
+                      debugPrint("User following : "+user.following.toString());
                       if(!snapshot.hasData){
                         return const ProgressWidget();
                       }
                       if(snapshot.data!.docs.isEmpty){
-                        return const Center(child: Text("No post followers"));
+                        return const Center(child: Text("No post from following"));
                       }
                       List<Post> followingPost = snapshot.data!.docs.map((e) => Post.fromFirestore(data: e)).toList();
                       return ListView.builder(
