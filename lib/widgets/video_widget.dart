@@ -20,7 +20,6 @@ class _VideoWidgetState extends State<VideoWidget> {
   @override
   void initState() {
     super.initState();
-    debugPrint("URL : ${widget.url}");
     controller = VideoPlayerController.network(widget.url);
     _initializeVideoPlayerFuture = controller.initialize();
     controller.setLooping(true);
@@ -30,7 +29,6 @@ class _VideoWidgetState extends State<VideoWidget> {
   void dispose(){
     super.dispose();
     controller.dispose();
-    debugPrint("disposing video widget");
   }
   
   @override

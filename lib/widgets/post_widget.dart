@@ -4,11 +4,13 @@ import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/other_user_profile_view.dart';
 import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
 import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class PostWidget extends StatelessWidget {
   final Post post;
@@ -57,6 +59,7 @@ class PostWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    UserProfile using = context.watch<UserProfile>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -67,47 +70,57 @@ class PostWidget extends StatelessWidget {
               return const ProgressWidget();
             } else {
               UserProfile user = UserProfile.fromFirestore(data:  ownerSnapshot.data!);
-              return Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle
-                    ),
-                    child: user.picture == null ?
-                      ClipRRect(
+              return GestureDetector(
+                onTap: (){
+                  Navigator.of(context).pushNamed(
+                    OtherUserProfileView.routeName,
+                    arguments: {
+                      "user":user
+                    }
+                  );
+                },
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
+                      clipBehavior: Clip.antiAlias,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle
+                      ),
+                      child: user.picture == null ?
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: Image.asset(
+                            "assets/images/userpic.png", 
+                            fit: BoxFit.fill,
+                            height: 30,
+                            width: 30,
+                          ),
+                        )
+                      :ClipRRect(
                         borderRadius: BorderRadius.circular(30),
-                        child: Image.asset(
-                          "assets/images/userpic.png", 
+                        child: Image.network(
+                          user.picture!,
                           fit: BoxFit.fill,
                           height: 30,
                           width: 30,
                         ),
-                      )
-                    :ClipRRect(
-                      borderRadius: BorderRadius.circular(30),
-                      child: Image.network(
-                        user.picture!,
-                        fit: BoxFit.fill,
-                        height: 30,
-                        width: 30,
                       ),
                     ),
-                  ),
-                  Text(
-                    user.displayName.capitalize(),
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const Spacer(),
-                  if(latest)
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8.0),
-                    child: Chip(
-                      label: Text("Latest"),
+                    Text(
+                      user.displayName.capitalize(),
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
-                  )
-                ],
+                    const Spacer(),
+                    if(latest)
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8.0),
+                      child: Chip(
+                        label: Text("Latest"),
+                      ),
+                    )
+                  ],
+                ),
               );
             }
           },
@@ -131,6 +144,24 @@ class PostWidget extends StatelessWidget {
           ),
         ),
         attachementViewByType(post.attachmentType, post.attachmentUrl),
+        Row(
+          children: [
+            IconButton(
+              onPressed: () async { 
+                if(!post.likers.contains(using.userRef)){
+                  await post.addLike(using.userRef);
+                } else {
+                  await post.removeLike(using.userRef);
+                }
+              }, 
+              icon: Icon(
+                post.likers.contains(using.userRef) ? Icons.star : Icons.star_border,
+                color: post.likers.contains(using.userRef) ? const Color.fromARGB(255, 216, 174, 84) : Colors.black,
+                size: 30,
+              )
+            ),
+          ],
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: GestureDetector(

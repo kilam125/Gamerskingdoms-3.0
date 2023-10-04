@@ -131,6 +131,7 @@ class _AddPostsState extends State<AddPosts> {
                       if(result != null){
                         setState(() {
                           uploadImages = true;
+                          uploadVideo = false;
                           isAttachmentSend = true;
                           listXFileImages = [];
                           listImages = [];
@@ -165,6 +166,7 @@ class _AddPostsState extends State<AddPosts> {
                       );
                       if(compressResult != null){
                         setState(() {
+                          uploadImages = false;
                           uploadVideo = true;
                           isAttachmentSend = true;
                           videoFile = XFile(compressResult.path!);
@@ -293,12 +295,27 @@ class _AddPostsState extends State<AddPosts> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [...listImages]
               ),
-              if(uploadVideo || uploadAudioFile)
-              Container(
+              if((uploadVideo || uploadAudioFile) && !(isLoading))
+              const SizedBox(
                 height: 100,
-                width: 100,
-                color: Colors.black,
-                child: const Icon(Icons.check, color: Colors.white,),
+                width: 150,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '\u2705',
+                      style: TextStyle(
+                        fontSize: 30
+                      ),
+                    ),
+                    Text(
+                      "Attachment choosed",
+                      style: TextStyle(
+                        color: Colors.black
+                      ),
+                    )
+                  ],
+                ),
               ),
               isLoading ?
               const ProgressWidget()

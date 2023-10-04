@@ -52,7 +52,11 @@ class _PostsState extends State<Posts> {
   void initState() {
     super.initState();
   }
-
+  @override
+  void dispose(){
+    debugPrint("Dispose");
+    super.dispose();
+  }
   Widget getPictureWidget(String url){
     return Container(
       constraints: const BoxConstraints(
@@ -93,36 +97,26 @@ class _PostsState extends State<Posts> {
   Widget build(BuildContext context) {
     UserProfile using = context.watch<UserProfile>();
     FilteredSkills filter = Provider.of<FilteredSkills>(context);
-    debugPrint("Filsstered skills : ${filter.getSkills}");
     List<Post> posts;
     if(filter.getSkills.isEmpty){
       posts = context.watch<List<Post>>();
     } else {
       posts = context.watch<List<Post>>().where((post) {
-        debugPrint("Post skill : ${post.skills}");
         List<String> ff = filter.getSkills.map((e) => Util.skillsToString(e)).toList();
-        debugPrint("String skill : $ff");
         bool retour = post.skills.any((elem) {
-          debugPrint("Elem : $elem");
-          debugPrint("ff : $ff");
           return ff.contains(elem);
         });
-        debugPrint("Retour : $retour");
         return retour;
       }).toList();
     }
-/*     List<Post> posts = filter.getSkills.isEmpty ? 
-        context.watch<List<Post>>():
-        context.watch<List<Post>>().where((post) => post.skills.every((element) => filter.getSkills.contains(element))).toList(); */
-
     if(posts.isEmpty){
       return const Center(child: Text("No Post found"),);
     }
     return ListView.builder(
       itemBuilder: (context, index){
         debugPrint("Index $index");
-        // Post post = Post.fromFirestore(data: snapshot.data!.docs[index]);
         Post post = posts[index];
+        debugPrint("Post id ${post.postRef.toString()}");
         bool hasAttachment = (post.attachmentType != null && post.attachmentUrl != null);
         return Container(
           constraints: BoxConstraints(

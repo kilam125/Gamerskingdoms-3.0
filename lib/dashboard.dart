@@ -220,6 +220,7 @@ class MySearchDelegate extends SearchDelegate {
         child: ListView.builder(
           itemBuilder: (context, index) {
           debugPrint("Index $index");
+          debugPrint("Post ID : $index");
           Post post = filteredList[index];
           return Container(
             constraints: BoxConstraints(

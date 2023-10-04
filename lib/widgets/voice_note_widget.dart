@@ -29,14 +29,11 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
 
 
   initController() async {
-    debugPrint("Voice note url : ${widget.url}");
     await player.setUrl(widget.url);
     player.setLoopMode(LoopMode.off);
     player.durationStream.listen((durationDuration) {
-      debugPrint("Duration changed");
       player.positionStream.listen((positionDuration) async {
         if (durationDuration!.inSeconds == positionDuration.inSeconds) {
-          debugPrint("ITS THE END");
           await Future.delayed(const Duration(milliseconds: 500));
           await player.stop();
           await player.seek(Duration.zero);
@@ -53,6 +50,7 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
 
   @override
   void dispose() {
+    debugPrint("Voice note widget disposed");
     super.dispose();
     player.dispose();
   }

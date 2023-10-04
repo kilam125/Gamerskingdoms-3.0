@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -20,9 +22,18 @@ import 'package:gamers_kingdom/profile_view_standalone.dart';
       importance: Importance.max,
       priority: Priority.high,
     );
+    const DarwinNotificationDetails darwinInitSettings =
+      DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true
+      );
 
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
+    NotificationDetails platformChannelSpecifics =
+      NotificationDetails(
+        android: Platform.isAndroid ? androidPlatformChannelSpecifics : null,
+        iOS: Platform.isIOS ? darwinInitSettings : null
+      );
 
     await fl.show(
       0,
@@ -153,8 +164,10 @@ import 'package:gamers_kingdom/profile_view_standalone.dart';
       );
       FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
       const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/launcher_icon');
+      const DarwinInitializationSettings ios = DarwinInitializationSettings(requestAlertPermission: true, requestBadgePermission: true, defaultPresentBadge: true);
       const InitializationSettings initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid,
+        iOS: ios
       );
       flutterLocalNotificationsPlugin.initialize(initializationSettings);
       logging(settings.authorizationStatus);

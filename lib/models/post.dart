@@ -121,7 +121,9 @@ class Post extends ChangeNotifier {
   }
 
   static Stream<List<Post>> streamAllPosts(){
-    Query posts = FirebaseFirestore.instance.collection("posts").orderBy("datePost", descending: true);
+    Query posts = FirebaseFirestore.instance
+      .collection("posts")
+      .orderBy("datePost", descending: true);
     return posts.snapshots().map(
       (listOfPosts) {
         return listOfPosts.docs.map((e) => Post.fromFirestore(data:e)).toList();
