@@ -6,6 +6,7 @@ import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/other_user_profile_view.dart';
 import 'package:gamers_kingdom/page_comments.dart';
+import 'package:gamers_kingdom/widgets/audio_widget.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
 import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
@@ -43,18 +44,21 @@ class PostWidget extends StatelessWidget {
     );
   }
 
-  Widget attachementViewByType(AttachmentType? attachmentType, String? attachmentUrl){
+   Widget attachementViewByType(AttachmentType? attachmentType, String? attachmentUrl){
     if(attachmentType == null || attachmentUrl == null){
       return Container();
+    } else {
+      if(attachmentType == AttachmentType.picture){
+        return getPictureWidget(attachmentUrl);
+      }
+      else if(attachmentType == AttachmentType.video){
+        return getVideoWidget(attachmentUrl);
+      } else if(attachmentType == AttachmentType.audio){
+        return AudioWidget(url: attachmentUrl);
+      } else{
+        return VoiceNoteWidget(url: attachmentUrl);
+      }
     }
-    else if(attachmentType == AttachmentType.picture){
-      return getPictureWidget(attachmentUrl);
-    } else if(attachmentType == AttachmentType.video){
-      return getVideoWidget(attachmentUrl);
-    } else if(attachmentType == AttachmentType.voice){
-      return VoiceNoteWidget(url: attachmentUrl);
-    }
-    return Container();
   }
 
   @override

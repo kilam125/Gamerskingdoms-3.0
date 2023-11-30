@@ -87,10 +87,10 @@ class _PostsState extends State<Posts> {
       return getVideoWidget(attachmentUrl);
     } else if(attachmentType == AttachmentType.audio){
       return AudioWidget(url: attachmentUrl);
-    } else {
-      //return Container(height: 300, width: 300, color: Colors.purple);
+    } else if(attachmentType == AttachmentType.voice){
       return VoiceNoteWidget(url: attachmentUrl);
     }
+    return Container();
   }
   
   @override

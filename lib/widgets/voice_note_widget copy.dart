@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:audioplayers/audioplayers.dart' as ad;
 
 class VoiceNoteWidget extends StatefulWidget {
   final String url; 
@@ -17,8 +18,8 @@ class VoiceNoteWidget extends StatefulWidget {
 }
 
 class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
-  final player = AudioPlayer();
-  //final adPlayer = ad.AudioPlayer(playerId: "test"); // Create a player
+  final player = AudioPlayer(); // Create a player
+  final adPlayer = ad.AudioPlayer(); // Create a player
   Duration duration = Duration.zero;
   Duration position = Duration.zero;
 
@@ -32,17 +33,13 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
 
 
   Future<bool> initController(String url) async {
-/*       await adPlayer.setSource(
-        ad.UrlSource(url),
-      ); */
-/*     await adPlayer.setAudioSource(
+    await player.setAudioSource(
       AudioSource.uri(Uri.parse(url))
-    ); */
-    await player.setUrl(
-      url,
     );
-    //adPlayer.onPositionChanged
-    //await player.setLoopMode(LoopMode.off);
+/*     await player.setUrl(
+      url,
+    ); */
+    await player.setLoopMode(LoopMode.off);
     player.durationStream.listen((durationDuration) {
       player.positionStream.listen((positionDuration) async {
         if (durationDuration!.inSeconds == positionDuration.inSeconds) {
@@ -57,8 +54,8 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
 
   @override
   void dispose() {
-/*     adPlayer.stop();
-    adPlayer.dispose(); */
+    player.stop();
+    player.dispose();
     super.dispose();
   }
   @override
@@ -77,7 +74,7 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
               log("snp : ${snp.error.toString()}");
             }
             if(!snp.hasData){
-              log("snp data : ${snp.data.toString()}");
+              log("snp : ${snp.data.toString()}");
               return const ProgressWidget();
             } else {
               log("snp result : ${snp.data!}");
@@ -92,8 +89,7 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
                         if (!snapshot.hasData) {
                           return const ProgressWidget();
                         }
-                        //ad.PlayerState playing = snapshot.data!;
-                        bool playing = snapshot.data!;
+                        bool playing = snapshot.data as bool;
                         return IconButton(
                           highlightColor: Colors.transparent,
                           splashColor: Colors.transparent,
@@ -107,19 +103,18 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
                               ),
                             size: 20
                           )
-                          : const Icon(
-                            Icons.play_arrow, 
-                            color: Color.fromRGBO(62, 62, 147, 1), 
-                            size: 20
-                          ),
+                          : const Icon(Icons.play_arrow, color: Color.fromRGBO(62, 62, 147, 1), size: 20),
                           onPressed: () async {
                             bool playing = snapshot.data as bool;
                             debugPrint("PLAYER : $playing");
                             if (playing) {
-                              //await adPlayer.pause();
-                              await player.pause();
+                              setState(() {
+                                player.pause();
+                              });
                             } else {
-                              await player.play();
+                              setState(() {
+                                player.play();
+                              });
                             }
                           }
                         );
@@ -134,7 +129,6 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
                         child: Column(
                           children: [
                             StreamBuilder(
-                                //stream: adPlayer.onDurationChanged,
                                 stream: player.durationStream,
                                 builder: (context, snapshotDt) {
                                   if (!snapshotDt.hasData) {

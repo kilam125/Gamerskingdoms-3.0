@@ -108,7 +108,6 @@ class _DashboardState extends State<Dashboard> {
             builder: (context, __) {
               UserProfile user = context.watch<UserProfile>();
               return Navigator(
-                //key: secondNavigatorKey,
                 onUnknownRoute: (settings) => MaterialPageRoute(
                   settings: RouteSettings(
                     name:UnknownRoute.routeName,
@@ -412,9 +411,10 @@ class MySearchDelegate extends SearchDelegate {
     }
     else if(attachmentType == AttachmentType.video){
       return getVideoWidget(attachmentUrl);
-    } else {
+    } else if(attachmentType == AttachmentType.voice){
       return VoiceNoteWidget(url: attachmentUrl);
     }
+    return Container();
   }
   
   double heightByAttachmentType(AttachmentType? attachmentType){

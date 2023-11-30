@@ -1,7 +1,9 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
@@ -12,6 +14,7 @@ import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/comment_line.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class PageComments extends StatefulWidget {
@@ -35,12 +38,31 @@ class _PageCommentsState extends State<PageComments> {
   bool showSendButton = false;
   bool showMicrowave = false;
   late PlayerController controller;
-  RecorderController recorderController = RecorderController();      // Initialise
   bool isPlaying = false;
   bool audioRecorded = false;
   DateTime date = DateTime.now();
   final scrollController = ScrollController();
+  final recordController = RecorderController();
+  late String fullPath;
+  late String localPath;
 
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+  initPath() async {
+    localPath = await _localPath;
+    fullPath = "$localPath/recording_${date.day}_${date.month}_${date.year}_${date.hour}_${date.minute}_${date.second}.aac";
+    debugPrint("PATH : $fullPath");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initPath();
+  }
+  
   @override
   Widget build(BuildContext context) {
     Post post = context.read<List<Post>>().firstWhere((post) =>(post.postRef == widget.postRef));
@@ -151,16 +173,19 @@ class _PageCommentsState extends State<PageComments> {
                         size: 20,
                         color: Colors.black,
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         if(isPlaying){
-                          recorderController.pause();
+                          recordController.pause();
                           setState(() {
                             isPlaying = false;
                           });
                         } else {
-                          recorderController.record(
+                          await recordController.record(
                             bitRate: 96000,
-                            sampleRate: 48000
+                            sampleRate: 48000,
+                            androidEncoder: AndroidEncoder.aac,
+                            iosEncoder: IosEncoder.kAudioFormatMPEG4AAC,
+                            path: fullPath
                           );
                           setState(() {
                             isPlaying = true;
@@ -179,8 +204,8 @@ class _PageCommentsState extends State<PageComments> {
                         ),
                         onPressed: () {
                           setState(() {
-                            recorderController.stop();
-                            recorderController.reset();
+                            recordController.stop();
+                            recordController.reset();
                             audioRecorded = false;
                             isPlaying = false;
                             showMicrowave = false;
@@ -193,7 +218,7 @@ class _PageCommentsState extends State<PageComments> {
                       Expanded(
                         child: AudioWaveforms(
                           size: Size(MediaQuery.of(context).size.width, 10.0),
-                          recorderController: recorderController,
+                          recorderController: recordController,
                           enableGesture: true,
                           waveStyle: const WaveStyle(
                             middleLineColor: Colors.transparent,
@@ -271,12 +296,22 @@ class _PageCommentsState extends State<PageComments> {
                           ),
                           onPressed: () async {
                             if(audioRecorded){
-                              String? path = await recorderController.stop();
+                              String? path = await recordController.stop();
                               if(path != null){
-                                File audioFile = File(path);
+                                String? result = await Util.convertToMp3(path);
                                 // ignore: use_build_context_synchronously
-                                String pathToUpload = "${context.read<UserProfile>().email}_audio_recorded_${date.day}${date.minute}${date.year}${date.minute}${date.second}";
-                                String downloadUrl = await Util.uploadFileToFirebaseStorage(pathToUpload, audioFile);
+                                Uint8List filesAsBytes = await File(result!).readAsBytes();
+                                if(!mounted)return;
+                                final TaskSnapshot upload = await FirebaseStorage.instance
+                                  .ref("${context.read<UserProfile>().email}_audio_recorded_${date.day}${date.minute}${date.year}${date.minute}${date.second}.mp3")
+                                  .putData(
+                                    filesAsBytes, 
+                                    SettableMetadata(
+                                      contentType: 'audio/mp3'
+                                    )
+                                  );
+                                log("Data upload done");
+                                String downloadUrl = upload.ref.fullPath;
                                 await post.addComment(
                                   Comment(
                                     // ignore: use_build_context_synchronously
@@ -292,6 +327,7 @@ class _PageCommentsState extends State<PageComments> {
                                 textController.clear();
                                 setState(() {
                                   showMicrowave = false;
+                                  audioRecorded = false;
                                 });
                                 scrollController.jumpTo(scrollController.position.maxScrollExtent*2);
                               }
@@ -325,13 +361,16 @@ class _PageCommentsState extends State<PageComments> {
                                 isPlaying = true;
                                 audioRecorded = true;
                               });
-                              await recorderController.record(
+                              await recordController.record(
                                 bitRate: 96000,
-                                sampleRate: 48000
+                                sampleRate: 48000,
+                                androidEncoder: AndroidEncoder.aac,
+                                iosEncoder: IosEncoder.kAudioFormatMPEG4AAC,
+                                path: fullPath
                               );
                             },
                             onLongPressEnd: (details) async {
-                              await recorderController.pause();
+                              await recordController.pause();
                               setState(() {
                                 isPlaying = false;
                                 showSendButton = true;

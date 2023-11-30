@@ -292,7 +292,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                       .where("owner", whereIn: user.following)
                       .snapshots(),
                     builder: (context, snapshot) {
-                      debugPrint("User following : "+user.following.toString());
+                      debugPrint("User following : ${user.following}");
                       if(!snapshot.hasData){
                         return const ProgressWidget();
                       }

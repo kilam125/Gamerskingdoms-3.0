@@ -84,6 +84,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
       theme: ThemeData(
+        useMaterial3: false,
         primarySwatch: blackSwatch,
         primaryColor: const Color.fromARGB(255, 0, 0, 0),
         appBarTheme: AppBarTheme(

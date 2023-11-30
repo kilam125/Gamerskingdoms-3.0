@@ -1,5 +1,9 @@
+import 'dart:developer';
 import 'dart:io';
 
+import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_session.dart';
+import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +11,29 @@ import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
 
 class Util{
+
+  static   Future<String?> convertToMp3(String inputFilePath) async {
+    final outputFile = inputFilePath.replaceAll('.aac', '.mp3');
+    final command = '-i $inputFilePath -c:a libmp3lame $outputFile';
+    try {
+      FFmpegSession session = await FFmpegKit.execute(command);
+      final returnCode = await session.getReturnCode();
+
+      if (ReturnCode.isSuccess(returnCode)) {
+        // Conversion successful
+        return outputFile;
+      } else {
+        // Handle error, conversion failed
+        log("Error in converting file: ${await session.getAllLogsAsString()}");
+        return null;
+      }
+    } catch (e) {
+      print("Error during conversion: $e");
+      return null;
+    }
+    return null;
+  }
+  
   static Future<String> uploadFileToFirebaseStorage(String pathToUpload, File file) async {
     Uint8List filesAsBytes = await (file).readAsBytes();
     final TaskSnapshot upload = await FirebaseStorage.instance
