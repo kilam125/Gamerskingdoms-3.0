@@ -218,8 +218,6 @@ class MySearchDelegate extends SearchDelegate {
         height: MediaQuery.of(context).size.height,
         child: ListView.builder(
           itemBuilder: (context, index) {
-          debugPrint("Index $index");
-          debugPrint("Post ID : $index");
           Post post = filteredList[index];
           return Container(
             constraints: BoxConstraints(

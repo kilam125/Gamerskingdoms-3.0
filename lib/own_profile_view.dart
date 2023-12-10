@@ -290,6 +290,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                     stream: FirebaseFirestore.instance
                       .collection("posts")
                       .where("owner", whereIn: user.following)
+                      .orderBy("datePost", descending: true)
                       .snapshots(),
                     builder: (context, snapshot) {
                       debugPrint("User following : ${user.following}");
@@ -318,7 +319,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                                 }
                                 UserProfile owner = UserProfile.fromFirestore(data:  ownerSnapshot.data!);
                                 return PostWidget(
-                                  latest: index == followingPost.length-1,
+                                  latest: index == 0,
                                   post: ps, 
                                   user: owner,
                                 );

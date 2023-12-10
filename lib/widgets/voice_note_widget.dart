@@ -28,30 +28,20 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
   @override
   void initState() {
     super.initState();
+    player.positionStream.listen((positionDuration) async {
+      var totalDuration = player.duration;
+      if (totalDuration != null && positionDuration >= totalDuration) {
+        await player.seek(Duration.zero);
+        await player.pause();
+        // Optionally, if you want to automatically play again, uncomment the next line
+        // await player.play();
+      }
+    });
   }
 
-
   Future<bool> initController(String url) async {
-/*       await adPlayer.setSource(
-        ad.UrlSource(url),
-      ); */
-/*     await adPlayer.setAudioSource(
-      AudioSource.uri(Uri.parse(url))
-    ); */
-    await player.setUrl(
-      url,
-    );
-    //adPlayer.onPositionChanged
-    //await player.setLoopMode(LoopMode.off);
-    player.durationStream.listen((durationDuration) {
-      player.positionStream.listen((positionDuration) async {
-        if (durationDuration!.inSeconds == positionDuration.inSeconds) {
-          await Future.delayed(const Duration(milliseconds: 500));
-          await player.stop();
-          await player.seek(Duration.zero);
-        }
-      });
-    });
+    await player.setUrl(url);
+    // No need to listen to durationStream here
     return true;
   }
 
@@ -69,7 +59,6 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
         if(!snapshot.hasData){
           return const ProgressWidget();
         }
-        log("download url : ${snapshot.data!}");
         return FutureBuilder(
           future: initController(snapshot.data!),
           builder: (context, snp) {
@@ -80,7 +69,6 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
               log("snp data : ${snp.data.toString()}");
               return const ProgressWidget();
             } else {
-              log("snp result : ${snp.data!}");
               return Row(
                 children: [
                   Flexible(
@@ -116,7 +104,6 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
                             bool playing = snapshot.data as bool;
                             debugPrint("PLAYER : $playing");
                             if (playing) {
-                              //await adPlayer.pause();
                               await player.pause();
                             } else {
                               await player.play();

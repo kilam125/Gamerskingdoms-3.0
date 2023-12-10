@@ -57,8 +57,10 @@ class _AddPostsState extends State<AddPosts> {
 
   bool showMicrowave = false;
   bool audioRecorded = false;
+  late bool recordPermission;
 
   bool isPlaying = false;
+
 
   Future<String?> convertToMp3(String inputFilePath) async {
     final outputFile = inputFilePath.replaceAll('.aac', '.mp3');
@@ -83,10 +85,6 @@ class _AddPostsState extends State<AddPosts> {
     return null;
   }
 
-  permissionCheck() async {
-    await recordController.checkPermission();
-    //await record.hasPermission();
-  }
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
     return directory.path;
@@ -98,17 +96,21 @@ class _AddPostsState extends State<AddPosts> {
     debugPrint("PATH : $fullPath");
   }
 
+  Future<void> initPermission() async {
+    recordPermission = await Util.askMicrophone();
+    log("Record permisson : $recordPermission");
+  }
+
   @override
   void initState() {
     super.initState();
+    initPermission();
     initPath();
     controller = PlayerController();
-    permissionCheck();
   }
 
   @override
   Widget build(BuildContext context) {
-
     attachmentTypeByBool(){
       if(uploadImages){
         return 0;
@@ -230,27 +232,40 @@ class _AddPostsState extends State<AddPosts> {
                   GestureDetector(
                     onLongPress: () async {
                       FocusScope.of(context).unfocus();
-                      setState(() {
-                        showMicrowave = true;
-                        isPlaying = true;
-                        audioRecorded = true;
-                      });
-                      await recordController.record(
-                        bitRate: 96000,
-                        sampleRate: 48000,
-                        androidEncoder: AndroidEncoder.aac,
-                        iosEncoder: IosEncoder.kAudioFormatMPEG4AAC,
-                        path: fullPath
-                      );
+                      if(recordPermission){
+                        setState(() {
+                          showMicrowave = true;
+                          isPlaying = true;
+                          audioRecorded = true;
+                        });
+                        await recordController.record(
+                          bitRate: 96000,
+                          sampleRate: 48000,
+                          androidEncoder: AndroidEncoder.aac,
+                          iosEncoder: IosEncoder.kAudioFormatMPEG4AAC,
+                          path: fullPath
+                        );
+                      } else {
+                        PopUp.okPopUp(
+                          context: context, 
+                          title: "Wait...", 
+                          message: "Please give the permission to Gamers Kindgom to use the microphone so you can use voice note.",
+                          okCallBack: () {
+                            Util.askMicrophoneOrOpenSettings();
+                          }
+                        );
+                      }
                     },
                     onLongPressEnd: (details) async {
-                      await recordController.pause();
-                      //await recorderController.pause();
-                      setState(() {
-                        isPlaying = false;
-                        showSendButton = true;
-                        uploadVoiceNote = true;
-                      });
+                      if(recordPermission){
+                        await recordController.pause();
+                        //await recorderController.pause();
+                        setState(() {
+                          isPlaying = false;
+                          showSendButton = true;
+                          uploadVoiceNote = true;
+                        });
+                      }
                     },
                     child: const Icon(Icons.mic, size: 30,)
                   )

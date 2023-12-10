@@ -116,7 +116,6 @@ class _PostsState extends State<Posts> {
       itemBuilder: (context, index){
         debugPrint("Index $index");
         Post post = posts[index];
-        debugPrint("Post id ${post.postRef.toString()}");
         bool hasAttachment = (post.attachmentType != null && post.attachmentUrl != null);
         return Container(
           constraints: BoxConstraints(

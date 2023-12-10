@@ -11,6 +11,7 @@ import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/comment.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/comment_line.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
@@ -40,6 +41,7 @@ class _PageCommentsState extends State<PageComments> {
   late PlayerController controller;
   bool isPlaying = false;
   bool audioRecorded = false;
+  late bool recordPermission;
   DateTime date = DateTime.now();
   final scrollController = ScrollController();
   final recordController = RecorderController();
@@ -51,6 +53,11 @@ class _PageCommentsState extends State<PageComments> {
     return directory.path;
   }
 
+  Future<void> initPermission() async {
+    recordPermission = await Util.askMicrophone();
+    log("Record permisson : $recordPermission");
+  }
+
   initPath() async {
     localPath = await _localPath;
     fullPath = "$localPath/recording_${date.day}_${date.month}_${date.year}_${date.hour}_${date.minute}_${date.second}.aac";
@@ -60,6 +67,7 @@ class _PageCommentsState extends State<PageComments> {
   @override
   void initState() {
     super.initState();
+    initPermission();
     initPath();
   }
   
@@ -354,8 +362,9 @@ class _PageCommentsState extends State<PageComments> {
                       : Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 14.0),
                         child: GestureDetector(
-                            onLongPress: () async {
-                              FocusScope.of(context).unfocus();
+                          onLongPress: () async {
+                            FocusScope.of(context).unfocus();
+                            if(recordPermission){
                               setState(() {
                                 showMicrowave = true;
                                 isPlaying = true;
@@ -368,18 +377,28 @@ class _PageCommentsState extends State<PageComments> {
                                 iosEncoder: IosEncoder.kAudioFormatMPEG4AAC,
                                 path: fullPath
                               );
-                            },
-                            onLongPressEnd: (details) async {
-                              await recordController.pause();
-                              setState(() {
-                                isPlaying = false;
-                                showSendButton = true;
-                                audioRecorded = true;
-                              });
-                            },
-                            child: const Icon(
-                              Icons.mic_rounded,
-                              size: 30,
+                            } else {
+                              PopUp.okPopUp(
+                                context: context, 
+                                title: "Wait...", 
+                                message: "Please give the permission to Gamers Kindgom to use the microphone so you can use voice note.",
+                                okCallBack: () {
+                                  Util.askMicrophoneOrOpenSettings();
+                                }
+                              );
+                            }
+                          },
+                          onLongPressEnd: (details) async {
+                            await recordController.pause();
+                            setState(() {
+                              isPlaying = false;
+                              showSendButton = true;
+                              audioRecorded = true;
+                            });
+                          },
+                          child: const Icon(
+                            Icons.mic_rounded,
+                            size: 30,
                           ),
                         ),
                       ),

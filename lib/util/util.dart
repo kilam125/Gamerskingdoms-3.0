@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:app_settings/app_settings.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_flutter_full_gpl/return_code.dart';
@@ -9,9 +10,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class Util{
-
+  static void askMicrophoneOrOpenSettings() async {
+    var status = await Permission.microphone.status;
+    if (!status.isGranted) {
+      // If permission is not granted, request it
+      var result = await Permission.microphone.request();
+      if (result.isDenied || result.isPermanentlyDenied) {
+        // If permission is denied or permanently denied, open app settings
+        AppSettings.openAppSettings();
+      }
+    }
+  }
+  static Future<bool> askMicrophone() async {
+    var status = await Permission.microphone.status;
+    log("Status : $status");
+    if (status.isGranted) {
+      return true;
+    } else if(!status.isPermanentlyDenied){
+      var result = await Permission.microphone.request();
+      return result.isGranted;
+    } else {
+      return false;
+    }
+  }
   static   Future<String?> convertToMp3(String inputFilePath) async {
     final outputFile = inputFilePath.replaceAll('.aac', '.mp3');
     final command = '-i $inputFilePath -c:a libmp3lame $outputFile';
@@ -164,7 +188,6 @@ class Util{
   }
 
   static double heightByAttachmentType(AttachmentType? attachmentType){
-    debugPrint("attachment type is : $attachmentType");
     if(attachmentType == AttachmentType.picture){
       return 400;
     }

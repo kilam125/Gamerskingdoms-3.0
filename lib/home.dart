@@ -58,7 +58,7 @@ class _HomeState extends State<Home> {
     ];
 
     UserProfile user = context.watch<UserProfile>();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       var messaging = FirebaseMessaging.instance;
       messaging.onTokenRefresh.listen((newToken) async {
         debugPrint("On Token Refresh");
@@ -70,16 +70,18 @@ class _HomeState extends State<Home> {
           SetOptions(merge: true)
         );
       });
-      messaging.getToken().then((value) async {
-        debugPrint("Setting token : $value");
-        if(!(context.read<UserProfile>().getFcmTokens.contains(value))){
-          await context.read<UserProfile>().userRef.set(
-            {
-              "fcmTokens":FieldValue.arrayUnion([value]),
-            },
-            SetOptions(merge: true)
-          );
-        }
+      messaging.getAPNSToken().then((apnValue) {
+        messaging.getToken().then((value) async {
+          debugPrint("Setting token : $value");
+          if(!(context.read<UserProfile>().getFcmTokens.contains(value))){
+            await context.read<UserProfile>().userRef.set(
+              {
+                "fcmTokens":FieldValue.arrayUnion([value]),
+              },
+              SetOptions(merge: true)
+            );
+          }
+        });
       });
     });
 

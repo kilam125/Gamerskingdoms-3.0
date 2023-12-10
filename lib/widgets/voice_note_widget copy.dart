@@ -66,7 +66,6 @@ class _VoiceNoteWidgetState extends State<VoiceNoteWidget> {
         if(!snapshot.hasData){
           return const ProgressWidget();
         }
-        log("download url : ${snapshot.data!}");
         return FutureBuilder(
           future: initController(snapshot.data!),
           builder: (context, snp) {
