@@ -1,4 +1,4 @@
-package com.gamerskindoms.app
+package com.AKNCMPNY.GamersKingdoms
 
 import io.flutter.embedding.android.FlutterActivity
 

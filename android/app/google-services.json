@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1006388837793:android:c39b363940869423141fe0",
+        "mobilesdk_app_id": "1:1006388837793:android:2660fd4ae33bc1a2141fe0",
         "android_client_info": {
-          "package_name": "com.gamerskindoms.app"
+          "package_name": "com.AKNCMPNY.GamersKingdoms"
         }
       },
       "oauth_client": [
