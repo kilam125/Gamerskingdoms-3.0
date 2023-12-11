@@ -322,7 +322,6 @@ class _PageCommentsState extends State<PageComments> {
                                 String downloadUrl = upload.ref.fullPath;
                                 await post.addComment(
                                   Comment(
-                                    // ignore: use_build_context_synchronously
                                     commentator: context.read<UserProfile>().userRef, 
                                     post: post.postRef, 
                                     attachmentPresent: false, 

@@ -1,6 +1,3 @@
-import 'dart:developer';
-
-import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +10,6 @@ import 'package:gamers_kingdom/widgets/comment_line.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
 import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'models/comment.dart';
 
@@ -32,44 +28,11 @@ class CommentViewStandalone extends StatefulWidget {
 }
 
 class _CommentViewStandaloneState extends State<CommentViewStandalone> {
-  final formKey = GlobalKey<FormState>();
-  int activeIndex = 0;
-  TextEditingController textController = TextEditingController();
-  String message = "";
-  bool showSendButton = false;
-  bool showMicrowave = false;
-  late PlayerController controller;
-  bool isPlaying = false;
-  bool audioRecorded = false;
-  late bool recordPermission;
-  DateTime date = DateTime.now();
-  final scrollController = ScrollController();
-  final recordController = RecorderController();
-  late String fullPath;
-  late String localPath;
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<void> initPermission() async {
-    recordPermission = await Util.askMicrophone();
-    log("Record permisson : $recordPermission");
-  }
-
-  initPath() async {
-    localPath = await _localPath;
-    fullPath = "$localPath/recording_${date.day}_${date.month}_${date.year}_${date.hour}_${date.minute}_${date.second}.aac";
-    debugPrint("PATH : $fullPath");
-  }
-
   @override
   void initState() {
     super.initState();
-    initPermission();
-    initPath();
   }
+
 
   Widget getPictureWidget(String url){
     return Container(
@@ -108,12 +71,15 @@ class _CommentViewStandaloneState extends State<CommentViewStandalone> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text("Comments"),
+      ),
       body: Container(
         constraints: BoxConstraints(
           minHeight:Util.heightByAttachmentType(widget.post.attachmentType),
         ),
-        width: 375,
+        width: MediaQuery.of(context).size.width,
         margin: const EdgeInsets.all(16.0),
         decoration: const BoxDecoration(
           color: Color.fromARGB(255, 223, 222, 222),

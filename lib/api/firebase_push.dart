@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +11,11 @@ import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/comment.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/page_comments.dart';
 import 'package:gamers_kingdom/post_view_owner_standalone.dart';
 import 'package:gamers_kingdom/own_profile_view.dart';
 import 'package:gamers_kingdom/profile_view_standalone.dart';
+import 'package:provider/provider.dart';
 
   Future<void> showNotification(Map<String, dynamic> messageData, FlutterLocalNotificationsPlugin fl) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
@@ -80,7 +83,7 @@ import 'package:gamers_kingdom/profile_view_standalone.dart';
         );
       } else if(route == PostViewOwnerStandalone.routeName) {
         Post post = Post.fromFirestore(data: await FirebaseFirestore.instance.collection("posts").doc(message.data["postId"]).get());
-        DocumentSnapshot followerDoc = await FirebaseFirestore.instance.collection("users").doc(message.data["userId"]).get();
+        DocumentSnapshot followerDoc = await FirebaseFirestore.instance.collection("users").doc(message.data["likerId"]).get();
         navigatorKey.currentState!.push(
           MaterialPageRoute(
             settings: RouteSettings(
@@ -97,8 +100,10 @@ import 'package:gamers_kingdom/profile_view_standalone.dart';
         );
       } else if(route == CommentViewStandalone.routeName) {
         Post post = Post.fromFirestore(data: await FirebaseFirestore.instance.collection("posts").doc(message.data["postId"]).get());
+        UserProfile postOwner = UserProfile.fromFirestore(data: await FirebaseFirestore.instance.collection("users").doc(message.data["ownerId"]).get());
         Comment comment = Comment.fromFirestore(doc: await FirebaseFirestore.instance.collection("comments").doc(message.data["commentId"]).get());
-        navigatorKey.currentState!.push(
+        UserProfile commentator = UserProfile.fromFirestore(data: await comment.commentator.get());
+/*         navigatorKey.currentState!.push(
           MaterialPageRoute(
             settings: RouteSettings(
               name:CommentViewStandalone.routeName,
@@ -109,6 +114,35 @@ import 'package:gamers_kingdom/profile_view_standalone.dart';
             builder: (context) => CommentViewStandalone(
               post: post,
               comment: comment,
+            )
+          )
+        ); */
+        navigatorKey.currentState!.push(
+          MaterialPageRoute(
+            settings: RouteSettings(
+              name:PageComments.routeName,
+              arguments: {
+                "route":message.data
+              }
+            ),
+            builder: (context) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider<UserProfile>.value(
+                  value: commentator
+                ),
+                StreamProvider<List<Post>>.value(
+                  value: Post.streamAPost(post),
+                  //value:Post.streamAllPosts(),
+                  updateShouldNotify:(oldList,currentList) => (currentList!=oldList),
+                  initialData: [post],
+                ),
+              ],
+              builder: (context, child) {
+                return PageComments(
+                  postRef: post.postRef,
+                  userProfile: postOwner,
+                );
+              }
             )
           )
         );

@@ -36,9 +36,9 @@ class Util{
       return false;
     }
   }
-  static   Future<String?> convertToMp3(String inputFilePath) async {
+  static Future<String?> convertToMp3(String inputFilePath) async {
     final outputFile = inputFilePath.replaceAll('.aac', '.mp3');
-    final command = '-i $inputFilePath -c:a libmp3lame $outputFile';
+    final command = '-i $inputFilePath -y -c:a libmp3lame $outputFile';
     try {
       FFmpegSession session = await FFmpegKit.execute(command);
       final returnCode = await session.getReturnCode();

@@ -129,4 +129,8 @@ class Post extends ChangeNotifier {
         return listOfPosts.docs.map((e) => Post.fromFirestore(data:e)).toList();
       });
   }
+  static Stream<List<Post>> streamAPost(Post post){
+    Stream<DocumentSnapshot> posts = post.postRef.snapshots();
+    return posts.map((event) => [Post.fromFirestore(data: event)]);
+  }
 }

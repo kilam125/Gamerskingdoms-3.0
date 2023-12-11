@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBcHIp1VrMGYjvZfggt4Oz77ziBQAXvgS8',
-    appId: '1:1006388837793:android:c39b363940869423141fe0',
+    appId: '1:1006388837793:android:2660fd4ae33bc1a2141fe0',
     messagingSenderId: '1006388837793',
     projectId: 'test-a06bf',
     storageBucket: 'test-a06bf.appspot.com',
@@ -59,11 +59,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDoD9-jpqyUMwIQrjSE7vBRY2_HOLWl0wM',
-    appId: '1:1006388837793:ios:aa15c990e1f15c65141fe0',
+    appId: '1:1006388837793:ios:9a3df2fb6ad222e5141fe0',
     messagingSenderId: '1006388837793',
     projectId: 'test-a06bf',
     storageBucket: 'test-a06bf.appspot.com',
-    iosClientId: '1006388837793-rngvlsjqi09dh6jlhbq1me1ffqj4u8s2.apps.googleusercontent.com',
-    iosBundleId: 'com.example.gamersKingdom',
+    iosBundleId: 'com.AKNCMPNY.GamersKingdoms',
   );
 }

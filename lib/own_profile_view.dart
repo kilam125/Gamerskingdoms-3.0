@@ -79,7 +79,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
         child: StreamBuilder(
           stream: FirebaseFirestore.instance.collection("posts")
             .where("owner", isEqualTo: user.userRef)
-            //.orderBy("datePost", descending: true)
+            .orderBy("datePost", descending: true)
             .snapshots(),
           builder: (context, snapshot) {
             if(!snapshot.hasData){

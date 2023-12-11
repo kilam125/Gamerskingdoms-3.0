@@ -164,6 +164,13 @@ class PostWidget extends StatelessWidget {
                 size: 30,
               )
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6.0),
+              child: Text(
+                "${post.likes} likes",
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
           ],
         ),
         Padding(

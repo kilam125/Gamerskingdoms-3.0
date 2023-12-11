@@ -10,6 +10,7 @@ import 'package:gamers_kingdom/widgets/post_widget.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
+import 'package:provider/provider.dart';
 
 class ProfileViewStandalone extends StatefulWidget {
   final UserProfile followerData;
@@ -256,10 +257,16 @@ class _ProfileViewStandaloneState extends State<ProfileViewStandalone> {
                             borderRadius: BorderRadius.all(Radius.circular(8.0)),
                             color: Color.fromARGB(255, 211, 213, 216),
                           ),
-                          child: PostWidget(
-                            latest: index == posts.length-1,
-                            post: posts[index], 
-                            user: widget.followerData,
+                          child: StreamProvider.value(
+                            initialData: widget.recipientData,
+                            value: UserProfile.streamUser(widget.recipientData.userRef),
+                            builder: (context, child) {
+                              return PostWidget(
+                                latest: index == posts.length-1,
+                                post: posts[index], 
+                                user: widget.followerData,
+                              );
+                            }
                           )
                         ),
                       )

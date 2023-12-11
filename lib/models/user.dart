@@ -167,6 +167,9 @@ class UserProfile extends ChangeNotifier {
         "date":DateTime.now()
       });
   }
+  static Stream<UserProfile> streamUser(DocumentReference user){
+    return user.snapshots().map((event) => UserProfile.fromFirestore(data: event));
+  }
 
   factory UserProfile.fromFirestore({required DocumentSnapshot data}){
     Map dataMap = data.data() as Map;
