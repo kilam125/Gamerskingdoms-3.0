@@ -2,8 +2,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gamers_kingdom/comment_view_standalone.dart';
-import 'package:gamers_kingdom/comments_view_standalone.dart';
 import 'package:gamers_kingdom/database_service.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';

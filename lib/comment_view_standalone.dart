@@ -17,10 +17,12 @@ class CommentViewStandalone extends StatefulWidget {
   final Post post;
   final Comment comment;
   final bool ownUser = true;
+  final UserProfile myself;
   const CommentViewStandalone({
     super.key,
     required this.post,
-    required this.comment
+    required this.comment,
+    required this.myself
   });
   static const String routeName = "/CommentViewStandalone";
   @override
@@ -173,7 +175,8 @@ class _CommentViewStandaloneState extends State<CommentViewStandalone> {
                 CommentLine(
                   comment: widget.comment,
                   nested: true,
-                  postOwner: ownerSnapshot.data!
+                  postOwner: ownerSnapshot.data!,
+                  myself: widget.myself,
                 ),
                 if(widget.comment.attachmentType == AttachmentType.voice && widget.comment.attachmentUrl != null)
                 VoiceNoteWidget(url: widget.comment.attachmentUrl!),

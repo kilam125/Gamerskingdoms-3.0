@@ -1,8 +1,10 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:gamers_kingdom/dashboard.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/other_user_profile_view.dart';
 import 'package:gamers_kingdom/posts.dart';
 import 'package:gamers_kingdom/own_profile_view.dart';
 import 'package:gamers_kingdom/profile_by_skills.dart';
@@ -13,7 +15,6 @@ import 'add_posts.dart';
 import 'enums/skills.dart';
 import 'followers.dart';
 import 'models/filtered_skills.dart';
-import 'models/post.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -125,9 +126,7 @@ class _HomeState extends State<Home> {
               onPressed: () async {
                 await showSearch(
                   context: context, 
-                  delegate: MySearchDelegate(
-                    selectedPosts: context.read<List<Post>>()
-                  )
+                  delegate: UserSearchDelegate()
                 );
                 if (!mounted) return;
                 FocusManager.instance.primaryFocus!.unfocus();
@@ -202,6 +201,95 @@ class _HomeState extends State<Home> {
         ],
       ),
       body: pages[activeIndex],
+    );
+  }
+}
+
+class UserSearchDelegate extends SearchDelegate {
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return FutureBuilder<QuerySnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('users') // Nom de votre collection Firestore
+          .where('displayName', isEqualTo: query)
+          .get(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        log("Snapshot : ${snapshot.data!.docs.toString()}");
+        log(query.toString());
+        final List<UserProfile> users = snapshot.data!.docs
+            .map((doc) => UserProfile.fromFirestore(data: doc))
+            .toList();
+        
+        return ListView.builder(
+          itemCount: users.length,
+          itemBuilder: (context, index) {
+            final user = users[index];
+            return ListTile(
+              onTap: () => Navigator.of(context).pushNamed(
+                OtherUserProfileView.routeName,
+                arguments: {
+                  "user":user,
+                  "ownUser":false
+                }
+              ),
+              leading: user.picture == null ? 
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(30),
+                  child: Image.asset(
+                    "assets/images/userpic.png", 
+                    fit: BoxFit.fill,
+                    height: 30,
+                    width: 30,
+                  ),
+                )
+                :ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: Image.network(
+                  user.picture!,
+                  fit: BoxFit.fill,
+                  height: 30,
+                  width: 30,
+                ),
+              ),
+              title: Text(user.displayName),
+              subtitle: Text(user.email),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return const Center(
+      child: Text('Search users by name'),
     );
   }
 }

@@ -1,5 +1,8 @@
+import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:gamers_kingdom/delete_entry.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/followers_standalone.dart';
@@ -76,17 +79,19 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
       ),
       body: Padding(
         padding: const EdgeInsets.only(top:16.0, left: 8, right: 8.0),
-        child: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection("posts")
+        child: FutureBuilder(
+          future: FirebaseFirestore.instance.collection("posts")
             .where("owner", isEqualTo: user.userRef)
+            .where("visible", isEqualTo: true)
             .orderBy("datePost", descending: true)
-            .snapshots(),
+            .get(),
           builder: (context, snapshot) {
             if(!snapshot.hasData){
               return const Center(child: ProgressWidget());
             }
             List<Post> posts = snapshot.data!.docs.map((e) => Post.fromFirestore(data: e)).toList();
-            posts.sort((a, b) => a.datePost.isAfter(b.datePost) ? 1 : -1);
+            log("Posts : ${posts.map((e) => e.content).toList()}");
+            log("Posts : ${posts[0].content}");
             return NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) {
                 return [
@@ -290,6 +295,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                     stream: FirebaseFirestore.instance
                       .collection("posts")
                       .where("owner", whereIn: user.following)
+                      .where("visible", isEqualTo: true)
                       .orderBy("datePost", descending: true)
                       .snapshots(),
                     builder: (context, snapshot) {
@@ -334,8 +340,32 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                   ListView.builder(
                     itemCount: posts.length,
                     itemBuilder: ((context, index) {
-                      return GestureDetector(
-                        onTap: (){},
+                      return Slidable(
+                        key: UniqueKey(),
+                        groupTag: 'group', // All slidables share the same groupTag now
+                        endActionPane: ActionPane(
+                          extentRatio: 0.40,
+                          motion: const ScrollMotion(),
+                          children: [
+                            Builder(
+                              builder: (builderContext) {
+                                return GestureDetector(
+                                  onTap: () async {
+                                    // Callback délenchant l'exception
+                                    Slidable.of(builderContext)!.dismiss(
+                                      ResizeRequest(
+                                        const Duration(milliseconds: 50), 
+                                        () { }
+                                      )
+                                    );
+                                    await deletePost(posts[index]);
+                                  },
+                                  child: const DeleteEntryButton(),
+                              );
+                            }
+                          ),
+                        ],
+                        ),
                         child: Container(
                           margin: const EdgeInsets.all(8.0),
                           decoration: const BoxDecoration(
@@ -344,11 +374,11 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                           ),
                           child: PostWidget(
                             latest: index == 0,
-                            post: posts[posts.length-index-1], 
+                            post: posts[index], 
                             user: user,
                           )
                         ),
-                        );
+                      );
                       }
                     )
                   ),
@@ -358,6 +388,32 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
           }
         ),
       ),
+    );
+  }
+  Future<void> deletePost(Post post){
+    return showDialog(
+      context: context, 
+      builder: (context){
+        return AlertDialog(
+          title: const Text("Delete Post"),
+          content: const Text("Are you sure you want to delete this post?"),
+          actions: [
+            TextButton(
+              onPressed: (){
+                Navigator.of(context).pop();
+              }, 
+              child: const Text("Cancel")
+            ),
+            TextButton(
+              onPressed: () async {
+                await post.postRef.delete();
+                Navigator.of(context).pop();
+              }, 
+              child: const Text("Delete")
+            ),
+          ],
+        );
+      }
     );
   }
 }

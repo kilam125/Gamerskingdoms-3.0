@@ -76,6 +76,7 @@ class _ProfileViewStandaloneState extends State<ProfileViewStandalone> {
         child: StreamBuilder(
           stream: FirebaseFirestore.instance.collection("posts")
             .where("owner", isEqualTo: widget.followerData.userRef)
+            .where("visible", isEqualTo: true)
             //.orderBy("datePost", descending: true)
             .snapshots(),
           builder: (context, snapshot) {

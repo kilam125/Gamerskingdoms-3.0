@@ -193,7 +193,7 @@ class _AddPostsState extends State<AddPosts> {
                       );
                       var compressResult = await VideoCompress.compressVideo(
                         result!.path,
-                        quality:VideoQuality.LowQuality
+                        quality:VideoQuality.MediumQuality
                       );
                       if(compressResult != null){
                         setState(() {
@@ -391,6 +391,7 @@ class _AddPostsState extends State<AddPosts> {
                       }
                       debugPrint(downloadUrls.toString());
                       await FirebaseFirestore.instance.collection("posts").add({
+                        "visible":true,
                         "userName":user.displayName,
                         "attachmentType":attachmentTypeByBool(),
                         "attachmentUrl":downloadUrls.first,
@@ -415,6 +416,7 @@ class _AddPostsState extends State<AddPosts> {
                       }
                       debugPrint(downloadUrls.toString());
                       await FirebaseFirestore.instance.collection("posts").add({
+                        "visible":true,
                         "userName":user.displayName,
                         "attachmentType":attachmentTypeByBool(),
                         "attachmentUrl":downloadUrls.first,
@@ -445,6 +447,7 @@ class _AddPostsState extends State<AddPosts> {
                           );
                         log("Data upload done");
                         await FirebaseFirestore.instance.collection("posts").add({
+                          "visible":true,
                           "userName":user.displayName,
                           "attachmentType":2,
                           "attachmentUrl":upload.ref.fullPath,
@@ -472,6 +475,7 @@ class _AddPostsState extends State<AddPosts> {
                           );
                         final String downloadUrl = await upload.ref.getDownloadURL();
                         await FirebaseFirestore.instance.collection("posts").add({
+                          "visible":true,
                           "userName":user.displayName,
                           "attachmentType":3,
                           "attachmentUrl":downloadUrl,
@@ -486,6 +490,7 @@ class _AddPostsState extends State<AddPosts> {
                         debugPrint("Done");
                     } else {
                       await FirebaseFirestore.instance.collection("posts").add({
+                        "visible":true,
                         "userName":user.displayName,
                         "attachmentType":null,
                         "attachmentUrl":null,
@@ -507,6 +512,7 @@ class _AddPostsState extends State<AddPosts> {
                         );
                       } else {
                         await FirebaseFirestore.instance.collection("posts").add({
+                          "visible":true,
                           "userName":user.displayName,
                           "attachmentType":null,
                           "attachmentUrl":null,

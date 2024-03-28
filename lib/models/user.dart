@@ -136,7 +136,7 @@ class UserProfile extends ChangeNotifier {
     },
     SetOptions(merge: true)
   );
-    QuerySnapshot result = await FirebaseFirestore.instance.collection("posts").where("owner", isEqualTo: userRef).get();
+    QuerySnapshot result = await FirebaseFirestore.instance.collection("posts").where("owner", isEqualTo: userRef).where("visible", isEqualTo: true).get();
     await Future.forEach(
       result.docs, (element) => element.reference.update(
         {

@@ -107,6 +107,60 @@ class Util{
         return Skills.noob;
       case "troll":
         return Skills.troll;
+      case "fighting_spirit":
+        return Skills.fightingSpirit;
+      case "loyal":
+        return Skills.loyal;
+      case "cooperative":
+        return Skills.cooperative;
+      case "altruist":
+        return Skills.altruist;
+      case "achiever":
+        return Skills.achiever;
+      case "artist":
+        return Skills.artist;
+      case "creative":
+        return Skills.creative;
+      case "eccentric":
+        return Skills.eccentric;
+      case "mysterious":
+        return Skills.mysterious;
+      case "storyteller":
+        return Skills.storyteller;
+      case "secret":
+        return Skills.secret;
+      case "up_for_it":
+        return Skills.upForIt;
+      case '\u{1F601}':
+        return Skills.smile;
+      case '\u{1F913}':
+        return Skills.nerd;
+      case '\u{1F602}':
+        return Skills.laugh;
+      case '\u{1F643}':
+        return Skills.angel;
+      case '\u{1FAE0}':
+        return Skills.reverseFace;
+      case '\u{1F644}':
+        return Skills.melted;
+      case '\u{1FAE3}':
+        return Skills.rolling;
+      case '\u{1F629}':
+        return Skills.hiding;
+      case '\u{1F972}':
+        return Skills.lasse;
+      case '\u{1F61B}':
+        return Skills.cry;
+      case '\u{1F608}':
+        return Skills.tongue;
+      case '\u{1F607}':
+        return Skills.devil;
+      case '\u{1F92A}':
+        return Skills.crazyTongue;
+      case '\u{1F621}':
+        return Skills.angry;
+      case '\u{2764}':
+        return Skills.heart;
       default:
         return Skills.noob;
     }
@@ -152,6 +206,62 @@ class Util{
         return "Noob";
       case Skills.troll:
         return "Troll";
+      case Skills.fightingSpirit:
+        return "Fighting Spirit";
+      case Skills.loyal:
+        return "Loyal";
+      case Skills.cooperative:
+        return "Cooperative";
+      case Skills.altruist:
+        return "Altruist";
+      case Skills.achiever:
+        return "Achiever";
+      case Skills.artist:
+        return "Artist";
+      case Skills.creative:
+        return "Creative";
+      case Skills.eccentric:
+        return "Eccentric";
+      case Skills.mysterious:
+        return "Mysterious";
+      case Skills.storyteller:
+        return "Storyteller";
+      case Skills.secret:
+        return "Secret";
+      case Skills.upForIt:
+        return 'Up For It';
+      case Skills.smile:
+        return '\u{1F601}';
+      case Skills.nerd:
+        return '\u{1F913}';
+      case Skills.laugh:
+        return '\u{1F602}';
+      case Skills.angel:
+        return '\u{1F643}';
+      case Skills.reverseFace:
+        return '\u{1FAE0}';
+      case Skills.melted:
+        return '\u{1F644}';
+      case Skills.rolling:
+        return '\u{1FAE3}';
+      case Skills.hiding:
+        return '\u{1F629}';
+      case Skills.lasse:
+        return '\u{1F972}';
+      case Skills.cry:
+        return '\u{1F61B}';
+      case Skills.tongue:
+        return '\u{1F608}';
+      case Skills.devil:
+        return '\u{1F607}';
+      case Skills.crazyTongue:
+        return '\u{1F92A}';
+      case Skills.angry:
+        return '\u{1F621}';
+      case Skills.heart:
+        return '\u{2764}';
+      default:
+        return "Unknown";
     }
   }
 

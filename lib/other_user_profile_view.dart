@@ -59,6 +59,7 @@ class _OtherUserProfileViewState extends State<OtherUserProfileView> with Ticker
         child: StreamBuilder(
           stream: FirebaseFirestore.instance.collection("posts")
             .where("owner", isEqualTo: widget.user.userRef)
+            .where("visible", isEqualTo: true)
             .orderBy("datePost", descending: true)
             .snapshots(),
           builder: (context, snapshot) {

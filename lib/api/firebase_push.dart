@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -99,24 +100,24 @@ import 'package:provider/provider.dart';
           )
         );
       } else if(route == CommentViewStandalone.routeName) {
-        Post post = Post.fromFirestore(data: await FirebaseFirestore.instance.collection("posts").doc(message.data["postId"]).get());
-        UserProfile postOwner = UserProfile.fromFirestore(data: await FirebaseFirestore.instance.collection("users").doc(message.data["ownerId"]).get());
-        Comment comment = Comment.fromFirestore(doc: await FirebaseFirestore.instance.collection("comments").doc(message.data["commentId"]).get());
+        // Définition des futures sans les attendre immédiatement
+        final postFuture = FirebaseFirestore.instance.collection("posts").doc(message.data["postId"]).get();
+        final postOwnerFuture = FirebaseFirestore.instance.collection("users").doc(message.data["ownerId"]).get();
+        final commentDocFuture = FirebaseFirestore.instance.collection("comments").doc(message.data["commentId"]).get();
+        // Exécution en parallèle et attente de toutes les futures
+        final results = await Future.wait([
+          postFuture,
+          postOwnerFuture,
+          commentDocFuture,
+        ]);
+
+        // Une fois les futures résolues, transformer les données reçues en objets appropriés
+        Post post = Post.fromFirestore(data: results[0] as DocumentSnapshot);
+        UserProfile postOwner = UserProfile.fromFirestore(data: results[1] as DocumentSnapshot);
+        Comment comment = Comment.fromFirestore(doc: results[2] as DocumentSnapshot);
+        // Pour le UserProfile du commentateur, nous devons attendre la résolution de comment.commentator.get()
+        // Cela ne peut pas être parallélisé avec les appels précédents car il dépend de la résolution de commentDocFuture
         UserProfile commentator = UserProfile.fromFirestore(data: await comment.commentator.get());
-/*         navigatorKey.currentState!.push(
-          MaterialPageRoute(
-            settings: RouteSettings(
-              name:CommentViewStandalone.routeName,
-              arguments: {
-                "route":message.data
-              }
-            ),
-            builder: (context) => CommentViewStandalone(
-              post: post,
-              comment: comment,
-            )
-          )
-        ); */
         navigatorKey.currentState!.push(
           MaterialPageRoute(
             settings: RouteSettings(

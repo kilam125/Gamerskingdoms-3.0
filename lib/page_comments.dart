@@ -156,6 +156,7 @@ class _PageCommentsState extends State<PageComments> {
                               return const ProgressWidget();
                             }
                             return CommentLine(
+                              myself: context.read<UserProfile>(),
                               comment:Comment.fromFirestore(doc: snapshot.data!)
                             );
                           }
@@ -322,6 +323,7 @@ class _PageCommentsState extends State<PageComments> {
                                 String downloadUrl = upload.ref.fullPath;
                                 await post.addComment(
                                   Comment(
+                                    ref: FirebaseFirestore.instance.collection("comments").doc(),
                                     commentator: context.read<UserProfile>().userRef, 
                                     post: post.postRef, 
                                     attachmentPresent: false, 
@@ -342,6 +344,7 @@ class _PageCommentsState extends State<PageComments> {
                               if(textController.text.isNotEmpty){
                                 await post.addComment(
                                   Comment(
+                                    ref: FirebaseFirestore.instance.collection("comments").doc(),
                                     commentator: context.read<UserProfile>().userRef, 
                                     post: post.postRef, 
                                     attachmentPresent: false, 

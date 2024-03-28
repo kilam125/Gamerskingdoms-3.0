@@ -40,12 +40,6 @@ class _AudioWidgetState extends State<AudioWidget> {
         }
       });
     });
-/*     await controller.preparePlayer(
-      path: path,
-      shouldExtractWaveform: true,
-      noOfSamples: 100,
-      volume: 1.0,
-    ); */
   }
 
   @override

@@ -129,7 +129,8 @@ class _PageCommentsStandaloneState extends State<PageCommentsStandalone> {
                                   return const ProgressWidget();
                                 }
                                 return CommentLine(
-                                  comment:Comment.fromFirestore(doc: snapshot.data!)
+                                  comment:Comment.fromFirestore(doc: snapshot.data!),
+                                  myself: widget.viewer,
                                 );
                               }
                             )
@@ -278,6 +279,7 @@ class _PageCommentsStandaloneState extends State<PageCommentsStandalone> {
                                   if(textController.text.isNotEmpty){
                                     await post.addComment(
                                       Comment(
+                                        ref: FirebaseFirestore.instance.collection("comments").doc(),
                                         commentator: widget.viewer.userRef, 
                                         post: post.postRef, 
                                         attachmentPresent: false, 

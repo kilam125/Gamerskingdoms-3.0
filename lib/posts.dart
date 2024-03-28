@@ -1,14 +1,18 @@
 
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable_text/expandable_text.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
+import 'package:gamers_kingdom/enums/type_of_post.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/filtered_skills.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/other_user_profile_view.dart';
 import 'package:gamers_kingdom/page_comments.dart';
+import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/audio_widget.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
@@ -94,14 +98,14 @@ class _PostsState extends State<Posts> {
   }
   
   @override
-  Widget build(BuildContext context) {
-    UserProfile using = context.watch<UserProfile>();
-    FilteredSkills filter = Provider.of<FilteredSkills>(context);
+  Widget build(BuildContext parentContext) {
+    UserProfile using = parentContext.watch<UserProfile>();
+    FilteredSkills filter = Provider.of<FilteredSkills>(parentContext);
     List<Post> posts;
     if(filter.getSkills.isEmpty){
-      posts = context.watch<List<Post>>();
+      posts = parentContext.watch<List<Post>>();
     } else {
-      posts = context.watch<List<Post>>().where((post) {
+      posts = parentContext.watch<List<Post>>().where((post) {
         List<String> ff = filter.getSkills.map((e) => Util.skillsToString(e)).toList();
         bool retour = post.skills.any((elem) {
           return ff.contains(elem);
@@ -141,12 +145,9 @@ class _PostsState extends State<Posts> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        flex: 2,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
+                  ListTile(
+                    leading: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
                           clipBehavior: Clip.antiAlias,
                           decoration: const BoxDecoration(
                             shape: BoxShape.circle
@@ -171,10 +172,7 @@ class _PostsState extends State<Posts> {
                             ),
                           ),
                         ),
-                      ),
-                      Flexible(
-                        flex: 6,
-                        child: GestureDetector(
+                        title: GestureDetector(
                           onTap: (){
                             Navigator.of(context).pushNamed(
                               OtherUserProfileView.routeName,
@@ -189,13 +187,76 @@ class _PostsState extends State<Posts> {
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
                         ),
-                      ),
-                      Flexible(
-                        flex: 2,
-                        fit: FlexFit.tight,
-                        child: Container(color: Colors.green)
-                      )
-                    ],
+                        trailing: GestureDetector(
+                          onTapDown: (details) async {
+                            final offset = details.globalPosition;
+                            // Utiliser PopupMenuButton
+                            String? value = await showMenu<String>(
+                              useRootNavigator: false,
+                              context: context,
+                              position: RelativeRect.fromLTRB(
+                                offset.dx,
+                                offset.dy,
+                                MediaQuery.of(context).size.width - offset.dx,
+                                MediaQuery.of(context).size.height - offset.dy,
+                              ),
+                              items: [
+                                if(post.owner != using.userRef)
+                                const PopupMenuItem<String>(
+                                  value: 'report',
+                                  child: Text('Report'),
+                                ),
+                                if(post.owner == using.userRef)
+                                const PopupMenuItem<String>(
+                                  value: 'delete',
+                                  child: Text('Supprimer'),
+                                ),
+                              ],
+                            );
+                            // Faire quelque chose avec la valeur retournée
+                            if (value != null) {
+                              if (value == 'report') {
+                                // ignore: use_build_context_synchronously
+                                var result = await PopUp.reportPopUp(
+                                  context: context, 
+                                  title: 'Report', 
+                                  message: 'Please select the reason for reporting this post', 
+                                  type: TypeOfPost.post,
+                                  okCallBack: (typeOfReport, typeOfPost) async {
+                                    return await FirebaseFirestore.instance.collection('reports').add({
+                                      "date":Timestamp.now(),
+                                      "isRequestProcessed":true,
+                                      "post": post.postRef,
+                                      "type": typeOfPost.index,
+                                      "typeOfReport": typeOfReport.index,
+                                      "userReported": post.owner,
+                                      "userReporter": using.userRef,
+                                    });
+                                  }
+                                );
+                                if(result != null && result){
+                                  PopUp.okPopUp(
+                                    context: context, 
+                                    title: "Done", 
+                                    message: "Post has been reported", 
+                                    okCallBack: () {}
+                                  );
+                                }
+                              } else if (value == 'delete') {
+                                // ignore: use_build_context_synchronously
+                                PopUp.yesNoPopUp(
+                                  context: context, 
+                                  title: "Wait..", 
+                                  message: "Are you sure you want to delete this post ?", 
+                                  yesCallBack: () async {
+                                    await post.postRef.delete();
+                                  }
+                                );
+                              }
+                            }
+                          },
+                          child: const Icon(Icons.more_vert),
+                        ),
                   ),
                   if(hasAttachment)
                   attachementViewByType(post.attachmentType!, post.attachmentUrl!),

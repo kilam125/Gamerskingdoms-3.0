@@ -1,14 +1,17 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Profile extends StatefulWidget {
   final UserProfile user;
@@ -173,6 +176,10 @@ class _ProfileState extends State<Profile> {
                       MultiSelectDialogField<Skills>(
                         initialValue: selectedSkills,
                         items: items,
+                        itemsTextStyle: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.black
+                        ),
                         title: const Text("Skills"),
                         selectedColor: Colors.blue,
                         buttonIcon: const Icon(
@@ -203,7 +210,7 @@ class _ProfileState extends State<Profile> {
                     user.bio = bio.text;
                     user.skills = selectedSkills;
                     await user.setUser(
-                      displayName: user.displayName,
+                      displayName: user.displayName.toLowerCase(),
                       skills: selectedSkills, 
                       picture: user.picture == null ? 
                         null
@@ -215,7 +222,40 @@ class _ProfileState extends State<Profile> {
                   }, 
                   child: const Text("Send")
                 ):
-                const ProgressWidget()
+                const ProgressWidget(),
+                ElevatedButton(
+                  onPressed: () async {
+                    const url = 'https://gamerskingdoms.com/mention/';
+                    // launch url here
+                    if (await canLaunch(url)) {
+                      await launch(url);
+                    } else {
+                      throw 'Could not launch $url';
+                    }
+                  },
+                  child: const Text("GCU")
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    PopUp.yesNoPopUp(
+                      context: context, 
+                      title: "Wait...", 
+                      message: "Are you sure you want to delete your account ?", 
+                      yesCallBack: () async {
+                        await user.userRef.update({
+                          "name": "Deleted",
+                          "surname": "User",
+                          "displayName": "Deleted User",
+                        });
+                        await FirebaseFunctions.instance.httpsCallable("disableAccount").call({
+                          "email": user.email
+                        });
+                        FirebaseAuth.instance.signOut();
+                      }
+                    );
+                  }, 
+                  child: const Text("Delete my account")
+                )
               ],
             ),
           ),

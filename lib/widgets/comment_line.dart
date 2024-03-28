@@ -2,10 +2,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
+import 'package:gamers_kingdom/enums/type_of_post.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/other_user_profile_view.dart';
 import 'package:gamers_kingdom/own_profile_view.dart';
+import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/profile_view_standalone.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
@@ -16,10 +19,12 @@ class CommentLine extends StatelessWidget {
   final Comment comment;
   final DocumentSnapshot<Object?>? postOwner;
   final bool nested;
+  final UserProfile myself;
   const CommentLine(
     {
       super.key,
       required this.comment,
+      required this.myself,
       this.nested = false,
       this.postOwner
     });
@@ -51,7 +56,7 @@ class CommentLine extends StatelessWidget {
                 onTap: (){
                   if(!nested){
                     Navigator.of(context).pushNamed(
-                      OwnProfileView.routeName,
+                      OtherUserProfileView.routeName,
                       arguments: {
                         "user":user
                       }
@@ -75,7 +80,7 @@ class CommentLine extends StatelessWidget {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Flexible(
-                      flex: 1,
+                      flex: 8,
                       child: Row(
                         children: [
                           Flexible(
@@ -117,15 +122,82 @@ class CommentLine extends StatelessWidget {
                         ],
                       ),
                     ),
-        /*                   Flexible(
-                      flex: 5,
+                    Flexible(
+                      flex: 2,
                       child: Padding(
                         padding: const EdgeInsets.only(right:16.0),
-                        child: Text(
-                          ""//DateFormat.yMMMMd().format(comment.date)
+                        child: GestureDetector(
+                          onTapDown: (details) async {
+                            final offset = details.globalPosition;
+                            // Utiliser PopupMenuButton
+                            String? value = await showMenu<String>(
+                              useRootNavigator: false,
+                              context: context,
+                              position: RelativeRect.fromLTRB(
+                                offset.dx,
+                                offset.dy,
+                                MediaQuery.of(context).size.width - offset.dx,
+                                MediaQuery.of(context).size.height - offset.dy,
+                              ),
+                              items: [
+                                if(comment.commentator != myself.userRef)
+                                const PopupMenuItem<String>(
+                                  value: 'report',
+                                  child: Text('Report'),
+                                ),
+                                if(comment.commentator == myself.userRef)
+                                const PopupMenuItem<String>(
+                                  value: 'delete',
+                                  child: Text('Supprimer'),
+                                ),
+                              ],
+                            );
+                            // Faire quelque chose avec la valeur retournée
+                            if (value != null) {
+                              if (value == 'report') {
+                                // ignore: use_build_context_synchronously
+                                var result = await PopUp.reportPopUp(
+                                  context: context, 
+                                  title: 'Report', 
+                                  message: 'Please select the reason for reporting this comment', 
+                                  type: TypeOfPost.comment,
+                                  okCallBack: (typeOfReport, typeOfPost) async {
+                                    return await FirebaseFirestore.instance.collection('reports').add({
+                                      "date":Timestamp.now(),
+                                      "isRequestProcessed":false,
+                                      "post": comment.ref,
+                                      "type": typeOfPost.index,
+                                      "typeOfReport": typeOfReport.index,
+                                      "userReported": comment.commentator,
+                                      "userReporter": myself.userRef,
+                                    });
+                                  }
+                                );
+                                if(result != null && result){
+                                  PopUp.okPopUp(
+                                    context: context, 
+                                    title: "Done", 
+                                    message: "Post has been reported", 
+                                    okCallBack: () {}
+                                  );
+                                }
+                              } else if (value == 'delete') {
+                                // ignore: use_build_context_synchronously
+                                PopUp.yesNoPopUp(
+                                  context: context, 
+                                  title: "Wait..", 
+                                  message: "Are you sure you want to delete this comment ?", 
+                                  yesCallBack: () async {
+                                    await comment.ref.delete();
+                                  }
+                                );
+                              }
+                            }
+                          },
+                          child: const Icon(Icons.more_vert),
                         ),
                       ),
-                    ) */
+                    )
                   ],
                 ),
               ),

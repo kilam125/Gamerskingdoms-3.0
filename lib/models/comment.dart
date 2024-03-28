@@ -4,6 +4,7 @@ import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/util/util.dart';
 
 class Comment{
+  final DocumentReference ref;
   final DocumentReference commentator;
   final DocumentReference post;
   final bool attachmentPresent;
@@ -14,6 +15,7 @@ class Comment{
 
   const Comment(
     {
+      required this.ref,
       required this.commentator,
       required this.post,
       required this.attachmentPresent,
@@ -32,12 +34,14 @@ class Comment{
       "date":date,
       "attachmentUrl":attachmentUrl,
       "attachmentType":Util.attachmentTypeToInt(attachmentType),
-      "content":content
+      "content":content,
+      "visible":true
     };
   }
 
   factory Comment.fromFirestore({required DocumentSnapshot doc}){
     return Comment(
+      ref: doc.reference,
       commentator: doc["commentator"], 
       post: doc["post"], 
       attachmentPresent: doc["attachmentPresent"],

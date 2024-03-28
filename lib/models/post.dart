@@ -123,6 +123,7 @@ class Post extends ChangeNotifier {
   static Stream<List<Post>> streamAllPosts(){
     Query posts = FirebaseFirestore.instance
       .collection("posts")
+      .where("visible", isEqualTo: true)
       .orderBy("datePost", descending: true);
     return posts.snapshots().map(
       (listOfPosts) {
