@@ -121,226 +121,244 @@ class _PostsState extends State<Posts> {
         debugPrint("Index $index");
         Post post = posts[index];
         bool hasAttachment = (post.attachmentType != null && post.attachmentUrl != null);
-        return Container(
-          constraints: BoxConstraints(
-            minHeight:Util.heightByAttachmentType(post.attachmentType),
-          ),
-          width: 375,
-          margin: const EdgeInsets.all(16.0),
-          decoration: const BoxDecoration(
-            color: Color.fromARGB(255, 223, 222, 222),
-            borderRadius: BorderRadius.all(Radius.circular(10))
-          ),
-          child: StreamBuilder(
-            stream: post.owner.get().asStream(),
-            builder: (context, ownerSnapshot) {
-              if(ownerSnapshot.data == null){
-                return const SizedBox(
-                  height: 300,
-                  width: 300,
-                  child: Center(child: ProgressWidget())
-                );
-              }
-              UserProfile user = UserProfile.fromFirestore(data:  ownerSnapshot.data!);
-              return Column(
+        return StreamBuilder(
+          stream: post.owner.get().asStream(),
+          builder: (context, ownerSnapshot) {
+            if(ownerSnapshot.data == null){
+              return const SizedBox(
+                height: 300,
+                width: 300,
+                child: Center(child: ProgressWidget())
+              );
+            }
+            UserProfile user = UserProfile.fromFirestore(data: ownerSnapshot.data!);
+            if(using.blockedUsers.contains(user.userRef)){
+              return const SizedBox.shrink();
+            }
+            return Container(
+              constraints: BoxConstraints(
+                minHeight:Util.heightByAttachmentType(post.attachmentType),
+              ),
+              width: 375,
+              margin: const EdgeInsets.all(16.0),
+              decoration: const BoxDecoration(
+                color: Color.fromARGB(255, 223, 222, 222),
+                borderRadius: BorderRadius.all(Radius.circular(10))
+              ),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ListTile(
                     leading: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-                          clipBehavior: Clip.antiAlias,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle
-                          ),
-                          child: user.picture == null ?
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(30),
-                              child: Image.asset(
-                                "assets/images/userpic.png", 
-                                fit: BoxFit.fill,
-                                height: 30,
-                                width: 30,
-                              ),
-                            )
-                            :ClipRRect(
-                            borderRadius: BorderRadius.circular(30),
-                            child: Image.network(
-                              user.picture!,
-                              fit: BoxFit.fill,
-                              height: 30,
-                              width: 30,
-                            ),
-                          ),
-                        ),
-                        title: GestureDetector(
-                          onTap: (){
-                            Navigator.of(context).pushNamed(
-                              OtherUserProfileView.routeName,
-                              arguments: {
-                                "user":user,
-                                "ownUser":false
-                              }
-                            );
-                          },
-                          child: Text(
-                            user.displayName.capitalize(),
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                        ),
-                        trailing: GestureDetector(
-                          onTapDown: (details) async {
-                            final offset = details.globalPosition;
-                            // Utiliser PopupMenuButton
-                            String? value = await showMenu<String>(
-                              useRootNavigator: false,
-                              context: context,
-                              position: RelativeRect.fromLTRB(
-                                offset.dx,
-                                offset.dy,
-                                MediaQuery.of(context).size.width - offset.dx,
-                                MediaQuery.of(context).size.height - offset.dy,
-                              ),
-                              items: [
-                                if(post.owner != using.userRef)
-                                const PopupMenuItem<String>(
-                                  value: 'report',
-                                  child: Text('Report'),
-                                ),
-                                if(post.owner == using.userRef)
-                                const PopupMenuItem<String>(
-                                  value: 'delete',
-                                  child: Text('Supprimer'),
-                                ),
-                              ],
-                            );
-                            // Faire quelque chose avec la valeur retournée
-                            if (value != null) {
-                              if (value == 'report') {
-                                // ignore: use_build_context_synchronously
-                                var result = await PopUp.reportPopUp(
-                                  context: context, 
-                                  title: 'Report', 
-                                  message: 'Please select the reason for reporting this post', 
-                                  type: TypeOfPost.post,
-                                  okCallBack: (typeOfReport, typeOfPost) async {
-                                    return await FirebaseFirestore.instance.collection('reports').add({
-                                      "date":Timestamp.now(),
-                                      "isRequestProcessed":true,
-                                      "post": post.postRef,
-                                      "type": typeOfPost.index,
-                                      "typeOfReport": typeOfReport.index,
-                                      "userReported": post.owner,
-                                      "userReporter": using.userRef,
-                                    });
-                                  }
-                                );
-                                if(result != null && result){
-                                  PopUp.okPopUp(
-                                    context: context, 
-                                    title: "Done", 
-                                    message: "Post has been reported", 
-                                    okCallBack: () {}
-                                  );
-                                }
-                              } else if (value == 'delete') {
-                                // ignore: use_build_context_synchronously
-                                PopUp.yesNoPopUp(
-                                  context: context, 
-                                  title: "Wait..", 
-                                  message: "Are you sure you want to delete this post ?", 
-                                  yesCallBack: () async {
-                                    await post.postRef.delete();
-                                  }
-                                );
-                              }
-                            }
-                          },
-                          child: const Icon(Icons.more_vert),
-                        ),
-                  ),
-                  if(hasAttachment)
-                  attachementViewByType(post.attachmentType!, post.attachmentUrl!),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () async { 
-                          if(!post.likers.contains(using.userRef)){
-                            await post.addLike(using.userRef);
-                          } else {
-                            await post.removeLike(using.userRef);
-                          }
-                        }, 
-                        icon: Icon(
-                          post.likers.contains(using.userRef) ? Icons.star : Icons.star_border,
-                          color: post.likers.contains(using.userRef) ? const Color.fromARGB(255, 216, 174, 84) : Colors.black,
-                          size: 30,
-                        )
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+                      clipBehavior: Clip.antiAlias,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle
                       ),
-                      IconButton(
-                        onPressed: () async {
-                          Navigator.pushNamed(
-                            context, 
-                            PageComments.routeName,
-                            arguments: {
-                              "postRef":post.postRef,
-                              "index":index,
-                              "userProfile":user
-                            }
-                          );
-                        }, 
-                        icon: const Icon(
-                          Icons.add_comment,
-                          size: 28,
+                      child: user.picture == null ?
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: Image.asset(
+                            "assets/images/userpic.png", 
+                            fit: BoxFit.fill,
+                            height: 30,
+                            width: 30,
+                          ),
                         )
+                        :ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Image.network(
+                          user.picture!,
+                          fit: BoxFit.fill,
+                          height: 30,
+                          width: 30,
+                        ),
                       ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      "${post.likes} likes",
-                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: ExpandableText(
-                      post.content ?? "",
-                      expandText: 'Show more',
-                      collapseText: 'Show less',
-                      style: const TextStyle(
-                        fontSize: 16
-                      ), 
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    child: GestureDetector(
+                    title: GestureDetector(
                       onTap: (){
                         Navigator.of(context).pushNamed(
-                          PageComments.routeName,
+                          OtherUserProfileView.routeName,
                           arguments: {
-                            "postRef":post.postRef,
-                            "index":index,
-                            "userProfile":user
+                            "user":user,
+                            "ownUser":false
                           }
                         );
                       },
                       child: Text(
-                        "Check ${post.comments.length} comments",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: const Color.fromARGB(255, 62, 62, 62),
-                          decoration: TextDecoration.underline
-                        ),
+                        user.displayName.capitalize(),
+                        style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),
+                    trailing: GestureDetector(
+                      onTapDown: (details) async {
+                        final offset = details.globalPosition;
+                        // Utiliser PopupMenuButton
+                        String? value = await showMenu<String>(
+                          useRootNavigator: false,
+                          context: context,
+                          position: RelativeRect.fromLTRB(
+                            offset.dx,
+                            offset.dy,
+                            MediaQuery.of(context).size.width - offset.dx,
+                            MediaQuery.of(context).size.height - offset.dy,
+                          ),
+                          items: [
+                            if(post.owner != using.userRef)
+                            const PopupMenuItem<String>(
+                              value: 'report',
+                              child: Text('Report'),
+                            ),
+                            if(post.owner != using.userRef)
+                            const PopupMenuItem<String>(
+                              value: 'block',
+                              child: Text('Block user'),
+                            ),
+                            if(post.owner == using.userRef)
+                            const PopupMenuItem<String>(
+                              value: 'delete',
+                              child: Text('Supprimer'),
+                            ),
+                          ],
+                        );
+                        // Faire quelque chose avec la valeur retournée
+                        if (value != null) {
+                          if (value == 'report') {
+                            // ignore: use_build_context_synchronously
+                            var result = await PopUp.reportPopUp(
+                              context: context, 
+                              title: 'Report', 
+                              message: 'Please select the reason for reporting this post', 
+                              type: TypeOfPost.post,
+                              okCallBack: (typeOfReport, typeOfPost) async {
+                                return await FirebaseFirestore.instance.collection('reports').add({
+                                  "date":Timestamp.now(),
+                                  "isRequestProcessed":true,
+                                  "post": post.postRef,
+                                  "type": typeOfPost.index,
+                                  "typeOfReport": typeOfReport.index,
+                                  "userReported": post.owner,
+                                  "userReporter": using.userRef,
+                                });
+                              }
+                            );
+                            if(result != null && result){
+                              PopUp.okPopUp(
+                                context: context, 
+                                title: "Done", 
+                                message: "Post has been reported", 
+                                okCallBack: () {}
+                              );
+                            }
+                          } else if (value == 'delete') {
+                            // ignore: use_build_context_synchronously
+                            PopUp.yesNoPopUp(
+                              context: context, 
+                              title: "Wait..", 
+                              message: "Are you sure you want to delete this post ?", 
+                              yesCallBack: () async {
+                                await post.postRef.delete();
+                              }
+                            );
+                          } else if (value == 'block') {
+                            // ignore: use_build_context_synchronously
+                            PopUp.yesNoPopUp(
+                              context: context, 
+                              title: "Wait..", 
+                              message: "Are you sure you want to block this user ?", 
+                              yesCallBack: () async {
+                                await using.blockUser(user);
+                              }
+                            );
+                          }
+                        }
+                      },
+                      child: const Icon(Icons.more_vert),
+                    ),
+              ),
+              if(hasAttachment)
+              attachementViewByType(post.attachmentType!, post.attachmentUrl!),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () async { 
+                      if(!post.likers.contains(using.userRef)){
+                        await post.addLike(using.userRef);
+                      } else {
+                        await post.removeLike(using.userRef);
+                      }
+                    }, 
+                    icon: Icon(
+                      post.likers.contains(using.userRef) ? Icons.star : Icons.star_border,
+                      color: post.likers.contains(using.userRef) ? const Color.fromARGB(255, 216, 174, 84) : Colors.black,
+                      size: 30,
+                    )
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      Navigator.pushNamed(
+                        context, 
+                        PageComments.routeName,
+                        arguments: {
+                          "postRef":post.postRef,
+                          "index":index,
+                          "userProfile":user
+                        }
+                      );
+                    }, 
+                    icon: const Icon(
+                      Icons.add_comment,
+                      size: 28,
+                    )
                   ),
                 ],
-              );
-            }
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  "${post.likes} likes",
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ExpandableText(
+                  post.content ?? "",
+                  expandText: 'Show more',
+                  collapseText: 'Show less',
+                  style: const TextStyle(
+                    fontSize: 16
+                  ), 
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: GestureDetector(
+                  onTap: (){
+                    Navigator.of(context).pushNamed(
+                      PageComments.routeName,
+                      arguments: {
+                        "postRef":post.postRef,
+                        "index":index,
+                        "userProfile":user
+                      }
+                    );
+                  },
+                  child: Text(
+                    "Check ${post.comments.length} comments",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: const Color.fromARGB(255, 62, 62, 62),
+                      decoration: TextDecoration.underline
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
+            );
+          }
         );
       },
       // itemCount: context.watch<List<Post>>().length,

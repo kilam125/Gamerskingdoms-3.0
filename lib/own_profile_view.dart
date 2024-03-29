@@ -90,8 +90,6 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
               return const Center(child: ProgressWidget());
             }
             List<Post> posts = snapshot.data!.docs.map((e) => Post.fromFirestore(data: e)).toList();
-            log("Posts : ${posts.map((e) => e.content).toList()}");
-            log("Posts : ${posts[0].content}");
             return NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) {
                 return [

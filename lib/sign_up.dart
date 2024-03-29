@@ -36,7 +36,7 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
   late AuthProblems errorType;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   double position = 0;
-
+  bool eulaAccepted = false;
   // Page View 0
   TextEditingController nameController = TextEditingController();
   TextEditingController surnameController = TextEditingController();
@@ -100,126 +100,150 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
             Column(
               children: [
                 if(position == 1)
-                GestureDetector(
-                  onTap: () async {
-                    const url = 'https://gamerskingdoms.com/mention/';
-                    // launch url here
-                    if (await canLaunch(url)) {
-                      await launch(url);
-                    } else {
-                      throw 'Could not launch $url';
-                    }
-                  },
-                  child: Text(
-                    "By clicking on the register button, you agree to our terms of use and our privacy policy", 
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.blue[600],
-                      decoration: TextDecoration.underline
+                Row(
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: Checkbox(
+                        value: eulaAccepted, 
+                        onChanged: ((value) => setState(() {
+                          eulaAccepted = value!;
+                        })),
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
+                    Flexible(
+                      flex: 8,
+                      child: GestureDetector(
+                        onTap: () async {
+                          const url = 'https://gamerskingdoms.com/mention/';
+                          // launch url here
+                          if (await canLaunch(url)) {
+                            await launch(url);
+                          } else {
+                            throw 'Could not launch $url';
+                          }
+                        },
+                        child: Text(
+                          "By clicking on the register button, you agree to our terms of use and our privacy policy", 
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue[600],
+                            decoration: TextDecoration.underline
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 Center(
                   child: ElevatedButton(
                     onPressed: () async {
                       debugPrint("Tapped");
-                      if(formKey.currentState!.validate()){
-                        formKey.currentState!.save();
-                        debugPrint(selectedSkills.toString());
-                        if(pageController.page == 1){
-                          setState(() {
-                            isLoading = true;
-                          });
-                          try{
-                            UserCredential? userC;
-                            if(FirebaseAuth.instance.currentUser == null){
-                              debugPrint("Creating user");
-                              userC = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                                email: emailController.text, 
-                                password: passwordController.text,
-                              );
-                            }
-                            AggregateQuerySnapshot aq = await fbf.collection("users")
-                              .where("displayName",isEqualTo: pseudoController.text.toLowerCase().trim())
-                              .count()
-                              .get();
-                            if(aq.count > 0){
-                              debugPrint("Found user already existing");
-                              PopUp.okPopUp(
-                                context: _scaffoldKey.currentContext!,
-                                title: "Something went wrong", 
-                                message: "An account with this username already exist"
-                              );
+                      if(!eulaAccepted){
+                        PopUp.okPopUp(
+                          context: _scaffoldKey.currentContext!,
+                          title: "Something went wrong", 
+                          message: "You must accept the terms of use and the privacy policy"
+                        );
+                      } else {
+                        if(formKey.currentState!.validate()){
+                          formKey.currentState!.save();
+                          debugPrint(selectedSkills.toString());
+                          if(pageController.page == 1){
+                            setState(() {
+                              isLoading = true;
+                            });
+                            try{
+                              UserCredential? userC;
+                              if(FirebaseAuth.instance.currentUser == null){
+                                debugPrint("Creating user");
+                                userC = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                                  email: emailController.text, 
+                                  password: passwordController.text,
+                                );
+                              }
+                              AggregateQuerySnapshot aq = await fbf.collection("users")
+                                .where("displayName",isEqualTo: pseudoController.text.toLowerCase().trim())
+                                .count()
+                                .get();
+                              if(aq.count > 0){
+                                debugPrint("Found user already existing");
+                                PopUp.okPopUp(
+                                  context: _scaffoldKey.currentContext!,
+                                  title: "Something went wrong", 
+                                  message: "An account with this username already exist"
+                                );
+                                setState(() {
+                                  isLoading = false;
+                                });
+                              } else {
+                                debugPrint("Creating user in firestore");
+                                await fbf.collection("users").add(
+                                  {
+                                    "email":emailController.text.toLowerCase().trim(),
+                                    "name": nameController.text.toLowerCase().trim(),
+                                    "surname": surnameController.text.toLowerCase().trim(),
+                                    "displayName": pseudoController.text.toLowerCase().trim(),
+                                    "bio": bioController.text,
+                                    "skills": selectedSkills
+                                  }
+                                );
+                                if(userC != null){
+                                  await userC.user!.sendEmailVerification();
+                                }
+                                await FirebaseAuth.instance.signOut();
+                                debugPrint("Sign out");
+                                if(!mounted)return;
+                                await PopUp.okPopUp(
+                                  context: _scaffoldKey.currentContext!,
+                                  title: "Done", 
+                                  message: "Your registration has been done, please go to your mails and click the confirmation link."
+                                );
+                                if(!mounted)return;
+                                Navigator.of(_scaffoldKey.currentContext!).pop();
+                              }
+                            } on FirebaseAuthException catch (e) {
+                              debugPrint("Caught exception");
                               setState(() {
                                 isLoading = false;
                               });
-                            } else {
-                              debugPrint("Creating user in firestore");
-                              await fbf.collection("users").add(
-                                {
-                                  "email":emailController.text.toLowerCase().trim(),
-                                  "name": nameController.text.toLowerCase().trim(),
-                                  "surname": surnameController.text.toLowerCase().trim(),
-                                  "displayName": pseudoController.text.toLowerCase().trim(),
-                                  "bio": bioController.text,
-                                  "skills": selectedSkills
+                              debugPrint(e.code.toString());
+                              switch (e.code) {
+                                case 'email-already-in-use':
+                                  debugPrint("Here");
+                                  await PopUp.okPopUp(
+                                    context: _scaffoldKey.currentContext!,
+                                    title: "Something went wrong",
+                                    message: "An account with this email already exists",
+                                  );
+                                  pageController.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
+                                  break;
+                                case 'weak-password':
+                                  await PopUp.okPopUp(
+                                    context: _scaffoldKey.currentContext!,
+                                    title: "Something went wrong",
+                                    message: "Password too weak",
+                                  );
+                                  pageController.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
+                                  break;
+                                default:
+                                  await PopUp.okPopUp(
+                                    context: _scaffoldKey.currentContext!,
+                                    title: "Something went wrong",
+                                    message: "Something went wrong, please try again later",
+                                  );
+                                  Navigator.of(context).pop();
                                 }
-                              );
-                              if(userC != null){
-                                await userC.user!.sendEmailVerification();
-                              }
-                              await FirebaseAuth.instance.signOut();
-                              debugPrint("Sign out");
-                              if(!mounted)return;
-                              await PopUp.okPopUp(
-                                context: _scaffoldKey.currentContext!,
-                                title: "Done", 
-                                message: "Your registration has been done, please go to your mails and click the confirmation link."
-                              );
-                              if(!mounted)return;
-                              Navigator.of(_scaffoldKey.currentContext!).pop();
                             }
-                          } on FirebaseAuthException catch (e) {
-                            debugPrint("Caught exception");
-                            setState(() {
-                              isLoading = false;
-                            });
-                            debugPrint(e.code.toString());
-                            switch (e.code) {
-                              case 'email-already-in-use':
-                                debugPrint("Here");
-                                await PopUp.okPopUp(
-                                  context: _scaffoldKey.currentContext!,
-                                  title: "Something went wrong",
-                                  message: "An account with this email already exists",
-                                );
-                                pageController.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
-                                break;
-                              case 'weak-password':
-                                await PopUp.okPopUp(
-                                  context: _scaffoldKey.currentContext!,
-                                  title: "Something went wrong",
-                                  message: "Password too weak",
-                                );
-                                pageController.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
-                                break;
-                              default:
-                                await PopUp.okPopUp(
-                                  context: _scaffoldKey.currentContext!,
-                                  title: "Something went wrong",
-                                  message: "Something went wrong, please try again later",
-                                );
-                                Navigator.of(context).pop();
-                              }
+                          } else {
+                            if(!mounted)return;
+                            pageController.nextPage(
+                              duration: const Duration(milliseconds: 500), 
+                              curve: Curves.easeIn
+                            );
                           }
-                        } else {
-                          if(!mounted)return;
-                          pageController.nextPage(
-                            duration: const Duration(milliseconds: 500), 
-                            curve: Curves.easeIn
-                          );
                         }
                       }
                     }, 

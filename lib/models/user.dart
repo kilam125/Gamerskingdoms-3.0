@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
@@ -14,7 +16,7 @@ class UserProfile extends ChangeNotifier {
   DocumentReference userRef;
   List? friendRequest;
   List fcmTokens;
-
+  List<DocumentReference> blockedUsers;
   get getFcmTokens => fcmTokens;
 
   void addFcmTokens(String token){
@@ -70,6 +72,28 @@ class UserProfile extends ChangeNotifier {
         merge: true
       )
     );
+    notifyListeners();
+  }
+
+  Future<void> blockUser(UserProfile profile) async {
+    log("$displayName blocked user ${profile.displayName}");
+    log("Blocked user ${profile.displayName}");
+    Future removeInFollowers = userRef.set({
+        "followers":FieldValue.arrayRemove([profile.userRef]),
+        "blockedUsers":FieldValue.arrayUnion([profile.userRef])
+      },
+      SetOptions(
+        merge: true
+      )
+    );
+    Future removeInFollowing = profile.userRef.set({
+        "following":FieldValue.arrayRemove([userRef]),
+      },
+      SetOptions(
+        merge: true
+      )
+    );
+    await Future.wait([removeInFollowers, removeInFollowing]);
     notifyListeners();
   }
 
@@ -156,7 +180,8 @@ class UserProfile extends ChangeNotifier {
     this.following,
     this.bio,
     this.friendRequest,
-    this.fcmTokens = const []
+    this.fcmTokens = const [],
+    this.blockedUsers = const []
   });
 
   static Future<DocumentReference> createFriendRequest({required DocumentReference requester, required DocumentReference target}) async {
@@ -183,7 +208,8 @@ class UserProfile extends ChangeNotifier {
       following: dataMap.containsKey("following") ? dataMap["following"] : [],
       friendRequest: dataMap.containsKey("friendRequest") ? dataMap["friendRequest"] : [],
       userRef: data.reference,
-      fcmTokens: dataMap.containsKey("fcmTokens") ? dataMap["fcmTokens"] : []
+      fcmTokens: dataMap.containsKey("fcmTokens") ? dataMap["fcmTokens"] : [],
+      blockedUsers: dataMap.containsKey("blockedUsers") ? List<DocumentReference>.from(dataMap["blockedUsers"]) : []
     );
   }
 

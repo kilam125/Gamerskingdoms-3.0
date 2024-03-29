@@ -42,6 +42,9 @@ class CommentLine extends StatelessWidget {
           );
         }
         UserProfile user = UserProfile.fromFirestore(data: userSnapshot.data!);
+        if(myself.blockedUsers.contains(user.userRef)){
+          return const SizedBox.shrink();
+        }
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           padding: const EdgeInsets.only(bottom: 8),
