@@ -148,9 +148,10 @@ class _PostsState extends State<Posts> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(height: 10),
                   ListTile(
                     leading: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 0),
                       clipBehavior: Clip.antiAlias,
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle
@@ -161,8 +162,8 @@ class _PostsState extends State<Posts> {
                           child: Image.asset(
                             "assets/images/userpic.png", 
                             fit: BoxFit.fill,
-                            height: 30,
-                            width: 30,
+                            height: 50,
+                            width: 50,
                           ),
                         )
                         :ClipRRect(
@@ -170,8 +171,8 @@ class _PostsState extends State<Posts> {
                         child: Image.network(
                           user.picture!,
                           fit: BoxFit.fill,
-                          height: 30,
-                          width: 30,
+                          height: 50,
+                          width: 50,
                         ),
                       ),
                     ),
@@ -181,6 +182,7 @@ class _PostsState extends State<Posts> {
                           OtherUserProfileView.routeName,
                           arguments: {
                             "user":user,
+                            "me": using,
                             "ownUser":false
                           }
                         );
@@ -217,7 +219,7 @@ class _PostsState extends State<Posts> {
                             if(post.owner == using.userRef)
                             const PopupMenuItem<String>(
                               value: 'delete',
-                              child: Text('Supprimer'),
+                              child: Text('Delete'),
                             ),
                           ],
                         );
@@ -230,15 +232,16 @@ class _PostsState extends State<Posts> {
                               title: 'Report', 
                               message: 'Please select the reason for reporting this post', 
                               type: TypeOfPost.post,
-                              okCallBack: (typeOfReport, typeOfPost) async {
+                              okCallBack: (typeOfReport, typeOfPost, cmt) async {
                                 return await FirebaseFirestore.instance.collection('reports').add({
                                   "date":Timestamp.now(),
-                                  "isRequestProcessed":true,
+                                  "isRequestProcessed":false,
                                   "post": post.postRef,
                                   "type": typeOfPost.index,
                                   "typeOfReport": typeOfReport.index,
                                   "userReported": post.owner,
                                   "userReporter": using.userRef,
+                                  "cmt": cmt,
                                 });
                               }
                             );
@@ -273,7 +276,7 @@ class _PostsState extends State<Posts> {
                           }
                         }
                       },
-                      child: const Icon(Icons.more_vert),
+                      child: const Icon(Icons.more_vert, size: 30),
                     ),
               ),
               if(hasAttachment)

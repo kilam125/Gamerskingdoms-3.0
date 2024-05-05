@@ -9,6 +9,7 @@ import 'package:gamers_kingdom/enums/gender.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/pop_up/pop_up.dart';
+import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/gmk_textfield.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -47,15 +48,15 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
   // Page View 1
   TextEditingController pseudoController = TextEditingController();
   TextEditingController bioController = TextEditingController();
-  List<String> skills = List.generate(Skills.values.length, (index) => Skills.values[index].name.capitalize());
-  List<String> selectedSkills = [];
-  late final List<MultiSelectItem<String>> items;
+  List<Skills> skills = List.generate(Skills.values.length, (index) => Skills.values[index]);
+  List<Skills> selectedSkills = [];
+  late final List<MultiSelectItem<Skills>> items;
 
   @override
   void initState() {
     super.initState();
     items = skills
-      .map((skill) => MultiSelectItem<String>(skill, skill))
+      .map((skill) => MultiSelectItem<Skills>(skill, Util.skillsToString(skill)))
       .toList();
   }
 
@@ -99,7 +100,7 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
             return (!isLoading)?
             Column(
               children: [
-                if(position == 1)
+                if(position == 0)
                 Row(
                   children: [
                     Flexible(
@@ -168,7 +169,7 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                                 .where("displayName",isEqualTo: pseudoController.text.toLowerCase().trim())
                                 .count()
                                 .get();
-                              if(aq.count > 0){
+                              if(aq.count! > 0){
                                 debugPrint("Found user already existing");
                                 PopUp.okPopUp(
                                   context: _scaffoldKey.currentContext!,
@@ -187,21 +188,19 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                                     "surname": surnameController.text.toLowerCase().trim(),
                                     "displayName": pseudoController.text.toLowerCase().trim(),
                                     "bio": bioController.text,
-                                    "skills": selectedSkills
+                                    "skills": selectedSkills.map((e) => Util.skillsToString(e)).toList()
+
                                   }
                                 );
-                                if(userC != null){
-                                  await userC.user!.sendEmailVerification();
-                                }
-                                await FirebaseAuth.instance.signOut();
-                                debugPrint("Sign out");
+                                await Future.wait([userC!.user!.sendEmailVerification(), FirebaseAuth.instance.signOut()]);
+/*                                 debugPrint("Sign out");
                                 if(!mounted)return;
                                 await PopUp.okPopUp(
                                   context: _scaffoldKey.currentContext!,
                                   title: "Done", 
                                   message: "Your registration has been done, please go to your mails and click the confirmation link."
                                 );
-                                if(!mounted)return;
+                                if(!mounted)return; */
                                 Navigator.of(_scaffoldKey.currentContext!).pop();
                               }
                             } on FirebaseAuthException catch (e) {
@@ -489,7 +488,7 @@ class _SignUpState extends State<SignUp> with AutomaticKeepAliveClientMixin  {
                                 style: Theme.of(context).textTheme.headlineSmall,
                               )
                             ),
-                            MultiSelectDialogField<String>(
+                            MultiSelectDialogField<Skills>(
                               items: items,
                               title: const Text("Skills"),
                               selectedColor: Colors.blue,

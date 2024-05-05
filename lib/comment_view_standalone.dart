@@ -118,8 +118,8 @@ class _CommentViewStandaloneState extends State<CommentViewStandalone> {
                             child: Image.asset(
                               "assets/images/userpic.png", 
                               fit: BoxFit.fill,
-                              height: 30,
-                              width: 30,
+                              height: 50,
+                              width: 50,
                             ),
                           )
                           :ClipRRect(
@@ -127,8 +127,8 @@ class _CommentViewStandaloneState extends State<CommentViewStandalone> {
                           child: Image.network(
                             user.picture!,
                             fit: BoxFit.fill,
-                            height: 30,
-                            width: 30,
+                            height: 50,
+                            width: 50,
                           ),
                         ),
                       ),

@@ -82,7 +82,6 @@ class _AddPostsState extends State<AddPosts> {
       print("Error during conversion: $e");
       return null;
     }
-    return null;
   }
 
   Future<String> get _localPath async {

@@ -18,4 +18,10 @@ class DatabaseService{
       .asStream()
       .map((userData) => UserProfile.fromFirestore(data:userData));
   }
+  static streamAllUsers(){
+    return FirebaseFirestore.instance
+      .collection("users")
+      .snapshots()
+      .map((userData) => userData.docs.map((doc) => UserProfile.fromFirestore(data:doc)).toList());
+  }
 }

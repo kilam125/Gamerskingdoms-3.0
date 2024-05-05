@@ -61,7 +61,8 @@ class CommentLine extends StatelessWidget {
                     Navigator.of(context).pushNamed(
                       OtherUserProfileView.routeName,
                       arguments: {
-                        "user":user
+                        "user":user,
+                        "me": myself
                       }
                     );
                   } else {
@@ -100,8 +101,8 @@ class CommentLine extends StatelessWidget {
                                   child: Image.asset(
                                     "assets/images/userpic.png", 
                                     fit: BoxFit.fill,
-                                    height: 30,
-                                    width: 30,
+                                    height: 50,
+                                    width: 50,
                                   ),
                                 )
                                 :ClipRRect(
@@ -109,8 +110,8 @@ class CommentLine extends StatelessWidget {
                                 child: Image.network(
                                   user.picture!,
                                   fit: BoxFit.fill,
-                                  height: 30,
-                                  width: 30,
+                                  height: 50,
+                                  width: 50,
                                 ),
                               ),
                             ),
@@ -151,7 +152,12 @@ class CommentLine extends StatelessWidget {
                                 if(comment.commentator == myself.userRef)
                                 const PopupMenuItem<String>(
                                   value: 'delete',
-                                  child: Text('Supprimer'),
+                                  child: Text('Delete'),
+                                ),
+                                if(comment.commentator != myself.userRef)
+                                const PopupMenuItem<String>(
+                                  value: 'block',
+                                  child: Text('Block user'),
                                 ),
                               ],
                             );
@@ -164,7 +170,7 @@ class CommentLine extends StatelessWidget {
                                   title: 'Report', 
                                   message: 'Please select the reason for reporting this comment', 
                                   type: TypeOfPost.comment,
-                                  okCallBack: (typeOfReport, typeOfPost) async {
+                                  okCallBack: (typeOfReport, typeOfPost, cmt) async {
                                     return await FirebaseFirestore.instance.collection('reports').add({
                                       "date":Timestamp.now(),
                                       "isRequestProcessed":false,
@@ -173,6 +179,7 @@ class CommentLine extends StatelessWidget {
                                       "typeOfReport": typeOfReport.index,
                                       "userReported": comment.commentator,
                                       "userReporter": myself.userRef,
+                                      "cmt": cmt,
                                     });
                                   }
                                 );
@@ -194,10 +201,12 @@ class CommentLine extends StatelessWidget {
                                     await comment.ref.delete();
                                   }
                                 );
+                              } else if(value == 'block'){
+                                await myself.blockUser(user);
                               }
                             }
                           },
-                          child: const Icon(Icons.more_vert),
+                          child: const Icon(Icons.more_vert, size: 25),
                         ),
                       ),
                     )

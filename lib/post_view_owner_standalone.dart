@@ -123,8 +123,8 @@ class _PostViewOwnerStandaloneState extends State<PostViewOwnerStandalone> {
                                 child: Image.asset(
                                   "assets/images/userpic.png", 
                                   fit: BoxFit.fill,
-                                  height: 30,
-                                  width: 30,
+                                  height: 50,
+                                  width: 50,
                                 ),
                               )
                               :ClipRRect(
@@ -132,8 +132,8 @@ class _PostViewOwnerStandaloneState extends State<PostViewOwnerStandalone> {
                               child: Image.network(
                                 user.picture!,
                                 fit: BoxFit.fill,
-                                height: 30,
-                                width: 30,
+                                height: 50,
+                                width: 50,
                               ),
                             ),
                           ),

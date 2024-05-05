@@ -206,6 +206,9 @@ class _HomeState extends State<Home> {
 }
 
 class UserSearchDelegate extends SearchDelegate {
+
+  UserSearchDelegate();
+
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -213,6 +216,7 @@ class UserSearchDelegate extends SearchDelegate {
         icon: const Icon(Icons.clear),
         onPressed: () {
           query = '';
+          showResults(context); // Pour actualiser les résultats après l'effacement de la requête
         },
       ),
     ];
@@ -230,57 +234,42 @@ class UserSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    return FutureBuilder<QuerySnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('users') // Nom de votre collection Firestore
-          .where('displayName', isEqualTo: query)
-          .get(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    final List<UserProfile> filteredUsers = context.read<List<UserProfile>>()
+        .where((user) => user.displayName.toLowerCase().startsWith(query.toLowerCase()))
+        .toList();
 
-        log("Snapshot : ${snapshot.data!.docs.toString()}");
-        log(query.toString());
-        final List<UserProfile> users = snapshot.data!.docs
-            .map((doc) => UserProfile.fromFirestore(data: doc))
-            .toList();
-        
-        return ListView.builder(
-          itemCount: users.length,
-          itemBuilder: (context, index) {
-            final user = users[index];
-            return ListTile(
-              onTap: () => Navigator.of(context).pushNamed(
-                OtherUserProfileView.routeName,
-                arguments: {
-                  "user":user,
-                  "ownUser":false
-                }
+    return ListView.builder(
+      itemCount: filteredUsers.length,
+      itemBuilder: (context, index) {
+        final user = filteredUsers[index];
+        return ListTile(
+          onTap: () => Navigator.of(context).pushNamed(
+            OtherUserProfileView.routeName,
+            arguments: {
+              "user": user,
+              "ownUser": false
+            }
+          ),
+          leading: user.picture == null ? 
+            ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: Image.asset(
+                "assets/images/userpic.png", 
+                fit: BoxFit.fill,
+                height: 30,
+                width: 30,
               ),
-              leading: user.picture == null ? 
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: Image.asset(
-                    "assets/images/userpic.png", 
-                    fit: BoxFit.fill,
-                    height: 30,
-                    width: 30,
-                  ),
-                )
-                :ClipRRect(
-                borderRadius: BorderRadius.circular(30),
-                child: Image.network(
-                  user.picture!,
-                  fit: BoxFit.fill,
-                  height: 30,
-                  width: 30,
-                ),
+            )
+            : ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: Image.network(
+                user.picture!,
+                fit: BoxFit.fill,
+                height: 30,
+                width: 30,
               ),
-              title: Text(user.displayName),
-              subtitle: Text(user.email),
-            );
-          },
+            ),
+          title: Text(user.displayName),
         );
       },
     );
@@ -288,8 +277,44 @@ class UserSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return const Center(
-      child: Text('Search users by name'),
+    log("Query : $query");
+    final List<UserProfile> suggestions = context.read<List<UserProfile>>()
+        .where((user) {
+          return user.displayName.toLowerCase().contains(query.toLowerCase());
+        }).toList();
+
+    return ListView.builder(
+      itemCount: suggestions.length,
+      itemBuilder: (context, index) {
+        final user = suggestions[index];
+        return ListTile(
+          onTap: () {
+            query = user.displayName;
+            showResults(context);
+          },
+          leading: user.picture == null ? 
+            ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: Image.asset(
+                "assets/images/userpic.png", 
+                fit: BoxFit.fill,
+                height: 30,
+                width: 30,
+              ),
+            )
+            : ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: Image.network(
+                user.picture!,
+                fit: BoxFit.fill,
+                height: 30,
+                width: 30,
+              ),
+            ),
+          title: Text(user.displayName),
+        );
+      },
     );
   }
 }
+

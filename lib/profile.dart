@@ -176,8 +176,12 @@ class _ProfileState extends State<Profile> {
                       MultiSelectDialogField<Skills>(
                         initialValue: selectedSkills,
                         items: items,
+                        selectedItemsTextStyle: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.blue
+                        ),
                         itemsTextStyle: const TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           color: Colors.black
                         ),
                         title: const Text("Skills"),
@@ -212,9 +216,7 @@ class _ProfileState extends State<Profile> {
                     await user.setUser(
                       displayName: user.displayName.toLowerCase(),
                       skills: selectedSkills, 
-                      picture: user.picture == null ? 
-                        null
-                        : user.picture!, 
+                      picture: user.picture, 
                       bio: user.bio!
                     );
                     if(!mounted)return;

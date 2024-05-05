@@ -39,28 +39,32 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    FirebaseAuth.instance.authStateChanges().listen((user) {
-      bool result = user != null;
-      debugPrint("InListening : ${result?"/Dashboard":"/LoginPage"}");
-      if (result) {
-        debugPrint("Checking mail validation");
-        if (user.emailVerified) {
-          debugPrint("Mail already verified");
+    try {
+      FirebaseAuth.instance.authStateChanges().listen((user) {
+        bool result = user != null;
+        debugPrint("InListening : ${result?"/Dashboard":"/LoginPage"}");
+        if (result) {
+          debugPrint("Checking mail validation");
+          if (user.emailVerified) {
+            debugPrint("Mail already verified");
+            navigatorKey.currentState!.pushReplacementNamed(
+              Dashboard.routeName,
+              arguments: {
+                "email":user.email
+              }
+            );
+          }
+        } else {
+          debugPrint("Not Authenticated");
           navigatorKey.currentState!.pushReplacementNamed(
-            Dashboard.routeName,
-            arguments: {
-              "email":user.email
-            }
+            HomePage.routeName,
+            arguments: {}
           );
         }
-      } else {
-        debugPrint("Not Authenticated");
-        navigatorKey.currentState!.pushReplacementNamed(
-          HomePage.routeName,
-          arguments: {}
-        );
-      }
-    });
+      });
+    } catch (e) {
+      debugPrint("Error : $e");
+    }
   }
 
   @override
@@ -161,15 +165,15 @@ class _MyAppState extends State<MyApp> {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.resolveWith((states) {
+            backgroundColor: WidgetStateProperty.resolveWith((states) {
               // If the button is pressed, return green, otherwise blue
-              if (states.contains(MaterialState.pressed)) {
+              if (states.contains(WidgetState.pressed)) {
                 return Theme.of(context).primaryColor.withOpacity(.5);
               }
               return Theme.of(context).primaryColor;
             }),
-            textStyle: MaterialStateProperty.resolveWith((states) {
-              if (states.contains(MaterialState.hovered)) {
+            textStyle: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.hovered)) {
                 return GoogleFonts.lalezar(
                   fontSize:30,
                   fontWeight:FontWeight.w100,

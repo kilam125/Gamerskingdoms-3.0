@@ -1,8 +1,7 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -83,8 +82,9 @@ import 'package:provider/provider.dart';
           )
         );
       } else if(route == PostViewOwnerStandalone.routeName) {
+        log("LikerId : ${message.data["likerId"]}");
         Post post = Post.fromFirestore(data: await FirebaseFirestore.instance.collection("posts").doc(message.data["postId"]).get());
-        DocumentSnapshot followerDoc = await FirebaseFirestore.instance.collection("users").doc(message.data["likerId"]).get();
+        DocumentSnapshot followerDoc = await FirebaseFirestore.instance.collection("users").doc(message.data["recipientId"]).get();
         navigatorKey.currentState!.push(
           MaterialPageRoute(
             settings: RouteSettings(

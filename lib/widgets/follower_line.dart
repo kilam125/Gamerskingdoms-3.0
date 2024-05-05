@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/other_user_profile_view.dart';
+import 'package:provider/provider.dart';
 
 class FollowerLine extends StatelessWidget {
   final UserProfile user;
@@ -19,7 +20,8 @@ class FollowerLine extends StatelessWidget {
         Navigator.of(context).pushNamed(
           OtherUserProfileView.routeName,
           arguments: {
-            "user":user
+            "user":user,
+            "me": context.read<UserProfile>()
           }
         );
       },
@@ -29,8 +31,8 @@ class FollowerLine extends StatelessWidget {
           child: Image.asset(
             "assets/images/userpic.png", 
             fit: BoxFit.fill,
-            height: 30,
-            width: 30,
+            height: 50,
+            width: 50,
           ),
         )
         :ClipRRect(
@@ -38,8 +40,8 @@ class FollowerLine extends StatelessWidget {
         child: Image.network(
           user.picture!,
           fit: BoxFit.fill,
-          height: 30,
-          width: 30,
+          height: 50,
+          width: 50,
         ),
       ),
       title: Text(

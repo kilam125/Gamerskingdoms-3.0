@@ -67,7 +67,6 @@ class _DashboardState extends State<Dashboard> {
         } */
       );
     }
-    
     return WillPopScope(
       onWillPop: (){
         return Future.value(false);
@@ -86,11 +85,17 @@ class _DashboardState extends State<Dashboard> {
             providers: [
               StreamProvider<UserProfile>.value(
                 updateShouldNotify:(oldList, currentList) {
-                  debugPrint("Updating");
                   return (currentList != oldList);
                 },
                 initialData: UserProfile.fromFirestore(data: qds.docs.first),
                 value: DatabaseService.streamUser(qds.docs.first.id),
+              ),
+              StreamProvider<List<UserProfile>>.value(
+                updateShouldNotify:(oldList, currentList) {
+                  return (currentList != oldList);
+                },
+                initialData: const [],
+                value: DatabaseService.streamAllUsers(),
               ),
               StreamProvider<List<Post>>.value(
                 value:Post.streamAllPosts(),
@@ -136,6 +141,7 @@ class _DashboardState extends State<Dashboard> {
                       ),
                       builder: (context) => OtherUserProfileView(
                         user: (settings.arguments as Map)["user"],
+                        me: (settings.arguments as Map)["me"],
                       )
                     );
                   }

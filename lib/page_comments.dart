@@ -73,7 +73,7 @@ class _PageCommentsState extends State<PageComments> {
   
   @override
   Widget build(BuildContext context) {
-    Post post = context.read<List<Post>>().firstWhere((post) =>(post.postRef == widget.postRef));
+    Post post = context.read<List<Post>>().firstWhere((post) => (post.postRef == widget.postRef));
     return Scaffold(
       appBar: AppBar(
         title: const Text("Comments"),
@@ -88,11 +88,12 @@ class _PageCommentsState extends State<PageComments> {
                 slivers: [
                   SliverToBoxAdapter(
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Flexible(
                           flex: 2,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
+                            padding: const EdgeInsets.only(left: 16.0, right: 8, top: 16, bottom: 16),
                             clipBehavior: Clip.antiAlias,
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle
@@ -103,8 +104,8 @@ class _PageCommentsState extends State<PageComments> {
                                 child: Image.asset(
                                   "assets/images/userpic.png", 
                                   fit: BoxFit.fill,
-                                  height: 30,
-                                  width: 30,
+                                  height: 50,
+                                  width: 50,
                                 ),
                               )
                               :ClipRRect(
@@ -112,8 +113,8 @@ class _PageCommentsState extends State<PageComments> {
                               child: Image.network(
                                 widget.userProfile.picture!,
                                 fit: BoxFit.fill,
-                                height: 30,
-                                width: 30,
+                                height: 50,
+                                width: 50,
                               ),
                             ),
                           ),
@@ -121,15 +122,17 @@ class _PageCommentsState extends State<PageComments> {
                         Flexible(
                           flex: 6,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 widget.userProfile.displayName.capitalize(),
                                 style: Theme.of(context).textTheme.titleSmall,
                               ),
                               if(post.content != null)
-                              Text(
-                                post.content!
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: Text(
+                                  post.content!
+                                ),
                               )
                             ],
                           ),
@@ -155,9 +158,10 @@ class _PageCommentsState extends State<PageComments> {
                             if(!snapshot.hasData){
                               return const ProgressWidget();
                             }
+                            Comment comment = Comment.fromFirestore(doc: snapshot.data!);
                             return CommentLine(
                               myself: context.read<UserProfile>(),
-                              comment:Comment.fromFirestore(doc: snapshot.data!)
+                              comment: comment
                             );
                           }
                         )

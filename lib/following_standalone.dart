@@ -52,15 +52,15 @@ class _FollowingStandaloneState extends State<FollowingStandalone> {
                   builder: (context, snapshot) {
                     if(userProfile.following == null){
                       return const SizedBox(
-                        height: 30,
-                        width: 30,
+                        height: 50,
+                        width: 50,
                         child: ProgressWidget(),
                       );
                     }
                     if(!snapshot.hasData){
                       return const SizedBox(
-                        height: 30,
-                        width: 30,
+                        height: 50,
+                        width: 50,
                         child: ProgressWidget(),
                       );
                     }

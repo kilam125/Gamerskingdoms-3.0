@@ -6,6 +6,7 @@ import 'package:gamers_kingdom/followers_standalone.dart';
 import 'package:gamers_kingdom/following_standalone.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
+import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/util/util.dart';
 import 'package:gamers_kingdom/widgets/post_widget.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
@@ -15,9 +16,11 @@ import 'package:provider/provider.dart';
 
 class OtherUserProfileView extends StatefulWidget {
   final UserProfile user;
+  final UserProfile me;
   const OtherUserProfileView({
     super.key,
     required this.user,
+    required this.me,
   });
   static const String routeName = "/OtherUserProfileView";
   @override
@@ -53,6 +56,44 @@ class _OtherUserProfileViewState extends State<OtherUserProfileView> with Ticker
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          GestureDetector(
+            onTapDown: (details) async {
+              final offset = details.globalPosition;
+              // Utiliser PopupMenuButton
+              String? value = await showMenu<String>(
+                useRootNavigator: false,
+                context: context,
+                position: RelativeRect.fromLTRB(
+                  offset.dx,
+                  offset.dy,
+                  MediaQuery.of(context).size.width - offset.dx,
+                  MediaQuery.of(context).size.height - offset.dy,
+                ),
+                items: [
+                  const PopupMenuItem<String>(
+                    value: 'block',
+                    child: Text('Block user'),
+                  ),
+                ],
+              );
+              // Faire quelque chose avec la valeur retournée
+              if (value != null) {
+                // ignore: use_build_context_synchronously
+                PopUp.yesNoPopUp(
+                  context: context, 
+                  title: "Wait..", 
+                  message: "Are you sure you want to block this user ?", 
+                  yesCallBack: () async {
+                    await widget.me.blockUser(widget.user);
+                    //await using.blockUser(user);
+                  }
+                );
+              }
+            },
+            child: const Icon(Icons.more_vert, size: 30),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.only(top:16.0, left: 8, right: 8.0),
@@ -72,7 +113,7 @@ class _OtherUserProfileViewState extends State<OtherUserProfileView> with Ticker
                 return [
                   SliverToBoxAdapter(
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
                             clipBehavior: Clip.antiAlias,
@@ -83,21 +124,21 @@ class _OtherUserProfileViewState extends State<OtherUserProfileView> with Ticker
                               Image.asset(
                                 "assets/images/userpic.png", 
                                 fit: BoxFit.fill,
-                                height: 50,
-                                width: 50,
+                                height: 80,
+                                width: 80,
                               )
                             :Image.network(
                               widget.user.picture!,
                               fit: BoxFit.fill,
-                              height: 50,
-                              width: 50,
+                              height: 80,
+                              width: 80,
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.only(left: 25.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
                                   widget.user.displayName.capitalize(),
@@ -196,7 +237,12 @@ class _OtherUserProfileViewState extends State<OtherUserProfileView> with Ticker
                         (index) => Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Chip(
-                            label: Text(Util.skillsToString(widget.user.skills[index])),
+                            label: Text(
+                              Util.skillsToString(widget.user.skills[index]),
+                              style: const TextStyle(
+                                fontSize: 20
+                              ),
+                            ),
                           ),
                         )
                       ),

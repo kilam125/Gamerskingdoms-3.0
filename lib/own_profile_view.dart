@@ -213,7 +213,10 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                         (index) => Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Chip(
-                            label: Text(Util.skillsToString(user.skills[index])),
+                            label: Text(
+                              Util.skillsToString(user.skills[index]),
+                              style: const TextStyle(fontSize: 16),
+                            ),
                           ),
                         )
                       ),
@@ -289,6 +292,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
               body: TabBarView(
                 controller: controller,
                 children: [
+                  user.following!.isNotEmpty ? 
                   StreamBuilder(
                     stream: FirebaseFirestore.instance
                       .collection("posts")
@@ -334,7 +338,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                         )
                       );
                     }
-                  ),
+                  ) : const Center(child: Text("No post from following")),
                   ListView.builder(
                     itemCount: posts.length,
                     itemBuilder: ((context, index) {
