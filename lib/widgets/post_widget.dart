@@ -1,11 +1,16 @@
 
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
+import 'package:gamers_kingdom/enums/type_of_post.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/other_user_profile_view.dart';
 import 'package:gamers_kingdom/page_comments.dart';
+import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/widgets/audio_widget.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/video_widget.dart';
@@ -16,12 +21,16 @@ import 'package:provider/provider.dart';
 class PostWidget extends StatelessWidget {
   final Post post;
   final UserProfile user;
+  final UserProfile moi;
   final bool latest;
+  final bool fromNotifAbo;
   const PostWidget({
     super.key,
     required this.post,
     required this.user,
-    required this.latest
+    required this.latest,
+    required this.moi,
+    this.fromNotifAbo = false, 
   });
 
   static Widget getPictureWidget(String url){
@@ -123,20 +132,98 @@ class PostWidget extends StatelessWidget {
                       child: Chip(
                         label: Text("Latest"),
                       ),
+                    ),
+                    GestureDetector(
+                      onTapDown: (details) async {
+                        final offset = details.globalPosition;
+                        // Utiliser PopupMenuButton
+                        String? value = await showMenu<String>(
+                          useRootNavigator: false,
+                          context: context,
+                          position: RelativeRect.fromLTRB(
+                            offset.dx,
+                            offset.dy,
+                            MediaQuery.of(context).size.width - offset.dx,
+                            MediaQuery.of(context).size.height - offset.dy,
+                          ),
+                          items: [
+                            if(post.owner != using.userRef)
+                            const PopupMenuItem<String>(
+                              value: 'report',
+                              child: Text('Report'),
+                            ),
+                            if(post.owner != using.userRef)
+                            const PopupMenuItem<String>(
+                              value: 'block',
+                              child: Text('Block user'),
+                            ),
+                            if(post.owner == using.userRef)
+                            const PopupMenuItem<String>(
+                              value: 'delete',
+                              child: Text('Delete'),
+                            ),
+                          ],
+                        );
+                        // Faire quelque chose avec la valeur retournée
+                        if (value != null) {
+                          if (value == 'report') {
+                            // ignore: use_build_context_synchronously
+                            var result = await PopUp.reportPopUp(
+                              context: context, 
+                              title: 'Report', 
+                              message: 'Please select the reason for reporting this post', 
+                              type: TypeOfPost.post,
+                              okCallBack: (typeOfReport, typeOfPost, cmt) async {
+                                return await FirebaseFirestore.instance.collection('reports').add({
+                                  "date":Timestamp.now(),
+                                  "isRequestProcessed":false,
+                                  "post": post.postRef,
+                                  "type": typeOfPost.index,
+                                  "typeOfReport": typeOfReport.index,
+                                  "userReported": post.owner,
+                                  "userReporter": using.userRef,
+                                  "cmt": cmt,
+                                });
+                              }
+                            );
+                            if(result != null && result){
+                              PopUp.okPopUp(
+                                context: context, 
+                                title: "Done", 
+                                message: "Post has been reported", 
+                                okCallBack: () {}
+                              );
+                            }
+                          } else if (value == 'delete') {
+                            // ignore: use_build_context_synchronously
+                            PopUp.yesNoPopUp(
+                              context: context, 
+                              title: "Wait..", 
+                              message: "Are you sure you want to delete this post ?", 
+                              yesCallBack: () async {
+                                await post.postRef.delete();
+                              }
+                            );
+                          } else if (value == 'block') {
+                            // ignore: use_build_context_synchronously
+                            PopUp.yesNoPopUp(
+                              context: context, 
+                              title: "Wait..", 
+                              message: "Are you sure you want to block this user ?", 
+                              yesCallBack: () async {
+                                await using.blockUser(user);
+                              }
+                            );
+                          }
+                        }
+                      },
+                      child: const Icon(Icons.more_vert, size: 30),
                     )
                   ],
                 ),
               );
             }
           },
-        ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 10),
-          height: 1,
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            color: Colors.black
-          ),
         ),
         if(post.content != null && post.content!.isNotEmpty)
         Padding(
@@ -179,13 +266,38 @@ class PostWidget extends StatelessWidget {
           child: GestureDetector(
             onTap: (){
               debugPrint("Tapped");
-              Navigator.of(context).pushNamed(
-                PageComments.routeName,
-                arguments: {
-                  "userProfile":user,
-                  "postRef":post.postRef
-                }
-              );
+              if(fromNotifAbo){
+                log("Tapped from notif abo");
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => StreamProvider<List<Post>>.value(
+                      initialData: [post],
+                      value: Post.streamAPost(post),
+                      builder: (context, c) {
+                        return StreamProvider<UserProfile>.value(
+                          initialData: moi,
+                          value: UserProfile.streamUser(moi.userRef),
+                          builder: (context, v) {
+                            return PageComments(
+                              userProfile: user,
+                              postRef: post.postRef
+                            );
+                          }
+                        );
+                      }
+                    )
+                  )
+                );
+              } else {
+                log("Tapped outside notif abo");
+                Navigator.of(context).pushNamed(
+                  PageComments.routeName,
+                  arguments: {
+                    "userProfile":user,
+                    "postRef":post.postRef
+                  }
+                );
+              }
             },
             child: Text(
               "Check ${post.comments.length} comments",

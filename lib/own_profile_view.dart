@@ -330,6 +330,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                                   latest: index == 0,
                                   post: ps, 
                                   user: owner,
+                                  moi: user
                                 );
                               }
                             )
@@ -378,6 +379,7 @@ class _OwnProfileViewState extends State<OwnProfileView> with TickerProviderStat
                             latest: index == 0,
                             post: posts[index], 
                             user: user,
+                            moi: user
                           )
                         ),
                       );

@@ -1,5 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/skills.dart';
@@ -59,7 +60,11 @@ class _ProfileState extends State<Profile> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: (){
-              FirebaseAuth.instance.signOut();
+              user.userRef.update({
+                "fcmTokens": []
+              }).then((value){
+                FirebaseAuth.instance.signOut();
+              });
             },
           )
         ],
@@ -177,11 +182,11 @@ class _ProfileState extends State<Profile> {
                         initialValue: selectedSkills,
                         items: items,
                         selectedItemsTextStyle: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 20,
                           color: Colors.blue
                         ),
                         itemsTextStyle: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 20,
                           color: Colors.black
                         ),
                         title: const Text("Skills"),
@@ -194,7 +199,7 @@ class _ProfileState extends State<Profile> {
                           "Your skills",
                           style: TextStyle(
                             color: Colors.blue[800],
-                            fontSize: 16,
+                            fontSize: 20,
                           ),
                         ),
                         onConfirm: (results) {

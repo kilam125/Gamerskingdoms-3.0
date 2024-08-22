@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
@@ -82,6 +83,10 @@ class _PageCommentsState extends State<PageComments> {
         key: formKey,
         child: Column(
           children: [
+            if(kDebugMode)
+            Text("Je suis : ${context.read<UserProfile>().displayName}"),
+            if(kDebugMode)
+            Text("Post owner : ${widget.userProfile.displayName}"),
             Flexible(
               flex: 8,
               child: CustomScrollView(
@@ -159,9 +164,19 @@ class _PageCommentsState extends State<PageComments> {
                               return const ProgressWidget();
                             }
                             Comment comment = Comment.fromFirestore(doc: snapshot.data!);
-                            return CommentLine(
-                              myself: context.read<UserProfile>(),
-                              comment: comment
+                            return StreamBuilder(
+                              stream: post.owner.get().asStream(),
+                              builder: (context, postOwner) {
+                                if(!postOwner.hasData){
+                                  return const ProgressWidget();
+                                }
+                                return CommentLine(
+                                  myself: context.read<UserProfile>(),
+                                  comment: comment,
+                                  nested: true,
+                                  postOwner: postOwner.data,
+                                );
+                              }
                             );
                           }
                         )

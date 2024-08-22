@@ -322,6 +322,7 @@ class _OtherUserProfileViewState extends State<OtherUserProfileView> with Ticker
                           latest: index == posts.length-1,
                           post: posts[index], 
                           user: widget.user,
+                          moi: widget.me,
                         )
                       );
                       }

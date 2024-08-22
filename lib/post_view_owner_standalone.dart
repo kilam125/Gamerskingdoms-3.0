@@ -1,7 +1,8 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/material.dart';
-import 'package:gamers_kingdom/comments_view_standalone.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/main.dart';
@@ -17,12 +18,12 @@ import 'package:provider/provider.dart';
 
 class PostViewOwnerStandalone extends StatefulWidget {
   final Post post;
-  final UserProfile viewer;
+  final UserProfile moi;
   final bool ownUser = true;
   const PostViewOwnerStandalone({
     super.key,
     required this.post,
-    required this.viewer
+    required this.moi
   });
   static const String routeName = "/PostViewOwnerStandalone";
   @override
@@ -72,6 +73,8 @@ class _PostViewOwnerStandaloneState extends State<PostViewOwnerStandalone> {
   
   @override
   Widget build(BuildContext context) {
+    // devrait montrer sam93200
+    log("Moi : ${widget.moi.displayName}");
     return Scaffold(
       appBar: AppBar(),
       body: Container(
@@ -161,15 +164,15 @@ class _PostViewOwnerStandaloneState extends State<PostViewOwnerStandalone> {
                       children: [
                         IconButton(
                           onPressed: () async { 
-                            if(!post.likers.contains(widget.viewer.userRef)){
-                              await post.addLike(widget.viewer.userRef);
+                            if(!post.likers.contains(widget.moi.userRef)){
+                              await post.addLike(widget.moi.userRef);
                             } else {
-                              await post.removeLike(widget.viewer.userRef);
+                              await post.removeLike(widget.moi.userRef);
                             }
                           }, 
                           icon: Icon(
-                            post.likers.contains(widget.viewer.userRef) ? Icons.star : Icons.star_border,
-                            color: post.likers.contains(widget.viewer.userRef) ? const Color.fromARGB(255, 216, 174, 84) : Colors.black,
+                            post.likers.contains(widget.moi.userRef) ? Icons.star : Icons.star_border,
+                            color: post.likers.contains(widget.moi.userRef) ? const Color.fromARGB(255, 216, 174, 84) : Colors.black,
                             size: 30,
                           )
                         ),
@@ -183,7 +186,7 @@ class _PostViewOwnerStandaloneState extends State<PostViewOwnerStandalone> {
                                 builder: (context) => MultiProvider(
                                   providers: [
                                     ChangeNotifierProvider<UserProfile>.value(
-                                      value: widget.viewer
+                                      value: widget.moi
                                     ),
                                     StreamProvider<List<Post>>.value(
                                       value: Post.streamAPost(post),
@@ -238,7 +241,7 @@ class _PostViewOwnerStandaloneState extends State<PostViewOwnerStandalone> {
                               builder: (context) => MultiProvider(
                                 providers: [
                                   ChangeNotifierProvider<UserProfile>.value(
-                                    value: widget.viewer
+                                    value: widget.moi
                                   ),
                                   StreamProvider<List<Post>>.value(
                                     value: Post.streamAPost(post),

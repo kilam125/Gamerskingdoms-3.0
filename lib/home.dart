@@ -247,7 +247,7 @@ class UserSearchDelegate extends SearchDelegate {
             OtherUserProfileView.routeName,
             arguments: {
               "user": user,
-              "ownUser": false
+              "me": context.read<UserProfile>()
             }
           ),
           leading: user.picture == null ? 

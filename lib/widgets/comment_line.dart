@@ -1,4 +1,6 @@
 
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
@@ -7,7 +9,6 @@ import 'package:gamers_kingdom/extensions/string_extension.dart';
 import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/other_user_profile_view.dart';
-import 'package:gamers_kingdom/own_profile_view.dart';
 import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/profile_view_standalone.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
@@ -57,6 +58,7 @@ class CommentLine extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: (){
+                  log("Nested : $nested");
                   if(!nested){
                     Navigator.of(context).pushNamed(
                       OtherUserProfileView.routeName,
@@ -66,14 +68,19 @@ class CommentLine extends StatelessWidget {
                       }
                     );
                   } else {
+                    // user snapshot log
+                    // samy.hamitouche8@gmail.com
+                    log("User snapshot : ${userSnapshot.data!.data().toString()}");
+                    // sam93200@gmail.com
+                    log("moi : ${myself.displayName}");
                     navigatorKey.currentState!.push(
                       MaterialPageRoute(
                         settings: const RouteSettings(
                           name:ProfileViewStandalone.routeName,
                         ),
                         builder: (context) => ProfileViewStandalone(
-                          followerData : UserProfile.fromFirestore(data: userSnapshot.data!),
-                          recipientData : UserProfile.fromFirestore(data: postOwner!)
+                          follower : UserProfile.fromFirestore(data: userSnapshot.data!),
+                          moi : UserProfile.fromFirestore(data: postOwner!)
                         )
                       )
                     );
@@ -198,7 +205,10 @@ class CommentLine extends StatelessWidget {
                                   title: "Wait..", 
                                   message: "Are you sure you want to delete this comment ?", 
                                   yesCallBack: () async {
-                                    await comment.ref.delete();
+                                    log("Deleting comment on post : ${comment.post}");
+                                    await comment.post.update({
+                                      "comments":FieldValue.arrayRemove([comment.ref])
+                                    });
                                   }
                                 );
                               } else if(value == 'block'){

@@ -76,14 +76,14 @@ import 'package:provider/provider.dart';
               }
             ),
             builder: (context) => ProfileViewStandalone(
-              followerData : UserProfile.fromFirestore(data: followerDoc),
-              recipientData : UserProfile.fromFirestore(data: recipientDoc)
+              follower : UserProfile.fromFirestore(data: followerDoc),
+              moi : UserProfile.fromFirestore(data: recipientDoc)
             )
           )
         );
       } else if(route == PostViewOwnerStandalone.routeName) {
-        log("LikerId : ${message.data["likerId"]}");
         Post post = Post.fromFirestore(data: await FirebaseFirestore.instance.collection("posts").doc(message.data["postId"]).get());
+        DocumentSnapshot moi = (await post.owner.get());
         DocumentSnapshot followerDoc = await FirebaseFirestore.instance.collection("users").doc(message.data["recipientId"]).get();
         navigatorKey.currentState!.push(
           MaterialPageRoute(
@@ -95,7 +95,7 @@ import 'package:provider/provider.dart';
             ),
             builder: (context) => PostViewOwnerStandalone(
               post: post,
-              viewer: UserProfile.fromFirestore(data: followerDoc),
+              moi: UserProfile.fromFirestore(data: followerDoc),
             )
           )
         );
@@ -110,7 +110,7 @@ import 'package:provider/provider.dart';
           postOwnerFuture,
           commentDocFuture,
         ]);
-
+        
         // Une fois les futures résolues, transformer les données reçues en objets appropriés
         Post post = Post.fromFirestore(data: results[0] as DocumentSnapshot);
         UserProfile postOwner = UserProfile.fromFirestore(data: results[1] as DocumentSnapshot);
@@ -118,6 +118,8 @@ import 'package:provider/provider.dart';
         // Pour le UserProfile du commentateur, nous devons attendre la résolution de comment.commentator.get()
         // Cela ne peut pas être parallélisé avec les appels précédents car il dépend de la résolution de commentDocFuture
         UserProfile commentator = UserProfile.fromFirestore(data: await comment.commentator.get());
+        log("Owner ID : ${postOwner.displayName}");
+        log("Commentator ID : ${commentator.displayName}");
         navigatorKey.currentState!.push(
           MaterialPageRoute(
             settings: RouteSettings(
@@ -129,11 +131,10 @@ import 'package:provider/provider.dart';
             builder: (context) => MultiProvider(
               providers: [
                 ChangeNotifierProvider<UserProfile>.value(
-                  value: commentator
+                  value: postOwner
                 ),
                 StreamProvider<List<Post>>.value(
                   value: Post.streamAPost(post),
-                  //value:Post.streamAllPosts(),
                   updateShouldNotify:(oldList,currentList) => (currentList!=oldList),
                   initialData: [post],
                 ),
@@ -159,8 +160,8 @@ import 'package:provider/provider.dart';
               }
             ),
             builder: (context) => ProfileViewStandalone(
-              followerData : UserProfile.fromFirestore(data: followerDoc),
-              recipientData : UserProfile.fromFirestore(data: recipientDoc)
+              follower : UserProfile.fromFirestore(data: followerDoc),
+              moi : UserProfile.fromFirestore(data: recipientDoc)
             )
           )
         );

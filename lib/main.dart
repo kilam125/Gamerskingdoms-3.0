@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamers_kingdom/api/firebase_push.dart';
@@ -274,14 +275,14 @@ class _MyAppState extends State<MyApp> {
               email: FirebaseAuth.instance.currentUser!.email!,
             )
           );
-        }/*  else {
+        } else {
           return MaterialPageRoute(
             settings: RouteSettings(
               name:HomePage.routeName,
             ),
             builder: (context) => const HomePage()
           );
-        } */
+        }
 /*         if(FirebaseAuth.instance.currentUser == null) {
           return MaterialPageRoute(
             settings: RouteSettings(
@@ -316,32 +317,43 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     debugPrint("Routename : HomePage");
-    return WillPopScope(
-      onWillPop: (){
-        return Future.value(false);
-      },
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Container(
-            height: MediaQuery.of(context).size.height,
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-            child: Column(
-              children: [
-                Flexible(
-                  flex: 3,
-                  child: Image.asset("assets/icon/main_logo_transparent.png")
-                ),
-                Flexible(
-                  flex: 7,
-                  child: LoginPage(
-                    parentContext:context
-                  )
-                ),
-              ],
+    if(FirebaseAuth.instance.currentUser != null){
+      return Dashboard(
+        email: FirebaseAuth.instance.currentUser!.email!,
+      );
+    } else {
+      return WillPopScope(
+        onWillPop: (){
+          return Future.value(false);
+        },
+        child: Scaffold(
+          body: SingleChildScrollView(
+            child: Container(
+              height: MediaQuery.of(context).size.height,
+              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+              child: Column(
+                children: [
+                  if(kDebugMode)
+                  const Flexible(
+                    flex:3,
+                    child: Text("On unkown route", style: TextStyle(fontSize: 50),)
+                  ),
+                  Flexible(
+                    flex: 3,
+                    child: Image.asset("assets/icon/main_logo_transparent.png")
+                  ),
+                  Flexible(
+                    flex: 7,
+                    child: LoginPage(
+                      parentContext:context
+                    )
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 }

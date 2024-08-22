@@ -190,6 +190,11 @@ class _AddPostsState extends State<AddPosts> {
                         source: ImageSource.gallery,
                         maxDuration: const Duration(minutes: 1, seconds: 30)
                       );
+                      if(result != null){
+                        setState(() {
+                          isLoading = true;
+                        });
+                      }
                       var compressResult = await VideoCompress.compressVideo(
                         result!.path,
                         quality:VideoQuality.MediumQuality
@@ -199,6 +204,7 @@ class _AddPostsState extends State<AddPosts> {
                           uploadImages = false;
                           uploadVideo = true;
                           isAttachmentSend = true;
+                          isLoading = false;
                           videoFile = XFile(compressResult.path!);
                         });
                       }
@@ -541,7 +547,9 @@ class _AddPostsState extends State<AddPosts> {
                   },
                   child: const Text("Post")
                 ),
-              )
+              ),
+              const SizedBox(height: 40),
+              const Text("Max video lenght : 30 seconds")
             ],
           ),
         ),
