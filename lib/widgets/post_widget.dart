@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:gamers_kingdom/enums/attachment_type.dart';
 import 'package:gamers_kingdom/enums/type_of_post.dart';
 import 'package:gamers_kingdom/extensions/string_extension.dart';
+import 'package:gamers_kingdom/main.dart';
 import 'package:gamers_kingdom/models/post.dart';
 import 'package:gamers_kingdom/models/user.dart';
 import 'package:gamers_kingdom/other_user_profile_view.dart';
@@ -85,12 +86,26 @@ class PostWidget extends StatelessWidget {
               UserProfile user = UserProfile.fromFirestore(data:  ownerSnapshot.data!);
               return GestureDetector(
                 onTap: (){
-                  Navigator.of(context).pushNamed(
+/*                   Navigator.of(context).pushNamed(
                     OtherUserProfileView.routeName,
                     arguments: {
                       "user":user,
                       "me": using
                     }
+                  ); */
+                  navigatorKey.currentState!.push(
+                    MaterialPageRoute(
+                      settings: const RouteSettings(
+                        name: OtherUserProfileView.routeName,
+                      ),
+                      builder: (context) => ListenableProvider.value(
+                        value: using,
+                        child: OtherUserProfileView(
+                          user : user,
+                          me : using
+                        ),
+                      )
+                    )
                   );
                 },
                 child: Row(
@@ -266,7 +281,7 @@ class PostWidget extends StatelessWidget {
           child: GestureDetector(
             onTap: (){
               debugPrint("Tapped");
-              if(fromNotifAbo){
+              if(true){
                 log("Tapped from notif abo");
                 Navigator.of(context).push(
                   MaterialPageRoute(

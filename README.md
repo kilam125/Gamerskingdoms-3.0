@@ -1,6 +1,6 @@
-# gamers_kingdom
+# Commande de build android
 
-A new Flutter project.
+flutter build appbundle --build-number=30 --build-name=2.1.11
 
 ## Getting Started
 

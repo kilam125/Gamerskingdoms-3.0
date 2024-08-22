@@ -13,6 +13,7 @@ import 'package:gamers_kingdom/pop_up/pop_up.dart';
 import 'package:gamers_kingdom/profile_view_standalone.dart';
 import 'package:gamers_kingdom/widgets/progress_widget.dart';
 import 'package:gamers_kingdom/widgets/voice_note_widget.dart';
+import 'package:provider/provider.dart';
 
 import '../models/comment.dart';
 
@@ -76,6 +77,20 @@ class CommentLine extends StatelessWidget {
                     navigatorKey.currentState!.push(
                       MaterialPageRoute(
                         settings: const RouteSettings(
+                          name: OtherUserProfileView.routeName,
+                        ),
+                        builder: (context) => ListenableProvider.value(
+                          value: myself,
+                          child: OtherUserProfileView(
+                            user : UserProfile.fromFirestore(data: userSnapshot.data!),
+                            me : myself
+                          ),
+                        )
+                      )
+                    );
+/*                     navigatorKey.currentState!.push(
+                      MaterialPageRoute(
+                        settings: const RouteSettings(
                           name:ProfileViewStandalone.routeName,
                         ),
                         builder: (context) => ProfileViewStandalone(
@@ -83,7 +98,7 @@ class CommentLine extends StatelessWidget {
                           moi : UserProfile.fromFirestore(data: postOwner!)
                         )
                       )
-                    );
+                    ); */
                   }
                 },
                 child: Row(
